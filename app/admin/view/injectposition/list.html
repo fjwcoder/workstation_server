@@ -1,0 +1,201 @@
+<div class="box">
+    <div class="box-header ">
+        <div class="box-tools ">
+            <div class="input-group layui-form input-group-sm search-form">
+                <div class="layui-inline" >
+                    <label class="layui-form-label">进度：</label>
+                    <div class="layui-input-inline" style="width: 100px; margin-top: 4px;float: left;">
+                        <select name="inject_status" lay-verify="required">
+                            <option value="" selected>全部</option>
+                            <option value="1">正常</option>
+                            <option value="2">已驳回</option>
+                            <option value="3">待审核</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="text" name="search_data" style="width: 220px;" class="form-control pull-right" placeholder="支持账号|手机号|接种点名称|城市">
+                <div class="input-group-btn">
+                    <button type="button" id="reloadTableBtn"  data-type="reload" class="btn btn-default"><i class="fa fa-search"></i>搜索</button>
+                </div>
+            </div>
+        </div>
+
+        <br/>
+    </div>
+
+    <style>      
+        .layui-table-cell { overflow: visible !important;   } 
+        input.layui-input{
+            height: 30px!important;
+        }
+        .layui-form-select{float: left; width: 190px;}
+        .order-assign-btn{ margin: 4px;}
+        /* .layui-table-box{overflow: visible!important;}
+        .layui-table-body{overflow: visible!important;}
+        .table-responsive{overflow: visible!important;} */
+
+    </style>
+
+    <div class="box-body table-responsive" > 
+        <table class="layui-hide" id="test" lay-filter="order_test"></table>
+        <script type="text/html" id="barOrder">
+            <a class="layui-btn order-assign-btn layui-btn-xs" lay-event="assign">确定</a>
+            &nbsp;
+            <a class="layui-btn order-assign-btn layui-btn-xs" lay-event="checkOrder">查看详情</a>
+            </script>
+        </div>
+    </div>
+
+<script>
+
+    let splitWhere = {};
+    var recordObj = null; // table中记录的对象
+    var u_status = [];
+
+    layui.use(['table', 'form', 'layer', 'laypage'], function(){
+        var table = layui.table,
+            layer = layui.layer,
+            laypage = layui.laypage,
+            form = layui.form;
+        
+        table.render({
+            elem: '#test',
+            id: 'orderTable',
+            url:'/admin.php/Injectposition/getInjectPositionList',
+            where: splitWhere,
+            toolbar: true, //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            limit: 15,
+            cols: [[
+                {field:'id', width:80, title: 'ID', sort: true},
+                {align: 'center',field:'account', width:100, title: '账号'},
+                // {field:'password', width:200, title: '密码'},
+                {field:'name', width:300, title: '接种点名称'},
+                {field:'phone', width:150, title: '联系电话'},
+                {field:'province_city_district',align: 'center',width:200, title: '省/市/区'},
+                {field:'address', width:300, title: '详细地址'},
+                {align: 'center', width:300, title: '状态', templet: function(d){
+                    switch(d.status){
+                        case 1: return '<span style="color: green">正常</span>'; break;
+                        case 2: return '<span style="color: red">已驳回</span>'; break;
+                        case 3: return '<select id="'+d.id+'" lay-filter="setStstus"><option value="0">请选择</option><option value="1">通过</option><option value="2">驳回</option></select>'; break;
+                        default: return '未知';
+                    }
+                }},
+                {fixed: 'right', title: '操作', width: 200, align:'center', toolbar: '#barOrder'} //, fixed: 'right'
+            ]],
+            parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                // console.log(res);
+                res.code = 0;
+                res.count = res.total;
+
+                form.render();
+            },
+            page: true,
+            done: function(){
+                form.render();
+            }
+        });
+
+        var active = {
+            reload: function(){
+                //执行重载
+                table.reload('orderTable', {
+                    where: splitWhere
+                });
+            }
+        };
+
+        // 搜索按钮
+        $('#reloadTableBtn').on('click', function(){
+
+            var type = $(this).data('type');
+            splitWhere.status = $('select[name="inject_status"]').val();
+            splitWhere.search = $('input[name="search_data"]').val();
+            active[type] ? active[type].call(this) : '';
+
+        });
+
+        // 监听下拉菜单选择
+        form.on('select(setStstus)', function(obj){
+            if(obj.value != "" && obj.value > 0){
+                u_status[obj.elem.id] = obj.value;
+            }else{
+                delete u_status[obj.elem.id];
+            }
+        });
+
+        //监听行工具事件
+        table.on('tool(order_test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            recordObj = obj;  
+            var data = obj.data, //获得当前行数据
+            layEvent = obj.event; //获得 lay-event 对应的值
+            // console.log(obj);
+            layer.load();
+            if(layEvent === 'assign'){
+                var inject_id_status = u_status[data.id];
+                if(inject_id_status == undefined || inject_id_status == '' || inject_id_status == null){
+                    layer.msg('请选择是否通过');
+                    layer.closeAll('loading');
+                    return false;
+                }else{
+                    if(inject_id_status == 2){
+                        layer.prompt({title: '驳回原因'}, function(val, index){
+                            setStatus(data.id, inject_id_status, val);
+                            layer.close(index);
+                        });
+                    }else if(inject_id_status == 1){
+                        layer.confirm('是否确定通过', function(index){
+                            setStatus(data.id, inject_id_status);
+                        });
+                    }else{
+                        layer.msg('请选择是否通过');
+                        return false;
+                    }
+                    
+                }
+            } else if(layEvent === 'checkOrder'){
+                var o_id =  data.id;
+                window.location.href="getInjectPosistionDetail?id="+o_id;
+
+            }
+            layer.closeAll('loading');
+        });
+        
+        // laypage.render({
+        //     elem: 'demo3'
+        //     ,count: 100
+        //     ,first: '首页'
+        //     ,last: '尾页'
+        //     ,prev: '<em>←</em>'
+        //     ,next: '<em>→</em>'
+        // });
+
+        form.render();
+    });
+
+    function setStatus(id, status, reject = ''){
+        var postdata = {
+            id: id, 
+            status: status, 
+            reject: reject
+        };
+        layer.load();
+        $.ajax({
+            url: '/admin.php/Injectposition/set_status',
+            method: 'POST',
+            data: postdata,
+            success: function(res){
+                if(res.code === 400){ // 返回失败
+                    recordObj.del();
+                }
+                layer.msg(res.msg);
+                layer.closeAll('loading');
+            },
+            error: function(e){
+                layer.msg(e);
+                layer.closeAll('loading');
+            }
+        });
+
+    }
+</script>

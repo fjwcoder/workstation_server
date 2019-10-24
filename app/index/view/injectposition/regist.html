@@ -1,0 +1,160 @@
+<style>
+    form{
+        width: 1000px;
+        margin: 0 auto;
+    }
+    #city,#district,#town{
+        display: none;
+    }
+</style>
+<form class="layui-form" action="{:url()}" method="post">
+    <div class="layui-form-item">
+        <label class="layui-form-label">账号</label>
+        <div class="layui-input-block">
+            <input type="text" name="account" placeholder="请输入账号" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+            <input type="password" name="password" placeholder="请输入密码" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">确认密码</label>
+        <div class="layui-input-block">
+            <input type="password" name="repassword" placeholder="请再次输入密码" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">所在城市</label>
+        <div class="layui-input-inline">
+            <select name="province" lay-verify="required" lay-search="" lay-filter="province">
+                <option value="">请选择省份</option>
+                {volist name="city" id="vo"}
+                <option value="{$vo.id}">{$vo.name}</option>
+                {/volist}
+            </select>
+        </div>
+        <div class="layui-input-inline" id="city">
+            <select name="city" lay-verify="required" lay-search="" lay-filter="city">
+                <option value="">0</option>
+                
+            </select>
+        </div>
+        <div class="layui-input-inline" id="district">
+            <select name="district" lay-search="" lay-filter="district" >
+                <option value="">0</option>
+            </select>
+        </div>
+        <div class="layui-input-inline" id="town">
+            <select name="town" lay-search="" lay-filter="town" >
+                <option value="">0</option>
+            </select>
+        </div>
+        <input type="hidden" name="province_city_district" value="">
+        
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">详细地址</label>
+        <div class="layui-input-block">
+            <input type="text" name="address" placeholder="请输入详细地址" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">联系电话</label>
+        <div class="layui-input-block">
+            <input type="text" name="phone" placeholder="请输入电话，座机需要加区号" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">接种点名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" placeholder="请输入接种点名称" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit="" lay-filter="subform">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery;
+
+        // 账号输入框失去焦点，检查是否重复
+        $('input[name="account"]').blur(function(){
+            var account = $('input[name="account"]').val();
+            // console.log(account)
+            $.post('{:url("check_account")}',{'account':account},function(res){
+                if(res.code == 1){
+                    layer.msg(res.msg,{icon:5});
+                    $('input[name="account"]').val('');
+                }
+            },'json');
+        })
+
+        // 获取城市
+        form.on('select(province)', function(data){
+            var pid = data.value;
+            get_city(pid,'city');
+        });
+        // 获取区 / 县
+        form.on('select(city)', function(data){
+            var pid = data.value;
+            get_city(pid,'district');
+            
+        }); 
+        // 获取 镇/街道
+        form.on('select(district)', function(data){
+            var pid = data.value;
+            get_city(pid,'town');
+        });  
+
+        // 获取城市
+        function get_city(pid,select_name){
+            var pid = pid;
+            var select_name = select_name;
+            $.post('{:url("get_city")}',{'pid':pid},function(res){
+                $select = $('select[name='+select_name+']');
+                if(res){
+                    $select.empty();
+                    for (var i = 0, len = res.length; i < len; i++) {
+                        var option = '<option value="' + res[i]['id'] + '">' + res[i]['name'] + '</option>';
+                        $select.append(option);
+                    }
+                    $('#'+select_name).show();
+                    form.render('select');
+                }
+            },'json')
+        }
+
+        // 监听提交
+        form.on('submit(subform)', function(data){
+            var province = $('select[name="province"]').find('option:selected').text();
+            var city = $('select[name="city"]').find('option:selected').text();
+            var district = $('select[name="district"]').find('option:selected').text();
+            var town = $('select[name="town"]').find('option:selected').text();
+            var province_city_district = province +'/'+city+'/'+district+'/'+town;
+
+            $('input[name="province_city_district"]').val(province_city_district);
+
+            if(data.field['password'] !== data.field['repassword']){
+                layer.msg('两次密码不一致',{icon:5});
+                return false;
+            }
+            return true;
+        });
+    })
+
+</script>

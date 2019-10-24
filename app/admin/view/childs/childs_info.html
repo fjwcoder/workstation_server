@@ -1,0 +1,157 @@
+<div id="content-container">
+
+            <!-- 面包屑header -->
+            <div class="wp99">
+                <div class="big_box">
+                    <div class="btn_box">
+                        <!-- <div class="btn_item btn_item_left">保存草稿</div> 
+                        <div class="btn_item btn_item_left submit">完成</div>
+                        <div class="btn_item btn_item_left submit_next">完成并下一位</div>
+                        <div class="btn_item btn_item_left">呼叫</div>
+
+                        <div class="input_box">
+                            <input type="text" class="_input" placeholder="请输入编号">
+                            <div class="input_btn">跳转</div>
+                        </div>
+                        <div class="btn_item btn_item_right next_number">下一位</div>
+                        <div class="btn_item btn_item_right prev_number">上一位</div>-->
+                    </div>
+                    <div class="center_box">
+                        <div class="cen_left">
+                            <div class="cen_title"> 孩子信息</div>
+                            <div class="form_box">
+                                <form class="layui-form" action="" id="form">
+                                    <div class="form_left">
+                                        <input type="hidden" name="Id" value="{$info.Id}">
+
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label" style="color:#666">卡号：</label>
+                                            <div class="layui-input-block">
+                                                <input type="text"class="layui-input" disabled value="{$info.CardNo}">
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label" style="color:#666">姓名：</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" class="layui-input" disabled value="{$info.Name}">
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label" style="color:#666">出生日期：</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" class="layui-input" disabled value="{$info.BirthDate}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form_right">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label" style="color:#666">家长：</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" class="layui-input" disabled value="{$info.ParentName}">
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label" style="color:#666">电话：</label>
+                                            <div class="layui-input-block">
+                                                <input type="text" class="layui-input" disabled value="{$info.Mobile}">
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label" style="color:#666">性别：</label>
+                                            <div class="layui-input-block">
+                                                {if condition="$info['Sex'] == 1"}
+                                                <input type="text" class="layui-input" disabled value="男">
+                                                {elseif condition="$info['Sex'] == 2"}
+                                                <input type="text" class="layui-input" disabled value="女">
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form_bottom">
+                                        <div class="layui-form-item layui-form-text">
+                                            <label class="layui-form-label" style="color:#666">家庭住址：</label>
+                                            <div class="layui-input-block">
+                                                <textarea class="layui-textarea" name="Address" disabled>{$info.Address}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="cen_right">
+                            <div class="cen_title"> 采集信息</div>
+                            <div class="icon_box">
+                                <div class="icon_text">头像</div>
+                                <i class="iconfont icon-xingzhuanggongnengtubiao-"
+                                    style="font-size: 150px;line-height: 150px;"></i>
+                            </div>
+                            <div class="icon_box">
+                                <div class="icon_text">指纹</div>
+                                <i class="iconfont icon-fingerprint__" style="font-size: 100px;line-height: 150px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="today_box">
+                        <div class="cen_title"> <span>历史接种疫苗</span> </div>
+                        <table class="layui-hide" id="test1"></table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="fix_box">
+        <!-- <div class="j_item">
+            <div class="j_item_title">登记台</div>
+            <div class="j_item_number">1</div>
+        </div>
+        <div class="j_item">
+            <div class="j_item_title">登记台</div>
+            <div class="j_item_number">2</div>
+        </div> -->
+    </div>
+    <div id="black"></div>
+    <script>
+        var ChildId = '';
+        layui.use(['jquery', 'layer','table','laydate'], function(){
+            var table = layui.table,
+            layer = layui.layer,
+            laydate= layui.laydate,
+            $ = layui.jquery;
+
+            var ChildId = $('input[name="Id"]').val();
+
+        
+            table.render({
+                elem: '#test1'
+                ,url:'{:url("childvaccines/getChildVaccines")}'
+                ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
+                ,where:{
+                    ChildId:ChildId
+                }
+                ,cols: [[
+                    {field:'FullName', title: '接种疫苗', align: 'center' }
+                    ,{field:'VaccinationDate', title: '日期', align: 'center',sort:true}
+                    ,{field:'Times', title: '剂次', align: 'center'} 
+                    ,{field:'LotNumber', title: '疫苗批号', align: 'center' }
+                    ,{field:'Company', title: '生产企业', align: 'center'}
+                    ,{field:'VaccinationPosition', title: '接种部位', align: 'center'}
+                    ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
+                    ,{field:'IsFree', title: '免费',   align: 'center'} 
+                ]],
+                parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        'code':0,
+                        'count':res.length,
+                        'data': res
+                    };
+                },
+            });
+
+        
+
+
+        });
+
+
+    </script>

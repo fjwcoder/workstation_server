@@ -1,0 +1,59 @@
+<div class="box">
+    
+        <div class="box-header">
+      
+          <div class="row">
+              <div class="col-sm-5">
+                  <button type="button" class="btn btn-refresh"><i class="fa fa-refresh"></i>刷新</button>
+                  <script> $('.btn-refresh').click(function(){ window.location.reload(); }); </script>
+              </div>
+              
+              <div class="col-sm-7">
+                  <div class="box-tools search-form pull-right">
+                      <div class="input-group input-group-sm">
+                          
+                          <input type="text" name="search_data" style="width: 200px;" class="form-control pull-right" value="{:input('search_data')}" placeholder="请输入号码">
+      
+                          <div class="input-group-btn">
+                            <button type="button" id="search"  url="{:url('writingList')}" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
+                          </div>
+      
+                      </div>
+                 </div>
+              </div>
+          </div>
+          
+        </div>
+        <div class="box-body table-responsive">
+          <table  class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>号码</th>
+                <th>取号时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            
+            {notempty name='list'}
+              <tbody>
+                  {volist name='list' id='vo'}
+                      <tr>
+                        <td>{$vo.Number}</td>
+                        <td>{$vo.VaccinationDate}</td>
+                        <td class="col-md-3 text-center">
+                            <ob_link><a href="{:url('vaccinations/getWaitingInfo', array('Id' => $vo['Id']))}" class="btn"><i class="fa fa-edit"></i>登记资料</a></ob_link>
+                        </td>
+                      </tr>
+                  {/volist}
+              </tbody>
+              {else/}
+              <tbody><tr class="odd"><td colspan="8" class="text-center" valign="top">{:config('empty_list_describe')}</td></tr></tbody>
+            {/notempty}
+          </table>
+        </div>
+      
+        <div class="box-footer clearfix text-center">
+            {$list->render()}
+        </div>
+      
+      </div>

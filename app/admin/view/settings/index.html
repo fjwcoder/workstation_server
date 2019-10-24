@@ -1,0 +1,239 @@
+<style>
+.label_w{width:170px;}
+.un-select{-webkit-appearance: menulist;}
+</style>
+<div id="content-container">
+    <!-- 面包屑header -->
+    <div class="wp99">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+            <legend>常规
+                <div style="float:right;padding-right: 20px;padding-bottom: 10px;">
+                    <button  type="submit" class="btn ladda-button unajax-post un-input-btn" data-style="slide-up" target-form="form_single">
+                        <span class="ladda-label"><i class="fa fa-send"></i> 保 存</span>
+                    </button>
+                </div>  
+            </legend>
+        </fieldset>
+        
+        <div style="width: 60%">
+            <form class="layui-form form_single" action="{:url()}"  method="post">
+                <!-- 接种点id -->
+                <input type="hidden" name="App.InjectPositionId" value="{$info['App.InjectPositionId']|default='0'}">
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种点类型：</label>
+                    <div class="layui-input-block">
+                        <?php
+                            $selected = '';
+
+                            if(!empty($info['APP.InjectPositionType']) && $info['APP.InjectPositionType'] == 1){
+                                $selected = "<option value='1' selected>医院接种点</option><option value='2'>社区接种点</option>";
+                            }else if(!empty($info['APP.InjectPositionType']) && $info['APP.InjectPositionType'] == 2){
+                                $selected = "<option value='1'>医院接种点</option><option value='2' selected>社区接种点</option>";
+                            }else{
+                                $selected = "<option value='0'>请选择接种点类型</option><option value='1'>医院接种点</option><option value='2'>社区接种点</option>";
+                            }
+                        ?>
+                        <select class="layui-input input_w un-select" name="APP.InjectPositionType" style="display: inline;">
+                            {$selected}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种点地址：</label>
+                    <div class="layui-input-block">
+                        {:widget('Region/index',['name'=>'Id', 'province'=>$info['province.Id'], 'city'=>$info['city.Id'], 'county'=>$info['county.Id']])}
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种点详细地址：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.InjectPositionAddress" value="{$info['App.InjectPositionAddress']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">选择管理员：</label>
+                    <div class="layui-input-block">
+                        <select class="layui-input input_w un-select" name="App.AdminId" style="display: inline;">
+                            {volist name="userList" id="vo"}
+                            <option value="{$vo.Id}" <?php if(!empty($info['App.AdminId']) && $info['App.AdminId'] == $vo['Id']){ echo 'selected'; }else if(empty($info['App.AdminId'])){ if($vo['Id'] == 1){ echo 'selected'; }} ?>>{$vo.Name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w ">工作站点：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.WorkstationName" value="{$info['App.WorkstationName']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w ">接种点电话：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.InjectPositionPhone" value="{$info['App.InjectPositionPhone']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">登记台数：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.WritingDeskCount" value="{$info['App.WritingDeskCount']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">诊室数：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.VaccinationDeskCount" value="{$info['App.VaccinationDeskCount']|default=''}">
+                    </div>
+                </div>
+        </div>
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+            <legend>叫号机</legend>
+        </fieldset>
+        <div style="width: 60%">
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">叫号机地址：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.QueueServerAddress" value="{$info['App.QueueServerAddress']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">登记大屏显示行数：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.WritingDeskScreenRows" value="{$info['App.WritingDeskScreenRows']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w ">登记大屏刷新频率：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.WritingDeskScreenInterval" value="{$info['App.WritingDeskScreenInterval']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种大屏显示行数：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenRows" value="{$info['App.VaccinationDeskScreenRows']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种大屏刷新频率：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenInterval" value="{$info['App.VaccinationDeskScreenInterval']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">留观大屏显示行数：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.ObseverRoomScreenRows" value="{$info['App.ObseverRoomScreenRows']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">留观大屏刷新频率：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.ObseveScreenRefreshRate" value="{$info['App.ObseveScreenRefreshRate']|default=''}">
+                    </div>
+                </div>
+                
+            </form>
+            <button  type="submit" class="btn ladda-button ajax-post" data-style="slide-up" target-form="form_single" style="display:none;"></button>
+            
+        </div>
+
+
+        <!-- 
+        <button type="button" class="layui-btn main-bg-color f_r" style="height: 36px; line-height: 36px;">刷
+            新</button> -->
+        <!-- <button class="main-bg-color cf f_r" style="height: 30px; width: ">
+    刷新
+</button> -->
+    </div>
+    <!-- </div> -->
+</div>
+</div>
+
+<script>
+
+layui.use(['layer','jquery'], function(){
+    var layer = layui.layer,
+    $ = layui.jquery;
+  
+
+
+
+    $('.unajax-post').on('click',function(){
+
+        var that = this;
+
+        $('.fakeloader').show();
+
+        $(that).addClass('disabled').attr('autocomplete','off').prop('disabled',true);
+
+        var data = {};
+
+        var adminId = $('select[name="App.AdminId"] option:selected').val();
+        var inject_position_type = $('select[name="APP.InjectPositionType"] option:selected').val();
+        var province = $('select[name="province_Id"] option:selected').val();
+        var city = $('select[name="city_Id"] option:selected').val();
+        var district = $('select[name="county_Id"] option:selected').val();
+        var address = $('input[name="App.InjectPositionAddress"]').val();
+        var name = $('input[name="App.WorkstationName"]').val();
+        var phone = $('input[name="App.InjectPositionPhone"]').val();
+        var inject_position_id = $('input[name="App.InjectPositionId"]').val();
+        var provinceName = $('select[name="province_Id"] option:selected').text();
+        var cityName = $('select[name="city_Id"] option:selected').text();
+        var districtName = $('select[name="county_Id"] option:selected').text();
+
+        var province_city_district = provinceName+'/'+cityName+'/'+districtName;
+
+        $.post('{:url("users/getUserInfo")}',{Id:adminId},function(res){
+
+            data = {
+                account:res.UserName,
+                password:res.md5_password,
+                inject_position_type:inject_position_type,
+                province:province,
+                city:city,
+                district:district,
+                address:address,
+                phone:phone,
+                province_city_district:province_city_district,
+                name:name,
+                inject_position_id:inject_position_id,
+            };
+
+            $.post('{:url("settings/setSettingsInfo")}',data,function(res){
+                // console.log(res);
+                if(res.code == 200){
+                    console.log(res)
+                    if(res.msg !== 'success'){
+                        $('input[name="App.InjectPositionId"]').val(res.msg);
+                        
+                    }
+                    $('.ajax-post').trigger("click");
+                }else{
+                    layer.msg(res.msg);
+                    $('.fakeloader').hide();
+                    $(that).removeClass('disabled').prop('disabled',false);
+                }
+
+
+            },'json');
+            
+        });
+
+
+    })
+
+
+
+        
+
+       
+
+});  
+    
+</script>

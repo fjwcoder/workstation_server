@@ -1,0 +1,302 @@
+<div id="content-container">
+    <!-- 面包屑header -->
+    <div class="wp99">
+        <table class="layui-hide" id="test" lay-filter="test"></table>
+
+        <script type="text/html" id="toolbarDemo">
+            <div class="row">
+                <div class="col-sm-5">
+                    <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="addInfo">创建用户</button>
+                </div>
+                
+                <div class="col-sm-7">
+                    <div class="box-tools search-form pull-right">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="名称或昵称">
+                            <div class="input-group-btn">
+                                <button type="button" id="search" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/html" id="barDemo">
+            <a class="un-list-btn" lay-event="delInfo"><i class="fa fa-ban"></i> 禁用</a>
+            <span class="un-list-span">|</span>
+            <a class="un-list-btn" lay-event="editInfo"><i class="fa fa-edit"></i> 编辑</a>
+            <span class="un-list-span">|</span>
+            <a class="un-list-btn" lay-event="editUserPwd"><i class="fa fa-expeditedssl"></i> 重置密码</a>
+            
+        </script>
+
+
+    </div>
+    
+</div>
+
+<script>
+    let searchData = {};
+
+    if(searchData.search_data !== undefined){
+        $('input[name="search_data"]').val(searchData.search_data);
+    }
+
+    layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
+        var table = layui.table,
+        form = layui.form,
+        layer = layui.layer,
+        laydate = layui.laydate,
+        $ = layui.jquery;
+
+        // 数据表格
+        table.render({
+            elem: '#test',
+            url: '{:url("users/getUserList")}',
+            where:searchData,
+            toolbar: '#toolbarDemo',
+            defaultToolbar: [{
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-seach'
+            }],
+            title: '用户数据表',
+            cols: [[
+
+                { field: 'UserName', title: '名称', width:120,sort: true },
+                { field: 'Name', title: '昵称', width:120, sort: true },
+                { field: 'EmailAddress', title: '邮箱', sort: true },
+                { field: 'CreationTime', title: '创建时间', sort: true},
+                { title: '状态', align:'center', width:100, templet :function(d){
+                    if(d.IsActive == 1){
+                        return '<span style="color:#2AC7B2;">已启用</span>';
+                    }else{
+                        return '<span style="color:red;">已禁用</span>';
+                    }
+                }},
+                { fixed: 'right', title: '操作', align:'center', templet :function(d){
+                    if(d.IsActive == 1){
+                        return ' <a class="un-list-btn" lay-event="delInfo"><i class="fa fa-ban"></i> 禁用</a><span class="un-list-span">|</span><a class="un-list-btn" lay-event="editInfo"><i class="fa fa-edit"></i> 编辑</a><span class="un-list-span">|</span><a class="un-list-btn" lay-event="editUserPwd"><i class="fa fa-expeditedssl"></i> 重置密码</a>';
+                    }else{
+                        return ' <a class="un-list-btn" lay-event="delInfo"><i class="fa fa-check-circle-o"></i> 启用</a><span class="un-list-span">|</span><a class="un-list-btn" lay-event="editInfo"><i class="fa fa-edit"></i> 编辑</a><span class="un-list-span">|</span><a class="un-list-btn" lay-event="editUserPwd"><i class="fa fa-expeditedssl"></i> 重置密码</a>';
+                    }
+                }},
+                
+            ]],
+            parseData: function(res){ //res 即为原始返回的数据
+                // console.log(res)
+                return {
+                    "code": 0, //解析接口状态
+                    //"msg": res.message, //解析提示文本
+                    "count": res.total, //解析数据长度
+                    "data": res.data //解析数据列表
+                };
+            },
+            page: true,
+            limits:[15,30,50,100],
+            limit: 15
+        });
+
+        // 编辑，删除
+        table.on('tool(test)', function(obj){
+
+            var data = obj.data;
+            var layEvent = obj.event;
+            // var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+            
+            if(layEvent === 'editInfo'){
+                // 编辑
+
+                contentHtml = getContentHtml(data);
+
+                layer.prompt({
+                    title: '用户信息编辑',
+                    content: contentHtml,
+                    yes: function(index, layero){
+                        
+                        status = verificationForm();
+
+                        if(status !== 'true'){
+                            layer.msg(status);
+                            return false;
+                        }
+
+                        subData = $("#editInfo").serializeArray();
+
+                        $.post('{:url("users/editUserInfo")}',subData,function(res){
+                            // console.log(res)
+                            if(res.code == 200){
+                                layer.msg(res.msg);
+                                layer.close(index);
+                                table.reload('test', {});
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        },'json');
+                        
+                    },
+                    success:function(){ }
+                });
+                
+            } else if(layEvent === 'delInfo'){
+                // 删除
+                // layer.confirm('确定要删除吗？请谨慎操作', {icon: 3, title:'提示'}, function(index){
+                $.post('{:url("users/isActiveUser")}',{Id:obj.data.Id},function(res){
+                    if(res.code==200){
+                        // obj.del();
+                        // layer.close(index);
+                        table.reload('test', {});
+
+                    }else{
+                        layer.msg(res.msg)
+                    }
+                },'json');
+                // });
+                
+            }else if(layEvent === 'editUserPwd'){
+                layer.prompt({
+                    title: '重置密码',
+                    content:'<input type="hidden" name="Id" value="'+data.Id+'"><div style="width:400px;"><div class="col-md-12"><div class="form-group"><label>请输入新密码</label><span style="color:red;">*</span><input class="form-control" name="password" placeholder="请输入新密码" type="text"></div></div></div>',
+                    yes: function(index, layero){
+                        var Id = $('input[name="Id"]').val();
+                        var md5_password = $('input[name="password"]').val();
+
+                        if(md5_password == ''){
+                            layer.msg('请输入新密码');return false;
+                        }
+                        data = {
+                            Id:Id,
+                            md5_password:md5_password,
+                        };
+                        
+                        $.post('{:url("users/editUserPwd")}',data,function(res){
+                            if(res.code == 200){
+                                layer.msg(res.msg);
+                                layer.close(index);
+                                table.reload('test', {});
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        },'json');
+                    }
+
+                });
+
+            }
+        });
+
+        // 添加
+        table.on('toolbar(test)', function(obj){
+            var layEvent = obj.event;
+
+            // var checkStatus = table.checkStatus(obj.config.id);
+
+            if(layEvent == 'addInfo'){
+
+                contentHtml = getContentHtml();
+
+                layer.prompt({
+                    title: '创建用户',
+                    content: contentHtml,
+                    yes: function(index, layero){
+
+                        status = verificationForm();
+
+                        if(status !== 'true'){
+                            layer.msg(status);
+                            return false;
+                        }
+
+                        subData = $("#editInfo").serializeArray();
+
+                        $.post('{:url("users/addUserInfo")}',subData,function(res){
+                            console.log(res)
+                            if(res.code===200){
+                                layer.msg(res.msg);
+                                layer.close(index);
+                                table.reload('test', {});
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        },'json');
+                        
+                    },
+                    success:function(){ }
+                });
+
+            } else if(layEvent == 'searchData'){
+                
+                searchData.search_data = $('input[name="search_data"]').val();
+
+                table.reload('test', {
+                    url:'{:url("users/getUserList")}',
+
+                    where: searchData
+                });
+            }
+
+
+
+        });
+
+        // 添加/编辑弹出层html
+        function getContentHtml(res = {}){
+
+            if(res.Id == undefined){
+                res.Id = '';
+            }
+
+            if(res.UserName == undefined){
+                res.UserName = '';
+            }
+
+            if(res.Name == undefined){
+                res.Name = '';
+            }
+
+            if(res.EmailAddress == undefined){
+                res.EmailAddress = '';
+            }
+
+            var pwdHtml = '';
+
+            if(res.md5_password == undefined){
+                pwdHtml = '<div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>密码</label><div class="col-md-10"><input class="form-control"  placeholder="请输入密码" name="md5_password" type="text"></div></div>';
+            }
+
+            var IsActive = res.IsActive;
+            var isActiveHtml = '';
+
+            if(IsActive == 1){
+                isActiveHtml = '<input type="radio" name="IsActive" value="0"> 否</label><label><input type="radio" name="IsActive" value="1" checked="checked"> 是';
+            }else if(IsActive == 0){
+                isActiveHtml = '<input type="radio" checked="checked" name="IsActive" value="0"> 否</label><label><input type="radio" name="IsActive" value="1" > 是';
+            }else{
+                isActiveHtml = '<input type="radio" name="IsActive" value="0"> 否</label><label><input type="radio" name="IsActive" value="1" checked="checked"> 是';
+            }
+
+            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:600px;"><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>账号</label><div class="col-md-10"><input class="form-control" name="UserName" placeholder="请输入账号" type="text" value="'+res.UserName+'"></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>昵称</label><div class="col-md-10"><input class="form-control" name="Name" placeholder="请输入昵称" type="text" value="'+res.Name+'"></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>邮箱</label><div class="col-md-10"><input  class="form-control" typr="text" name="EmailAddress" placeholder="请输入邮箱" value="'+res.EmailAddress+'"></div></div>'+pwdHtml+'<div class="form-group"><label class="col-md-2 control-label">启用</label><div class="col-md-10">'+isActiveHtml+'</div></div></div></form>';
+
+            return cHtml;
+
+        }
+
+
+        // 添加/编辑提交时验证
+        function verificationForm(){
+            var UserName = $('input[name="UserName"]').val(),
+                Name = $('input[name="Name"]').val(),
+                EmailAddress = $('input[name="EmailAddress"]').val();
+
+            if(UserName =='' || Name == '' || EmailAddress == ''){
+                return '必填项不能为空';
+            }else{
+                return true;
+            }
+            
+        }
+
+
+    });
+</script>

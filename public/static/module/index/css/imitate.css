@@ -1,0 +1,34 @@
+/* 公共样式区 */
+
+
+
+/* 叫号机样式区 */
+#start-btn-1, .start-btn-1{
+    position: absolute; bottom: 150px; right: 90px;
+    height: 50px; width: 200px; line-height: 50px;
+    font-size: 24px; font-weight: 500; border-radius: 10px;
+}
+#start-btn, .start-btn{
+    position: absolute; bottom: 70px; right: 90px;
+    height: 50px; width: 200px; line-height: 50px;
+    font-size: 24px; font-weight: 500; border-radius: 10px;
+}
+#cancel-btn{
+    position: absolute; bottom: 70px; right: 90px;
+    height: 50px; width: 200px; line-height: 50px;
+    font-size: 24px; font-weight: 500; border-radius: 10px;
+}
+.step-tittle{
+    color: #fff; margin-top: 80px;
+}
+.step-tittle_1{
+    color: #fff; margin-top: 30px;
+}
+.opt-panel{
+    width: 600px; height: 400px;  margin: 0 auto;
+    border-radius: 20px; overflow: hidden; color: #fff;
+    background-color: rgba(0,0,0, .5); 
+    text-align: center;  line-height: 400px;
+}
+
+/* 登记台样式区 */

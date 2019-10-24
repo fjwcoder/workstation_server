@@ -1,0 +1,54 @@
+<div id="page-header" class="fixed-top main-bg-color">
+    <img src="/static/assets/logo-full.svg" class="f_l" style="max-height: 40px; margin-left: 20px;">
+</div>
+
+
+<ul class="layui-nav layui-nav-tree layui-bg-green f_l" lay-filter="test" style="height: 100%;">
+<!-- 侧边导航: <ul class="layui-nav layui-nav-tree layui-nav-side"> -->
+    <li class="layui-nav-item layui-nav-itemed">
+        <a href="javascript:;">工作台</a>
+        <dl class="layui-nav-child">
+            <dd><a href="{:url('Vaccinations/registerList')}">登记队列</a></dd>
+            <dd><a href="javascript:;">接种队列</a></dd>
+            <dd><a href="javascript:;">留观队列</a></dd>
+            <dd><a href="javascript:;">完成队列</a></dd>
+        </dl>
+    </li>
+    <li class="layui-nav-item">
+        <a href="javascript:;">解决方案</a>
+        <dl class="layui-nav-child">
+            <dd><a href="">移动模块</a></dd>
+            <dd><a href="">后台模版</a></dd>
+            <dd><a href="">电商平台</a></dd>
+        </dl>
+    </li>
+
+</ul>
+          
+<script>
+    //注意：导航 依赖 element 模块，否则无法进行功能性操作
+    layui.use(['layer', 'element'], function(){
+        var element = layui.element,
+        layer = layui.layer;
+        //…
+
+        $('.layui-nav .layui-nav-item a').click(function(){
+
+            // alert($(this).html());
+        });
+    });
+    
+</script>
+
+
+<div id="content-container">
+
+    <!-- 面包屑header -->
+    <div id="content-container-top" class="wp99">
+        hahahah 
+
+        <button type="button" class="layui-btn main-bg-color f_r" style="height: 36px; line-height: 36px;">刷  新</button>
+        <!-- <button class="main-bg-color cf f_r" style="height: 30px; width: ">
+            刷新
+        </button> -->
+    </div>

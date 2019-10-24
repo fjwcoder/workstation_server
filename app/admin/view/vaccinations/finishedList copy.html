@@ -1,0 +1,73 @@
+<div class="box">
+    
+        <div class="box-header">
+      
+          <div class="row">
+              <div class="col-sm-5">
+                  <button type="button" class="btn btn-refresh"><i class="fa fa-refresh"></i>刷新</button>
+                  <script> $('.btn-refresh').click(function(){ window.location.reload(); }); </script>
+              </div>
+              
+              <div class="col-sm-7">
+                  <div class="box-tools search-form pull-right">
+                      <div class="input-group input-group-sm">
+                          
+                          <input type="text" name="search_data" style="width: 200px;" class="form-control pull-right" value="{:input('search_data')}" placeholder="请输入号码">
+      
+                          <div class="input-group-btn">
+                            <button type="button" id="search"  url="{:url('observerList')}" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
+                          </div>
+      
+                      </div>
+                 </div>
+              </div>
+          </div>
+          
+        </div>
+        <div class="box-body table-responsive">
+          <table  class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>孩子</th>
+                <th>卡号</th>
+                <th>疫苗</th>
+                <th>接种时间</th>
+                <th>接种状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            
+            {notempty name='list'}
+              <tbody>
+                  {volist name='list' id='vo'}
+                      <tr>
+                        <td>{$vo.child_name}</td>
+                        <td>{$vo.CardNo}</td>
+                        <td>疫苗名称</td>
+                        <td>{$vo.VaccinationFinishTime}</td>
+                        <td>
+                            {switch name="vo.State"}
+                                {case value="0"}已取号，待登记{/case}
+                                {case value="1"}已登记，待接种{/case}
+                                {case value="2"}已完成{/case}
+                                {case value="3"}已接种，留观中{/case}
+                                {case value="4"}接种完成{/case}
+                            {/switch}
+                        </td>
+                        <td class="col-md-3 text-center">
+                            <ob_link><a href="{:url('index/index')}" class="btn"><i class="fa fa-newspaper-o"></i>查看资料</a></ob_link>
+                        </td>
+                      </tr>
+                  {/volist}
+              </tbody>
+              {else/}
+              <tbody><tr class="odd"><td colspan="8" class="text-center" valign="top">{:config('empty_list_describe')}</td></tr></tbody>
+            {/notempty}
+          </table>
+        </div>
+      
+        <div class="box-footer clearfix text-center">
+            {$list->render()}
+        </div>
+      
+      </div>

@@ -1,0 +1,66 @@
+<div class="box">
+    <div class="box-header">
+        
+      <div class="row">
+          <div class="col-sm-4">
+              <ob_link><a class="btn" href="{:url('vaccineAdd')}"><i class="fa fa-plus"></i> 新 增</a></ob_link>
+          </div>
+          
+          <div class="col-sm-8">
+              <div class="box-tools search-form pull-right">
+                  <div class="input-group input-group-sm">
+                      
+                      <input type="text" name="search_data" style="width: 200px;" class="form-control pull-right" value="{:input('search_data')}" placeholder="支持编码|中文名称|英文名称">
+  
+                      <div class="input-group-btn">
+                        <button type="button" id="search"  url="{:url('vaccineList')}" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
+                      </div>
+  
+                  </div>
+             </div>
+          </div>
+      </div>
+  
+    </div>
+    <div class="box-body table-responsive">
+      <table  class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>编码</th>
+            <th>中文简称</th>
+            <th>英文简称</th>
+            <th>是否免费</th>
+            <th>出生后第几周接种</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        
+        {notempty name='list'}
+          <tbody>
+              {volist name='list' id='vo'}
+                  <tr>
+                    <td>{$vo.code_abbr}</td>
+                    <td>{$vo.zh_name_abbr}</td>
+                    <td>{$vo.en_name_abbr}</td>
+                    
+                    <td>{if condition="$vo['category'] == 1"}免费{else/}不免费{/if}</td>
+                    <td>第{$vo.inject_week}周</td>
+                    <td>{if condition="$vo['status'] == 1"}正常{else/}<span style="color: red;">不显示</span>{/if}</td>
+                    
+                    <td class="col-md-2 text-center">
+                        <ob_link><a href="{:url('vaccineEdit', array('id' => $vo['id']))}" class="btn "><i class="fa fa-edit"></i> 编辑</a></ob_link>
+                        <ob_link><a class="btn confirm ajax-get" href="{:url('setStatus', array('ids' => $vo['id'], 'status' => $Think.DATA_DELETE))}"><i class="fa fa-trash-o"></i> 删 除</a></ob_link>
+                    </td>
+                  </tr>
+              {/volist}
+          </tbody>
+          {else/}
+          <tbody><tr class="odd"><td colspan="8" class="text-center" valign="top">{:config('empty_list_describe')}</td></tr></tbody>
+        {/notempty}
+      </table>
+    </div>
+    <div class="box-footer clearfix text-center">
+        {$list->render()}
+    </div>
+  </div>

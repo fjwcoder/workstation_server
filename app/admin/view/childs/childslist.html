@@ -1,0 +1,280 @@
+<div id="content-container" >
+
+    <!-- 面包屑header -->
+    <div class="wp99">
+        <table class="layui-hide" id="test" lay-filter="test"></table>
+
+        <script type="text/html" id="toolbarDemo">
+            <div class="row">
+                <div class="col-sm-5">
+                    <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="addInfo">新建孩子</button>
+                </div>
+                
+                <div class="col-sm-7">
+                    <div class="box-tools search-form pull-right">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="姓名|卡号|手机号">
+                            <div class="input-group-btn">
+                                <button type="button" id="search" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/html" id="barDemo">
+            <a class="un-list-btn" lay-event="checkInfo"><i class="fa fa-bars"></i> 查看资料</a>
+            <span class="un-list-span">|</span>
+            <a class="un-list-btn" lay-event="editInfo"><i class="fa fa-edit"></i> 编辑</a>
+            <span class="un-list-span">|</span>
+            <a class="un-list-btn" lay-event="delInfo"><i class="fa fa-ban"></i> 删除</a>
+        </script>
+
+
+    </div>
+    
+</div>
+
+<script>
+    let searchData = {};
+
+    layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
+        var table = layui.table,
+        form = layui.form,
+        layer = layui.layer,
+        laydate = layui.laydate,
+        $ = layui.jquery;
+
+        // 数据表格
+        table.render({
+            elem: '#test',
+            url: '{:url("childs/getChildsList")}',
+            where:searchData,
+            toolbar: '#toolbarDemo',
+            defaultToolbar: [{
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-seach'
+            }],
+            title: '用户数据表',
+            cols: [[
+
+                { field: 'Name', title: '孩子', width:120, align:'center' },
+                { field: 'CardNo', title: '卡号', align:'center', sort: true },
+                { field: 'ParentName', title: '联系人', width:120, align:'center' },
+                { field: 'Mobile', title: '联系电话', width:120, align:'center'},
+                { fixed: 'right', title: '操作', align:'center', toolbar: '#barDemo'},
+                
+            ]],
+            parseData: function(res){ //res 即为原始返回的数据
+                // console.log(res)
+                return {
+                    "code": 0, //解析接口状态
+                    //"msg": res.message, //解析提示文本
+                    "count": res.total, //解析数据长度
+                    "data": res.data //解析数据列表
+                };
+            },
+            page: true,
+            limits:[15,30,50,100],
+            limit: 15
+        });
+
+        // 查看详情，编辑，删除
+        table.on('tool(test)', function(obj){
+
+            var data = obj.data;
+            var layEvent = obj.event;
+            // var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+            if(layEvent === 'checkInfo'){ //查看
+
+                window.location.href = "{:url('childs/getChildsInfo')}?Id="+obj.data.Id;
+            } else if(layEvent === 'editInfo'){
+
+                for (var i in data) {
+                    if(data[i] == null || data[i] == 'null'){
+                        data[i] = '';
+                    }
+                }
+
+                contentHtml = getContentHtml(data)
+
+                layer.prompt({
+                    title: '孩子信息编辑',
+                    content: contentHtml,
+                    yes: function(index, layero){
+
+                        status = verificationForm();
+
+                        if(status !== 'true'){
+                            layer.msg(status);
+                            return false;
+                        }
+                        
+                        subData = $("#editInfo").serializeArray();
+
+                        $.post('{:url("childs/editChildsInfo")}',subData,function(res){
+                            // console.log(res)
+                            if(res.code===200){
+                                layer.msg(res.msg);
+                                layer.close(index);
+                                table.reload('test', {});
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        },'json');
+                        
+                    },
+                    success:function(){
+                        laydate.render({
+                            elem: '.BirthDate',
+                            type: 'datetime'
+                        });
+                    }
+                });
+                
+            } else if(layEvent === 'delInfo'){
+                // 删除
+                layer.confirm('确定要删除吗？请谨慎操作', {icon: 3, title:'提示'}, function(index){
+                    $.post('{:url("childs/delChilds")}',{Id:obj.data.Id},function(res){
+                        if(res.code == 200){
+                            obj.del();
+                            layer.close(index);
+
+                        }else{
+                            layer.msg(res.msg)
+                        }
+                    },'json')
+                });
+                
+            }
+        });
+
+        // 添加
+        table.on('toolbar(test)', function(obj){
+            var layEvent = obj.event;
+
+            if(layEvent == 'addInfo'){
+                // 添加
+
+                contentHtml = getContentHtml();
+
+                layer.prompt({
+                    title: '添加孩子信息',
+                    content: contentHtml,
+                    yes: function(index, layero){
+                        
+                        status = verificationForm();
+
+                        if(status !== 'true'){
+                            layer.msg(status);
+                            return false;
+                        }
+
+                        subData = $("#editInfo").serializeArray();
+
+                        $.post('{:url("childs/editChildsInfo")}',subData,function(res){
+
+                            if(res.code===200){
+                                layer.msg(res.msg);
+                                layer.close(index);
+                                table.reload('test', {});
+                            }else{
+                                layer.msg(res.msg);
+                            }
+                        },'json');
+                        
+                    },
+                    success:function(){
+                        laydate.render({
+                            elem: '.BirthDate',
+                            type: 'datetime'
+                        });
+                    }
+                });
+
+            } else if(layEvent == 'searchData'){
+                // 搜索
+                
+                searchData.search_data = $('input[name="search_data"]').val();
+
+                table.reload('test', {
+                    url:'{:url("childs/getChildsList")}',
+
+                    where: searchData
+                });
+            }
+
+        });
+
+
+        // 添加/编辑弹出层html
+        function getContentHtml(res = {}){
+            if(res.Id == undefined){
+                res.Id = '';
+            }
+
+            if(res.CardNo == undefined){
+                res.CardNo = '';
+            }
+
+            if(res.Name == undefined){
+                res.Name = '';
+            }
+
+            var Sex = res.Sex;
+            var sexHtml = '';
+
+            if(Sex == 1){
+                sexHtml = '<select class="form-control" name="Sex"><option value="1" checked>男</option><option value="2">女</option></select>';
+            }else if(Sex == 2){
+                sexHtml = '<select class="form-control" name="Sex"><option value="1">男</option><option value="2" checked>女</option></select>';
+            }else{
+                sexHtml = '<select class="form-control" name="Sex"><option value="1">男</option><option value="2">女</option></select>';
+            }
+
+            if(res.BirthDate == undefined){
+                res.BirthDate = '';
+            }
+
+            if(res.ParentName == undefined){
+                res.ParentName = '';
+            }
+
+            if(res.Mobile == undefined){
+                res.Mobile = '';
+            }
+
+            if(res.Address == undefined){
+                res.Address = '';
+            }
+
+            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:900px;"><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>卡号</label><div class="col-md-8"><input class="form-control" name="CardNo" placeholder="请输入卡号" type="text" value="'+res.CardNo+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>名称</label><div class="col-md-8"><input class="form-control" name="Name" placeholder="请输入孩子姓名" type="text" value="'+res.Name+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>性别</label><div class="col-md-8">'+sexHtml+'</div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>出生日期</label><div class="col-md-8"><input class="form-control BirthDate" name="BirthDate" placeholder="请选择出生日期" type="text" value="'+res.BirthDate+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">家长</label><div class="col-md-8"><input class="form-control" name="ParentName" placeholder="请输入家长姓名" type="text" value="'+res.ParentName+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">电话</label><div class="col-md-8"><input class="form-control" name="Mobile" placeholder="请输入联系电话" type="text" value="'+res.Mobile+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">地址</label><div class="col-md-8"><textarea name="Address" class="form-control" placeholder="请输入家庭住址" rows="5">'+res.Address+'</textarea></div></div></div></form>';
+
+            return cHtml;
+
+
+        }
+
+
+        // 添加/编辑提交时验证
+        function verificationForm(){
+            var CardNo = $('input[name="CardNo"]').val(),
+                Name = $('input[name="Name"]').val(),
+                Sex = $('select[name="Sex"] option:selected').val(),
+                BirthDate = $('input[name="BirthDate"]').val();
+
+            if(CardNo =='' || Name == '' || Sex == '' || BirthDate ==''){
+                return '必填项不能为空';
+            }else{
+                return true;
+            }
+            
+        }
+
+
+
+    });
+</script>

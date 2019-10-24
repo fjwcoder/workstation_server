@@ -1,0 +1,194 @@
+<div class="box">
+    
+        <div class="box-header">
+      
+          <div class="row">
+              <div class="col-sm-5">
+                  <a class="btn editVaccineInfo" href="javascript:;"><i class="fa fa-plus"></i>新建疫苗</a>
+              </div>
+              
+              <div class="col-sm-7">
+                  <div class="box-tools search-form pull-right">
+                      <div class="input-group input-group-sm">
+                          
+                          <input type="text" name="search_data" style="width: 200px;" class="form-control pull-right" value="{:input('search_data')}" placeholder="请输入疫苗简称">
+      
+                          <div class="input-group-btn">
+                            <button type="button" id="search"  url="{:url('vaccinesList')}" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
+                          </div>
+      
+                      </div>
+                 </div>
+              </div>
+          </div>
+          
+        </div>
+        <div class="box-body table-responsive">
+          <table  class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>疫苗简称</th>
+                <th>英文简称</th>
+                <th>疫苗剂次</th>
+                <th>疫苗属性</th>
+                <th>国家编码</th>
+                <th>是否免费疫苗</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            
+            {notempty name='list'}
+              <tbody>
+                  {volist name='list' id='vo'}
+                      <tr>
+                        <td>{$vo.ShortName}</td>
+                        <td>{$vo.EShortName}</td>
+                        <td>{$vo.Times}</td>
+                        <td>{$vo.Property}</td>
+                        <td>{$vo.CountryCode}</td>
+                        <td>
+                          {if condition="$vo['IsFree'] == 1"}免费{else}不免费{/if}
+                        </td>
+                        
+                        <td class="col-md-3 text-center">
+                            <a href="javascript:;" class="btn editVaccineInfo" id="{$vo.Id}"><i class="fa fa-edit"></i>编辑</a>
+                            <ob_link><a href="{:url('vaccines/delVaccine',array('Id'=>$vo['Id']))}" class="btn  confirm ajax-get"><i class="fa fa-trash-o"></i>删除</a></ob_link>
+                        </td>
+                      </tr>
+                  {/volist}
+              </tbody>
+              {else/}
+              <tbody><tr class="odd"><td colspan="8" class="text-center" valign="top">{:config('empty_list_describe')}</td></tr></tbody>
+            {/notempty}
+          </table>
+        </div>
+      
+        <div class="box-footer clearfix text-center">
+            {$list->render()}
+        </div>
+      
+      </div>
+<script>
+
+layui.use(['layer','form','jquery'], function(){
+    var layer = layui.layer,
+    form = layui.form,
+    $ = layui.jquery;
+    
+    
+  $('.editVaccineInfo').on('click',function(e){
+   
+    var id = $(this).attr('id');
+    if(id == '' || id == null || id == undefined){
+      layer.prompt({
+          formType: 2,
+          title: '编辑疫苗',
+          content:'<input type="hidden" name="Id"><div style="width:900px;"><div class="col-md-6"><div class="form-group"><label>英文简称</label><span style="color:red;">*</span><input class="form-control" name="EShortName" placeholder="请输入英文简称" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗简称</label><span style="color:red;">*</span><input class="form-control" name="ShortName" placeholder="请输入疫苗简称" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗全称</label><span style="color:red;">*</span><input class="form-control" name="FullName" placeholder="请输入疫苗全称" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗剂次</label><span style="color:red;">*</span><input class="form-control" name="Times" placeholder="请输入疫苗剂次" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗类目</label><span></span><input class="form-control" name="Category" placeholder="请输入疫苗类目" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗属性</label><span></span><input class="form-control" name="Property" placeholder="请输入疫苗属性" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>国家编码</label><span></span><input class="form-control" name="CountryCode" placeholder="请输入国家编码" type="text"></div></div><div class="col-md-6"><div class="form-group"><label>是否免费</label><span></span><div><label class="margin-r-5"><input type="radio" checked="checked" name="IsFree" value="0"> 否</label><label><input type="radio" name="IsFree" value="1"> 是</label></div></div></div></div>', 
+          btn: ['确定', '取消']
+          ,yes: function(index, layero){
+            var Id= $('input[name="Id"]').val();
+            var EShortName= $('input[name="EShortName"]').val();
+            var ShortName= $('input[name="ShortName"]').val();
+            var FullName= $('input[name="FullName"]').val();
+            var Times= $('input[name="Times"]').val();
+            var Category= $('input[name="Category"]').val();
+            var Property= $('input[name="Property"]').val();
+            var CountryCode= $('input[name="CountryCode"]').val();
+            var IsFree = $('input[name="IsFree"]:checked').val();
+            if(EShortName == '' ||  ShortName == '' || FullName == '' || Times == ''){
+              layer.msg('必填项不能为空');return false;
+            }
+            data = {
+              Id:Id,
+              EShortName:EShortName,
+              ShortName:ShortName,
+              FullName:FullName,
+              Times:Times,
+              Category:Category,
+              Property:Property,
+              CountryCode:CountryCode,
+              IsFree:IsFree,
+            };
+            $.post('{:url("vaccines/editVaccineInfo")}',data,function(res){
+              // console.log(res);
+              if(res){
+                layer.msg(res.msg);
+              }
+            },'json');
+  }
+  ,btn2: function(index, layero){
+    layer.close(index);
+    
+    //return false 开启该代码可禁止点击该按钮关闭
+  }
+    });
+
+    }else{
+     
+
+      $.post('{:url("vaccines/getVaccineInfo")}',{Id:id},function(res){
+        IsFreehtml = '';
+        if(res.IsFree == 1){
+          IsFreehtml = '<input type="radio" name="IsFree" value="0"> 否</label><label><input type="radio" name="IsFree" value="1" checked="checked" > 是';
+
+        }else{
+          IsFreehtml = '<input type="radio" checked="checked" name="IsFree" value="0"> 否</label><label><input type="radio" name="IsFree" value="1" > 是';
+        }
+
+        layer.prompt({
+          formType: 2,
+          title: '编辑疫苗',
+          content:'<input type="hidden" name="Id" value="'+res.Id+'"><div style="width:900px;"><div class="col-md-6"><div class="form-group"><label>英文简称</label><span style="color:red;">*</span><input class="form-control" name="EShortName" placeholder="请输入英文简称" type="text" value="'+res.EShortName+'"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗简称</label><span style="color:red;">*</span><input class="form-control" name="ShortName" placeholder="请输入疫苗简称" type="text" value="'+res.ShortName+'"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗全称</label><span style="color:red;">*</span><input class="form-control" name="FullName" placeholder="请输入疫苗全称" type="text" value="'+res.FullName+'"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗剂次</label><span style="color:red;">*</span><input class="form-control" name="Times" placeholder="请输入疫苗剂次" type="text" value="'+res.Times+'"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗类目</label><span></span><input class="form-control" name="Category" placeholder="请输入疫苗类目" type="text" value="'+res.Category+'"></div></div><div class="col-md-6"><div class="form-group"><label>疫苗属性</label><span></span><input class="form-control" name="Property" placeholder="请输入疫苗属性" type="text" value="'+res.Property+'"></div></div><div class="col-md-6"><div class="form-group"><label>国家编码</label><span></span><input class="form-control" name="CountryCode" placeholder="请输入国家编码" type="text" value="'+res.CountryCode+'"></div></div><div class="col-md-6"><div class="form-group"><label>是否免费</label><span></span><div><label class="margin-r-5">'+IsFreehtml+'</label></div></div></div></div>', 
+          btn: ['确定', '取消']
+          ,yes: function(index, layero){
+            var Id= $('input[name="Id"]').val();
+            var EShortName= $('input[name="EShortName"]').val();
+            var ShortName= $('input[name="ShortName"]').val();
+            var FullName= $('input[name="FullName"]').val();
+            var Times= $('input[name="Times"]').val();
+            var Category= $('input[name="Category"]').val();
+            var Property= $('input[name="Property"]').val();
+            var CountryCode= $('input[name="CountryCode"]').val();
+            var IsFree = $('input[name="IsFree"]:checked').val();
+            if(EShortName == '' ||  ShortName == '' || FullName == '' || Times == ''){
+              layer.msg('必填项不能为空');return false;
+            }
+            data = {
+              Id:Id,
+              EShortName:EShortName,
+              ShortName:ShortName,
+              FullName:FullName,
+              Times:Times,
+              Category:Category,
+              Property:Property,
+              CountryCode:CountryCode,
+              IsFree:IsFree,
+            };
+            $.post('{:url("vaccines/editVaccineInfo")}',data,function(res){
+              if(res){
+                layer.msg(res.msg);
+              }
+            },'json');
+  }
+  ,btn2: function(index, layero){
+    layer.close(index);
+    
+    //return false 开启该代码可禁止点击该按钮关闭
+  }
+    });
+      },'json');
+    }
+    
+
+
+    
+
+
+  });
+
+
+
+});  
+
+
+</script>

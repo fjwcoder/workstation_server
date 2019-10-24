@@ -1,0 +1,79 @@
+<style>
+    ._item:hover{
+        cursor: pointer;
+    }
+</style>
+
+<div class="row">
+
+    <div class="col-md-12">
+        <!-- <div class="box"> -->
+            <div class="box-header">
+            <!-- <h3 class="box-title">系统信息</h3> -->
+            </div>
+            <div id="content-container" class="my-content-container">
+
+                <!-- 面包屑header -->
+                <!-- <div id="content-container-top" class="wp99"> -->
+                <div class="big_box">
+                    <div class="first_item">
+                        <div class="item_icon">
+                            <i class="iconfont icon-zhuyaorenyuan" style="font-size: 50px;"></i>
+                        </div>
+                        <div class="item_text">
+                            <div class="small_text">今日已取号人数量</div>
+                            <div class="big_text">{$todayNumber.Number}人</div>
+                        </div>
+                    </div>
+                    <div class="_item margin_right_15" url="{:url('Vaccinations/writingList')}">
+                        <div class="item_icon">
+                            <i class="iconfont icon-bianji" style="font-size: 50px;"></i>
+                        </div>
+                        <div class="item_text">
+                            <div class="small_text">今日登记队列数量</div>
+                            <div class="big_text">{$todayNumber.writingNumber} 人</div>
+                        </div>
+                    </div>
+                    <div class="_item margin_left_15" url="{:url('Vaccinations/inoculationList')}">
+                        <div class="item_icon">
+                            <i class="iconfont icon-yiwancheng" style="font-size: 50px;"></i>
+                        </div>
+                        <div class="item_text">
+                            <div class="small_text">今日接种队列数量</div>
+                            <div class="big_text">{$todayNumber.inoculationNumber} 人</div>
+                        </div>
+                    </div>
+                    <div class="_item margin_right_15" url="{:url('Vaccinations/observerList')}">
+                        <div class="item_icon">
+                            <i class="iconfont icon-fangdajing" style="font-size: 50px;"></i>
+                        </div>
+                        <div class="item_text">
+                            <div class="small_text">今日留观队列数量</div>
+                            <div class="big_text">{$todayNumber.observerNumber} 人</div>
+                        </div>
+                    </div>
+                    <div class="_item margin_left_15" url="{:url('Vaccinations/finishedList')}">
+                        <div class="item_icon">
+                            <i class="iconfont icon-chenggong" style="font-size: 50px;"></i>
+                        </div>
+                        <div class="item_text">
+                            <div class="small_text">今日已完成接种人数</div>
+                            <div class="big_text">{$todayNumber.completeNumber} 人</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+    </div>
+</div>
+<script>
+
+    $('._item').on('click',function(){
+        
+        var url = $(this).attr('url');
+
+        window.location.href = url;
+
+        console.log(url);
+    })
+</script>

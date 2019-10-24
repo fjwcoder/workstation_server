@@ -1,0 +1,121 @@
+<div id="content-container" >
+        <!-- 面包屑header -->
+        <div class="wp99">
+            <table class="layui-hide" id="test" lay-filter="test"></table>
+    
+            <script type="text/html" id="toolbarDemo">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="refresh">刷新</button>
+                    </div>
+                    
+                    <div class="col-sm-7">
+                        <div class="box-tools search-form pull-right">
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="请输入号码">
+                                <div class="input-group-btn">
+                                    <button type="button" id="search" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </script>
+    
+            <script type="text/html" id="barDemo">
+                <a class="un-list-btn" lay-event="regInfo"><i class="fa fa-edit"></i> 登记资料</a>
+            </script>
+    
+    
+        </div>
+        
+    </div>
+    
+    <script>
+        let searchData = {};
+    
+        if(searchData.search_data !== undefined){
+            $('input[name="search_data"]').val(searchData.search_data);
+        }
+    
+        layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
+            var table = layui.table,
+            form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            $ = layui.jquery;
+    
+            // 数据表格
+            table.render({
+                elem: '#test',
+                url: '{:url("vaccinations/getInoculationList")}',
+                where:searchData,
+                toolbar: '#toolbarDemo',
+                defaultToolbar: [{
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-seach'
+                }],
+                title: '用户数据表',
+                cols: [[
+    
+                    { field: 'Number', title: '号码', align:'center',sort:true },
+                    { field: 'child_name', title: '姓名', align:'center' },
+                    { field: 'ConsultationRoom', title: '诊室', align:'center' },
+                    { field: 'RegistrationFinishTime', title: '时间', align:'center',sort:true },
+                    { fixed: 'right', title: '操作', align:'center', templet:function(d){
+                      return '<a class="un-list-btn" href="{:url("vaccinations/getInoculationInfo")}?Id='+d.Id+'"><i class="fa fa-eyedropper"></i> 接种疫苗</a>';
+                    }},
+                    
+                ]],
+                parseData: function(res){ //res 即为原始返回的数据
+                    // console.log(res)
+                    return {
+                        "code": 0, //解析接口状态
+                        //"msg": res.message, //解析提示文本
+                        "count": res.total, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                },
+                page: true,
+                limits:[15,30,50,100],
+                limit: 15
+            });
+    
+            // 刷新 / 搜索
+            table.on('toolbar(test)', function(obj){
+                var layEvent = obj.event;
+    
+                if(layEvent == 'refresh'){
+    
+                    // var u_search_data = $('input[name="search_data"]').val();
+    
+                    // if(u_search_data !== ''){
+                    //     $('input[name="search_data"]').val(u_search_data);
+                    // }
+    
+                    searchData.search_data = '';
+    
+                    table.reload('test', {
+                        where:searchData
+                    });
+    
+                } else if(layEvent == 'searchData'){
+                    
+                    searchData.search_data = $('input[name="search_data"]').val();
+                    
+                    table.reload('test', {
+                        url:'{:url("vaccinations/getInoculationList")}',
+    
+                        where: searchData
+                    });
+                    if(searchData.search_data !== undefined){
+                        $('input[name="search_data"]').val(searchData.search_data);
+                    }
+                }
+            });
+    
+    
+    
+        });
+    </script>

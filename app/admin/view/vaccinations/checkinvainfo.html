@@ -1,0 +1,222 @@
+<div id="content-container">
+
+        <!-- 面包屑header -->
+        <div class="wp99">
+            <div class="big_box">
+                <div class="btn_box">
+                    <div class="un_number" style="display: inline;">{$info.registerInfo.Number}号</div>
+                                            
+
+                    <!-- <div class="input_box">
+                        <input type="text" class="form-control _input" placeholder="请输入编号">
+                        <div class="input_btn">跳转</div>
+                    </div> -->
+                    <button class="btn btn_item btn_item_right next_number">下一位</button>
+                    <button class="btn btn_item btn_item_right prev_number">上一位</button>
+                    <div class="un_writingdesk" style="display: inline;">接种台{$info.registerInfo.ConsultationRoom}</div>
+                </div>
+                <div class="center_box">
+                    <div class="cen_left">
+                        <div class="cen_title"> 孩子信息</div>
+                        <div class="form_box">
+                            <form class="layui-form" action="" id="form">
+                                <div class="form_left">
+                                    <input type="hidden" name="Id" value="{$info.registerInfo.ChildId}">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" style="color:#666">卡号：</label>
+                                        <div class="layui-input-block">
+                                            <input type="text"class="layui-input" disabled value="{$info.registerInfo.CardNo}">
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" style="color:#666">姓名：</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" class="layui-input" disabled value="{$info.registerInfo.child_name}">
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" style="color:#666">出生日期：</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" class="layui-input" disabled value="{$info.registerInfo.BirthDate}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form_right">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" style="color:#666">家长：</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" class="layui-input" disabled value="{$info.registerInfo.ParentName}">
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" style="color:#666">电话：</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" class="layui-input" disabled value="{$info.registerInfo.Mobile}">
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label" style="color:#666">性别：</label>
+                                        <div class="layui-input-block">
+                                            {if condition="$info['registerInfo']['Sex'] == 1"}
+                                            <input type="text" class="layui-input" disabled value="男">
+                                            {elseif condition="$info['registerInfo']['Sex'] == 2"}
+                                            <input type="text" class="layui-input" disabled value="女">
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form_bottom">
+                                    <div class="layui-form-item layui-form-text">
+                                        <label class="layui-form-label" style="color:#666">家庭住址：</label>
+                                        <div class="layui-input-block">
+                                            <textarea class="layui-textarea" name="Address" disabled>{$info.registerInfo.Address}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="cen_right">
+                        <div class="cen_title"> 采集信息</div>
+                        <div class="icon_box">
+                            <div class="icon_text">头像</div>
+                            <i class="iconfont icon-xingzhuanggongnengtubiao-"
+                                style="font-size: 150px;line-height: 150px;"></i>
+                        </div>
+                        <div class="icon_box">
+                            <div class="icon_text">指纹</div>
+                            <i class="iconfont icon-fingerprint__" style="font-size: 100px;line-height: 150px;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="today_box">
+                        <div class="cen_title"> <span>今日接种疫苗</span>
+                            <!-- <button class="btn btn_item btn_item_right add_vaccination">添加</button> -->
+                        </div>
+                        <table class="layui-table" id="test">
+                            <thead>
+                                <tr>
+                                    <th>接种疫苗</th>
+                                    <th>剂次</th>
+                                    <th>疫苗批号</th>
+                                    <th>生产企业</th>
+                                    <th>接种部位</th>
+                                    <th>接种地址</th>
+                                    <th>免费</th>
+                                </tr> 
+                            </thead>
+                            <tbody>
+                                {notempty name="info['registerInfoDefilds']"}
+                                    {volist name="info['registerInfoDefilds']" id="vo"}
+                                        <tr>
+                                            <td>
+                                                <input class="layui-input" type="text" name="Times" value="{$vo.ShortName}" disabled>
+                                            </td>
+                                            <td>
+                                                <input class="layui-input" type="text" name="Times" value="{$vo.Times}" disabled>
+                                            </td>
+                                            <td>
+                                                <input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber" value="{$vo.LotNumber}" disabled>
+                                            </td>
+                                            <td>
+                                                <input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company" value="{$vo.Company}" disabled>
+                                            </td>
+                                            <td>
+                                                <input class="layui-input" type="text" placeholder="请填写疫苗地址" name="VaccinationPlace" value="{$vo.VaccinationPlace}" disabled>
+                                            </td>
+                                            <td>
+                                                <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition" value="{$vo.VaccinationPosition}" disabled>
+                                            </td>
+                                            <td>
+                                                {if condition="$vo['IsFree'] == 1"}
+                                                <input type="checkbox" lay-skin="primary" name="IsFree" value="1" checked disabled>
+                                                {else}
+                                                <input type="checkbox" lay-skin="primary" name="IsFree" value="1" disabled>
+                                                {/if}
+                                            </td>
+                                        </tr>
+                                    {/volist}
+                                {/notempty}
+
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                <div class="today_box">
+                    <div class="cen_title"> <span>历史接种疫苗</span> </div>
+                    <table class="layui-hide" id="test1"></table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    var ChildId = '';
+    layui.use(['jquery', 'layer','table','laydate'], function(){
+        var table = layui.table,
+        layer = layui.layer,
+        laydate= layui.laydate,
+        $ = layui.jquery;
+
+        var ChildId = $('input[name="Id"]').val();
+
+    
+        table.render({
+            elem: '#test1'
+            ,url:'{:url("childvaccines/getChildVaccines")}'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度
+            ,where:{
+                ChildId:ChildId
+            }
+            ,cols: [[
+                {field:'FullName', title: '接种疫苗', align: 'center' }
+                ,{field:'VaccinationDate', title: '日期', align: 'center',sort:true}
+                ,{field:'Times', title: '剂次', align: 'center'} 
+                ,{field:'LotNumber', title: '疫苗批号', align: 'center' }
+                ,{field:'Company', title: '生产企业', align: 'center'}
+                ,{field:'VaccinationPosition', title: '接种部位', align: 'center'}
+                ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
+                ,{field:'IsFree', title: '免费',   align: 'center'} 
+            ]],
+            parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                return {
+                    'code':0,
+                    'count':res.length,
+                    'data': res
+                };
+            },
+        });
+
+        // 点击下一个按钮
+        $('.next_number').on('click',function(){
+                var next = {$info.next};
+
+                if(next == '' || next == null){
+                    layer.msg('已经到最后一位啦!');
+                }else{
+                    window.location.href = "{:url()}?Id="+next;
+
+                }
+
+            });
+
+            // 点击上一个按钮
+            $('.prev_number').on('click',function(){
+                var prev = {$info.prev};
+
+                if(prev == '' || prev == null){
+                    layer.msg('已经到第一位啦!');
+                }else{
+                    window.location.href = "{:url()}?Id="+prev;
+                }
+
+            });
+
+    
+
+
+    });
+
+
+</script>

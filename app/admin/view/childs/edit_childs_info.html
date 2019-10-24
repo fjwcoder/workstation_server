@@ -1,0 +1,104 @@
+<form action="{:url()}" method="post" class="form_single">
+    <div class="box">
+      <div class="box-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>姓名</label>
+              <span></span>
+              <input class="form-control" name="Name" placeholder="请输入孩子姓名" value="{$info['Name']|default=''}" type="text">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>卡号</label>
+              <span></span>
+              <input class="form-control" name="CardNo" placeholder="请输入卡号" value="{$info['CardNo']|default=''}" type="text">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>性别</label>
+              <span></span>
+              <div>
+                {empty name="info"}
+                <label class="margin-r-5"><input type="radio"checked="checked" name="Sex"  value="1"> 男</label>
+                <label><input type="radio" name="Sex" value="2"> 女</label>
+                
+                {else/}
+                <label class="margin-r-5"><input type="radio" {if condition="$info['Sex'] == 1"}checked="checked"{/if} name="Sex"  value="1"> 男</label>
+                <label><input type="radio" {if condition="$info['Sex'] == 2"}checked="checked"{/if} name="Sex" value="2"> 女</label>
+                {/empty}
+              </div>
+            </div>
+          </div>
+
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>出生日期</label>
+              <span>（格式 2019-09-09）</span>
+              <input class="form-control BirthDate" name="BirthDate" placeholder="请输入出生日期" value="{$info['BirthDate']|default=''}" type="text">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>家长姓名</label>
+              <span></span>
+              <input class="form-control" name="ParentName" placeholder="请输入家长姓名" value="{$info['ParentName']|default=''}" type="text">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>电话</label>
+              <span></span>
+              <input class="form-control" name="Mobile" placeholder="请输入电话" value="{$info['Mobile']|default=''}" type="text">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>家庭住址</label>
+              <span></span>
+              <textarea class="form-control" rows="3" name="Address">{$info['Address']|default=''}</textarea>
+            </div>
+          </div>
+          
+
+            
+          </div>
+        </div>
+        
+      <div class="box-footer">
+          
+        <input type="hidden" name="Id" value="{$info['Id']|default='0'}"/>
+        
+        {include file="layout/edit_btn_group"/}
+        
+      </div>
+        
+      </div>
+
+</form>
+
+<script>
+
+layui.use(['jquery', 'layer','table','laydate'], function(){
+  var table = layui.table,
+  layer = layui.layer,
+  laydate= layui.laydate,
+  $ = layui.jquery;
+
+// 日期
+laydate.render({
+    elem: '.BirthDate',
+    format: 'yyyy-MM-dd HH:mm:ss' //可任意组合
+});
+
+
+});
+
+</script>

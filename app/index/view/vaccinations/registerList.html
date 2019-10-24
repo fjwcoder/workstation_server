@@ -1,0 +1,116 @@
+
+<!-- 工作台 -->
+<div id="content-container" class="my-content-container">
+
+        <!-- 面包屑header -->
+        <div id="content-container-top" class="wp99">
+                <div class="demoTable">
+                        <div class="layui-inline">
+                          <input class="layui-input" name="search_data" id="demoReload" autocomplete="off" placeholder="请输入号码">
+                        </div>
+                        <button class="layui-btn search-btn" data-type="reload">搜索</button>
+                      </div>
+               
+
+            <table class="layui-hide" id="test" lay-filter="test"></table>
+
+            <!-- <script type="text/html" id="toolbarDemo">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-sm main-bg-color" lay-event="???">新建孩子</button>
+
+                </div>
+            </script> -->
+
+            <script type="text/html" id="barDemo">
+                <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+            </script>
+
+
+            <!-- <script src="//res.layui.com/layui/dist/layui.js" charset="utf-8"></script> -->
+            <!-- 
+            <button type="button" class="layui-btn main-bg-color f_r" style="height: 36px; line-height: 36px;">刷
+                新</button> -->
+            <!-- <button class="main-bg-color cf f_r" style="height: 30px; width: ">
+        刷新
+    </button> -->
+        </div>
+        <!-- </div> -->
+    </div>
+</div>
+
+<script>
+    let splitWhere = {};
+        layui.use('table', function () {
+            var table = layui.table;
+
+            table.render({
+                elem: '#test',
+                id:'tabletest',
+                url: '{:url("Vaccinations/getRegisterList")}',
+                toolbar: true ,//开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                limit: 15,
+                where: splitWhere,
+                defaultToolbar: [{ //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-seach'
+                }],
+                title: '用户数据表',
+                cols: [
+                    [ {
+                        field: 'Number',
+                        title: '号码',
+                    }, {
+                        field: 'CreationTime',
+                        title: '取号时间',
+                        sort: true,
+                    }, {
+                        field: 'Id',
+                        title: '操作',
+                    }, ]
+                ],
+                parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        'code':0,
+                        'count':res.length,
+                        'data': res
+                    };
+                },
+                page: true
+            });
+
+
+            var active = {
+                reload: function(){
+                    //执行重载
+                    table.reload('tabletest', {
+                        where: splitWhere
+                    });
+                }
+            };
+    
+            // 搜索按钮
+            $('.search-btn').on('click', function(){
+                var type = $(this).data('type');
+                splitWhere.search_data = $('#demoReload').val();
+                // console.log(splitWhere)
+                active[type] ? active[type].call(this) : '';
+    
+            });
+
+            //头工具栏事件
+            table.on('toolbar(test)', function (obj) {
+                var checkStatus = table.checkStatus(obj.config.id);
+                switch (obj.event) {
+
+                    //自定义头工具栏右侧图标 - 提示
+                    case 'LAYTABLE_TIPS':
+                        layer.alert('搜索......');
+                        break;
+                };
+            });
+
+
+        });
+    </script>

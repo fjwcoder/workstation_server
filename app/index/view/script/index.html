@@ -1,0 +1,150 @@
+
+<script type="text/javascript" src="__STATIC__/widget/jsencrypt.js"></script>
+<style>
+    .navbar-fixed-top{display: none;}
+</style>
+<div class="container" style="height: 450px;">
+    <div style="width: 50%; float: left; height: 100%;">
+            <label for="privkey">Private Key</label><br/>
+            <textarea id="privkey" rows="15" cols="65" readonly>{$private_key}</textarea>
+    </div>
+    <div style="width: 50%; float: left; height: 100%;">
+            <label for="pubkey">Public Key</label><br/>
+            <textarea id="pubkey" rows="15" cols="65" readonly>{$public_key}</textarea><br/>
+    </div>
+
+
+<div class="tool" style="height: 450px;">
+    <div style="width: 33.33%; float: left; height: 100%;">
+            输入需要加密文字：<br/>
+            <textarea name="" id="needCrypt" cols="300" rows="10" style="float: left;">测试XXXX</textarea>
+            <div style="float: left; width: 50px; height: 220px; background: yellow;">
+                    <a href="javascript:void(0);" id="crypt-btn">加密</a><br/>
+            </div>
+            
+    </div>
+    <div style="width: 33.33%; float: left; height: 100%;">
+            加密结果：<br/>
+            <textarea name="" id="resultCrypt" cols="300" rows="10" style="float: left;"> </textarea>
+            <a href="javascript:void(0);" id="decrypt-btn">解密</a>
+            <a href="javascript:void(0);" onclick="ajaxDecrypt();">后台解密</a><br/>
+    </div>
+    <div style="width: 33.33%; float: left; height: 100%;">
+            解密结果：<br/>
+            <textarea name="" id="result" cols="300" rows="10" style="float: left;"></textarea>
+    </div>
+        
+   
+    
+    
+</div>
+
+  <script type="text/javascript">
+
+  // Call this code when the page is done loading.
+  $(function() {
+      $("#crypt-btn").click(function(){
+        //   公钥加密
+        // console.log('公钥加密');
+        // var encrypted = pubEncrypt($("#needCrypt").val());
+          
+        //  私钥加密
+        console.log('私钥加密');
+        var encrypted = priEncrypt($("#needCrypt").val());
+
+        // ===================
+        document.getElementById("resultCrypt").innerText = encrypted;
+      });
+
+      $("#decrypt-btn").click(function(){
+        //   私钥解密
+        // console.log('私钥解密');
+        // var uncrypted = priDecrypt($("#resultCrypt").val());
+          
+        //  公钥解密
+        console.log('公钥解密');
+        var uncrypted = pubDecrypt($("#resultCrypt").val());
+
+        // ===================
+        document.getElementById("result").innerText = uncrypted;
+      });      
+  });
+
+// 公钥信息加密
+function pubEncrypt(data){
+    // Encrypt with the public key...
+    var encrypt = new JSEncrypt();
+    encrypt.setPublicKey($('#pubkey').val());
+    var encrypted = encrypt.encrypt(data);
+    return encrypted;
+}
+
+// 私钥信息解密
+function priDecrypt(data){
+    // Decrypt with the private key...
+    var decrypt = new JSEncrypt();
+    decrypt.setPrivateKey($('#privkey').val());
+    var uncrypted = decrypt.decrypt(data);
+    return uncrypted;
+}
+
+// ==========================================
+
+// 私钥信息加密
+function priEncrypt(data){
+    // Encrypt with the public key...
+    var encrypt = new JSEncrypt();
+    encrypt.setPrivateKey($('#privkey').val());
+    var encrypted = encrypt.encrypt(data);
+    return encrypted;
+}
+
+// 公钥信息解密
+function pubDecrypt(data){
+    // Decrypt with the public key...
+    var decrypt = new JSEncrypt();
+    decrypt.setPublicKey($('#pubkey').val());
+    var uncrypted = decrypt.decrypt(data);
+    return uncrypted;
+}
+
+function ajaxDecrypt(){
+      
+    var info = {
+        username: 'admin', 
+        password: 'admin'
+    };
+
+    info = JSON.stringify(info);
+
+    var encrypt = pubEncrypt(info); // 加密
+
+    document.getElementById("resultCrypt").innerText = encrypt; // 显示加密
+
+
+    if(encrypt == '' || encrypt == null){
+        alert('加密信息为空');
+        return false;
+    }
+    $.ajax({
+        method: 'POST',
+        url: 'http://mamitianshi.server/api.php/common/member_login',
+        header: {
+            accesstoken: '8f26e27c4d2f15e32f81d50436ca19df'
+        },
+        data: {
+            accesstoken: '8f26e27c4d2f15e32f81d50436ca19df', 
+            data: encrypt
+        },
+        success: function(res){
+            console.log(res);
+            
+            document.getElementById("result").innerText = pubDecrypt(res);
+        }
+    });
+}
+</script>
+
+</div>
+</body>
+</html>

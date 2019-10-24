@@ -1,0 +1,188 @@
+<form action="{:url()}" method="post" class="form_single">
+    <div class="box">
+        <div class="box-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>编码简称</label>
+                    <input class="form-control" name="code_abbr" placeholder="请输入编码简称" value="{$info['code_abbr']|default=''}" type="text">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>编码全称</label>
+                    <input class="form-control" name="code_full" placeholder="请输入编码全称" value="{$info['code_full']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>中文简称</label>
+                    <input class="form-control" name="zh_name_abbr" placeholder="请输入中文简称" value="{$info['zh_name_abbr']|default=''}" type="text" required="">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>中文全称</label>
+                    <input class="form-control" name="zh_name_full" placeholder="请输入中文全称" value="{$info['zh_name_full']|default=''}" type="text" required="">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>英文简称</label>
+                    <input class="form-control" name="en_name_abbr" placeholder="请输入英文简称" value="{$info['en_name_abbr']|default=''}" type="text">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>英文全称</label>
+                    <input class="form-control" name="en_name_full" placeholder="请输入英文全称" value="{$info['en_name_full']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>产品厂家编码简称</label>
+                    <input class="form-control" name="code_factory_abbr" placeholder="请输入产品厂家编码简称" value="{$info['code_factory_abbr']|default=''}" type="text">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>产品厂家编码全称</label>
+                    <input class="form-control" name="code_factory_full" placeholder="请输入产品厂家编码全称" value="{$info['code_factory_full']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>产品厂家 全称</label>
+                    <input class="form-control" name="zh_factory_name_full" placeholder="请输入产品厂家 全称" value="{$info['zh_factory_name_full']|default=''}" type="text">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>产品厂家 英文</label>
+                    <input class="form-control" name="en_factory_name_full" placeholder="请输入产品厂家 英文" value="{$info['en_factory_name_full']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>国家编码简称</label>
+                    <input class="form-control" name="ch_gnj" placeholder="请输入国家编码简称" value="{$info['ch_gnj']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>简称  产品计量</label>
+                    <input class="form-control" name="measure_abbr" placeholder="请输入简称  产品计量" value="{$info['measure_abbr']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>编码</label>
+                    <input class="form-control" name="measure_code" placeholder="请输入编码" value="{$info['measure_code']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>数量</label>
+                    <input class="form-control" name="measure_num" placeholder="请输入数量" value="{$info['measure_num']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>计量单位</label>
+                    <input class="form-control" name="measure_unit" placeholder="请输入计量单位" value="{$info['measure_unit']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>产品种类国家编码</label>
+                    <input class="form-control" name="cate_nation_code" placeholder="请输入产品种类国家编码" value="{$info['cate_nation_code']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>接种时间</label>
+                    <input class="form-control" name="inject_date" placeholder="请输入接种时间" value="{$info['inject_date']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>出生后第几周接种</label>
+                    <input class="form-control" name="inject_week" placeholder="请输入出生后第几周接种" value="{$info['inject_week']|default=''}" type="text">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>作用</label>
+                    <textarea class="form-control" name="affect" rows="5" placeholder="">{$info['affect']|default=''}</textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>简介</label>
+                    <textarea class="form-control" name="introduce" rows="5" placeholder="">{$info['introduce']|default=''}</textarea>
+                </div>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+            <div class="form-group">
+                <label>详细说明</label>
+                <textarea class="form-control textarea_editor" name="vaccint_text" placeholder="详细说明">{$info['vaccint_text']|default=''}</textarea>
+                {:widget('editor/index', array('name'=> 'vaccint_text','value'=> ''))}
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>是否免费</label>
+                    <div>
+                    {empty name="info.category"}
+                        <label class="margin-r-5"><input type="radio" name="category" value="1" checked> 免费</label>
+                        <label><input type="radio" name="category" value="2"> 不免费</label>
+                    {else/}
+                        <label class="margin-r-5"><input type="radio" name="category" value="1" {if condition="$info['category'] == 1"}checked{/if}> 免费</label>
+                        <label><input type="radio" name="category" value="2" {if condition="$info['category'] == 2"}checked{/if}> 不免费</label>
+                    {/empty}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>是否显示</label>
+                    <div>
+                    <label class="margin-r-5"><input type="radio" name="status" value="1" checked> 显示</label>
+                    <label><input type="radio" name="status" value="0"> 不显示</label>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-footer">
+            
+            <input type="hidden" name="id" value="{$info['id']|default='0'}"/>
+            
+            {include file="layout/edit_btn_group"/}
+            
+        </div>
+        
+        </div>
+    </div>
+</form>

@@ -1,0 +1,86 @@
+<style>
+        #imitate-container{
+            height: auto!important;
+            top: 0;
+            margin: 0 0 50px -650px;
+            /* background: red; */
+        }
+
+
+
+</style>
+
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        <strong style="color: #38d9a9">大数据模拟系统</strong>
+    </div>
+    <div class="layui-card-body">
+        1. 展示：疫苗接种统计、冰箱ERP统计等相关数据以及告警信息<br>
+        2. 中间显示各市县区的简单信息，点击该区域会进入相应区域的数据统计界面。<br>
+        3. 也可以在顶部导航栏选择地级市<br>
+        4. 所有数据均为自动模拟生成<br>
+    </div>
+</div>
+<div class="layui-card">
+        <div class="layui-card-header">
+            <strong style="color: #38d9a9">叫号机模拟系统</strong>
+        </div>
+        <div class="layui-card-body">
+            1. 可以选择 预约取号、立即取号。预约取号是在APP上预约后，会生成预约二维码，叫号机扫码取得排队序列号；立即取号 是通过叫号机采集相应信息，获得排队序列号<br>
+            2. 排队序列号自动生成，预约用户V开头，格式为V001，普通取号为非V开头，格式为A001。排队序列号自动生成且每日不重复。<br>
+        </div>
+    </div>
+    <div class="layui-card">
+            <div class="layui-card-header">
+                <strong style="color: #38d9a9">登记台</strong>
+            </div>
+            <div class="layui-card-body">
+                1. 登记台页面显示 待登记（已叫号）队列、待接种（已登记）队列、留观中（已接种）队列<br>
+                2. 点击 登记 按钮跳转到登记界面，如果是预约用户，会自动读取相关信息（也可以读取接种卡）；非预约用户需要读取（接种卡）<br>
+                3. 填写基本资料并且选择接种疫苗后，点击登记即可<br>
+                4. 跳过 按钮，将该队列延后，排队序列号不变<br>
+                5. 登记界面可以点击右上角“查看列表”返回到登记列表页面。
+            </div>
+        </div>
+        <div class="layui-card">
+                <div class="layui-card-header">
+                    <strong style="color: #38d9a9">接种冰箱模拟系统</strong>
+                </div>
+                <div class="layui-card-body">
+                    1. 工作人员可以选择账号密码登录和指纹登录<br>
+                    2. 在待接种列表中选择一条记录，并进行叫号操作。<br>
+                    
+                    3. 叫号后会显示需要接种的疫苗，如果没有库存，则会显示“库存不足”，点击取出疫苗，选择接种部位后，点击确认接种，该疫苗接种成功。库存会减少。<br>
+
+                    4. erp功能为疫苗进销存，只有点击了储存室按钮，才会显示扫码图示。<br>
+                    5. 点击储藏室按钮，会显示扫码图示，点击扫码图示会自动录入一条数据<br>
+                    6. 如果在库存列表中选择了一条记录，再点击扫码图示，则会进行出库操作。出库记录可以在列表中查看<br>
+                    7. 接种成功后，也会在出库记录中显示相应的出库记录。<br>
+                    8. 可以查看模拟的温度显示（动态模拟）
+                </div>
+            </div>
+            <div class="layui-card">
+                    <div class="layui-card-header">
+                        <strong style="color: #38d9a9">冷库模拟系统</strong>
+                    </div>
+                    <div class="layui-card-body">
+                        1. 工作人员可以选择账号密码登录和指纹登录<br>
+                        2. erp功能为疫苗进销存，只有点击了储存室按钮，才会显示扫码图示。<br>
+                        3. 点击储藏室按钮，会显示扫码图示，点击扫码图示会自动录入一条数据<br>
+                        4. 如果在库存列表中选择了一条记录，再点击扫码图示，则会进行出库操作。出库记录可以在列表中查看<br>
+                        5. 冷柜冰箱出库后，可以复制监管码，在接种冰箱中填入监管码，进行入库。出库超过3分钟，则不可入库到接种冰箱。
+                    </div>
+                </div>
+<script>
+        //Demo
+        layui.use(['form', 'table', 'layer'], function(){
+            var form = layui.form
+                , table = layui.table
+                , layer = layui.layer;
+            
+    
+            
+            form.render();
+        });
+</script>

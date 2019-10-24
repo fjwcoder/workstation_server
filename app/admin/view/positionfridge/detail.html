@@ -1,0 +1,70 @@
+<!-- <form action="{:url()}" method="post" class="form_single"> -->
+    <div class="box">
+            <div class="box-body">
+                <div class="row">
+    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>接种点ID</label>
+                            <spa></span>
+                            <input class="form-control" name="position_id" placeholder="" value="{$info['position_id']}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>unique_code（加密）</label>
+                            <spa>md5(mac地址+接种点ID+毫秒时间戳)</span>
+                            <input class="form-control" name="unique_code" placeholder="" value="{$info['unique_code']}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>MAC地址</label>
+                            <spa></span>
+                            <input class="form-control" name="mac_address" placeholder="" value="{$info.mac_address}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>管理员姓名</label>
+                            <spa></span>
+                            <input class="form-control" name="name" placeholder="" value="{$info['name']}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>手机号</label>
+                            <spa></span>
+                            <input class="form-control" name="mobile" placeholder="" value="{$info['mobile']}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>身份证号</label>
+                            <spa></span>
+                            <input class="form-control" name="id_card" placeholder="" value="{$info['id_card']}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>添加时间</label>
+                            <spa></span>
+                            <input class="form-control" name="create_time" placeholder="" value="{$info['create_time']}" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>最后修改</label>
+                            <spa></span>
+                            <input class="form-control" name="update_time" placeholder="" value="{$info['update_time']}" type="text" disabled>
+                        </div>
+                    </div>
+                
+                    <div class="box-footer">
+                        <input type="hidden" name="id" value="{$info['id']}"/>
+                        <a class="btn" onclick="javascript:history.back(-1);return false;"><i class="fa fa-history"></i> 返 回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- </form> -->
