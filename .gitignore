@@ -7,3 +7,4 @@
 /app/database.php
 *.sql
 *.txt
+*.log

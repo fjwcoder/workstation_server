@@ -23,7 +23,8 @@
         "firebase/php-jwt": "^5.0",
         "phpoffice/phpexcel": "^1.8",
         "qiniu/php-sdk": "^7.1",
-        "aliyuncs/oss-sdk-php": "^2.3"
+        "aliyuncs/oss-sdk-php": "^2.3",
+        "workerman/workerman-for-win": "^3.5"
     },
     "extra": {
         "think-path": "thinkphp"
