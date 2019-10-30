@@ -30,45 +30,41 @@ class Index extends IndexBase
 
     }
 
-    public function dengji(){
-        $url = 'http://192.168.0.249:9500';
 
-        $array11 = [
-            'deviceId'=>11,
+    public function dengji(){
+        // $temp = 'aa550bf0f80b07d9020200000000000000000000000000000000000000000000';
+
+        // dump($this->hexToStr($temp)); die;
+
+
+        // dump(bin2hex($temp)); 
+        // dump(strtotime('2019-10-29 10:50:24'));
+        // dump(strtotime('10:50:24')); die;
+        // // dump(substr($temp, -15, 8)); die;
+
+        $url = 'http://192.168.1.249:9500';
+        $message = [
+            'deviceId'=>1,
             'data'=>[
-                ['number'=>'A001', 'writingDesk'=>'登记台1'],
-                ['number'=>'A002', 'writingDesk'=>'登记台2'],
-                ['number'=>'A003', 'writingDesk'=>'登记台1'],
-                ['number'=>'A004', 'writingDesk'=>'登记台2'],
-                ['number'=>'A005', 'writingDesk'=>'登记台1'],
-                ['number'=>'A006', 'writingDesk'=>'登记台2'],
-                ['number'=>'A007', 'writingDesk'=>'登记台1'],
-                ['number'=>'A008', 'writingDesk'=>'登记台2'],
-                ['number'=>'A009', 'writingDesk'=>'登记台1'],
-                ['number'=>'A0010', 'writingDesk'=>'登记台2'],
-                ['number'=>'A0011', 'writingDesk'=>'登记台1'],
-                ['number'=>'A0012', 'writingDesk'=>'登记台2'],
+                ['number'=>'A001', 'writingDesk'=>'登记台1']
             ]
         ];
 
-        $json11 = json_encode($array11, 320);
-        $response11 = httpsPost($url, $json11);
-        dump($response11);
+        
+
+        $message = json_encode($message, 320);
+        return $message;
+        $response = httpsPost($url, $message);
+        dump($response);
     }
 
     public function jiezhong(){
-        $url = 'http://192.168.0.249:9500';
+        $url = 'http://192.168.1.249:9500';
 
         $array12 = [
             'deviceId'=>12,
             'data'=>[
-                ['number'=>'A001', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1'],
-                ['number'=>'A002', 'childName'=>'登记台2', 'consultingRoom'=>'诊室1'],
-                ['number'=>'A003', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1'],
-                ['number'=>'A004', 'childName'=>'登记台2', 'consultingRoom'=>'诊室1'],
-                ['number'=>'A005', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1'],
-                ['number'=>'A006', 'childName'=>'登记台2', 'consultingRoom'=>'诊室1'],
-
+                ['number'=>'A001', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1']
             ]
         ];
         $json12 = json_encode($array12, 320);
@@ -79,7 +75,7 @@ class Index extends IndexBase
     
 
     public function liuguan(){
-        $url = 'http://192.168.0.249:9500';
+        $url = 'http://192.168.1.249:9500';
 
         $array13 = [
             'deviceId'=>13,
