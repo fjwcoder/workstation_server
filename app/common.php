@@ -945,30 +945,30 @@ function isMobileNumber($phonenumber){
 }
 
 # php socket udp
-function send_udp_message($host, $port, $message)
-{
-    $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-    @socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
-        "sec" => 2,
-        "usec" => 0
-    ));
+// function send_udp_message($host, $port, $message)
+// {
+//     $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+//     @socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
+//         "sec" => 2,
+//         "usec" => 0
+//     ));
 
-    // @socket_connect($socket, $host, $port);
-    // 发送命令
-    @socket_sendto($socket, $message, strlen($message), 0, $host, $port);
+//     // @socket_connect($socket, $host, $port);
+//     // 发送命令
+//     @socket_sendto($socket, $message, strlen($message), 0, $host, $port);
     
-    @socket_recvfrom($socket, $buffer, 1024, 0, $host, $port);
-    // 关闭连接
-    socket_close($socket);
+//     @socket_recvfrom($socket, $buffer, 1024, 0, $host, $port);
+//     // 关闭连接
+//     socket_close($socket);
 
-    dump($buffer);
+//     dump($buffer);
 
-    if (!empty($buffer)) {
-        return $buffer;
-    } else {
-        echo "fail";
-    }
-}
+//     if (!empty($buffer)) {
+//         return $buffer;
+//     } else {
+//         echo "fail";
+//     }
+// }
 
 
 #https POST 请求处理函数 

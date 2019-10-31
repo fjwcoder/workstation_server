@@ -6,7 +6,23 @@
 /**
  * 创建日志
  */
-global $log_file;
+global $log_file; // 服务文件
+global $db_conn; // 数据库连接对象
+
+global $refrigeratorUrl; // 冰箱服务域名
+global $appUrl; // 小程序/app 服务域名
+global $serverBeginTime; // 服务执行开始时间
+global $serverEndTime; // 服务执行结束时间
+
+// global $WritingDeskScreenRows;
+// global $WritingDeskScreenInterval;
+// global $VaccinationDeskScreenRows;
+// global $VaccinationDeskScreenInterval;
+global $ObseverRoomScreenRows; // 留观队列屏幕显示条数
+global $ObseveScreenRefreshRate; // 留观队列屏幕刷新频率
+global $QueueServerAddress; // 留观队列推送推送地址
+global $waitting_queue; // 留观队列
+
 $date = date('Y-m-d');
 $log_path = __DIR__ . '/serverlog/screen_push/';
 $log_file =  $log_path.$date.'.log';
@@ -27,6 +43,9 @@ if(file_exists(__DIR__ . '/../../vendor/workerman/workerman/Autoloader.php')){
     serverLog('workerman/Autoloader.php 文件不存在');
 }
 
+
+
+
 use Workerman\Worker;
 use Workerman\Lib\Timer;
 
@@ -45,7 +64,7 @@ $db_name = "rt_workstation";
 
 
 // 创建连接
-global $db_conn;
+
 $db_conn = new mysqli($db_servername, $db_username, $db_password, $db_name);
 // Check connection
 if ($db_conn->connect_error) {
@@ -60,23 +79,14 @@ if ($db_conn->connect_error) {
 /**
  * 初始化显示屏参数配置
  */
-// global $WritingDeskScreenRows;
-// global $WritingDeskScreenInterval;
-// global $VaccinationDeskScreenRows;
-// global $VaccinationDeskScreenInterval;
-global $ObseverRoomScreenRows;
-global $ObseveScreenRefreshRate;
-global $QueueServerAddress;
 
 // $WritingDeskScreenRows = 10; // 登记台显示行数
 // $WritingDeskScreenInterval = 20; // 登记台屏幕刷新频率 单位：s
 // $VaccinationDeskScreenRows = 10; //接种台显示行数
 // $VaccinationDeskScreenInterval = 20; // 接种台屏幕刷新频率 单位：s
 $ObseverRoomScreenRows = 10; // 留观台显示行数
-$ObseveScreenRefreshRate = 20; // 留观台屏幕刷新频率 单位：s
+$ObseveScreenRefreshRate = 30; // 留观台屏幕刷新频率 单位：s
 $QueueServerAddress = null; // 显示队列发送地址
-
-global $waitting_queue; // 留观队列
 $waitting_queue = [];
 
 // $sql = "SELECT `Name`, `Value` FROM settings 
@@ -135,8 +145,8 @@ $task->count = 1;
 $task->onWorkerStart = function($task){
     
 
-    // 10秒后执行发送邮件任务，最后一个参数传递false，表示只运行一次
-    Timer::add(30, 'sendWaitingQueue', array(), true);
+    // N秒后执行发送邮件任务，最后一个参数传递false，表示只运行一次
+    Timer::add($GLOBALS['ObseveScreenRefreshRate'], 'sendWaitingQueue', array(), true);
     // Timer::add(5, 'serverLog', array(), true);
 };
 // 运行worker

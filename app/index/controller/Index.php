@@ -32,44 +32,69 @@ class Index extends IndexBase
 
 
     public function dengji(){
+        $data = [
+            'uc'=>'203',
+            'mac'=>'203',
+            'ql'=>json_encode(["A007","A003","A002","A001"])
+        ];
+        // $ql = json_encode(["A007","A003","A002","A001"]);
+
+        $url = 'http://xiaoai.server/positionInjectQueue';
+        
+        // echo $url; die;
+        $response = $this->formPost($url, $data);
+        dump($response); die;
+
         // $temp = 'aa550bf0f80b07d9020200000000000000000000000000000000000000000000';
 
         // dump($this->hexToStr($temp)); die;
 
 
-        // dump(bin2hex($temp)); 
-        // dump(strtotime('2019-10-29 10:50:24'));
-        // dump(strtotime('10:50:24')); die;
-        // // dump(substr($temp, -15, 8)); die;
 
-        $url = 'http://192.168.1.249:9500';
-        $message = [
-            'deviceId'=>1,
-            'data'=>[
-                ['number'=>'A001', 'writingDesk'=>'登记台1']
-            ]
+    }
+
+    public function formPost($url, $data, $headers = []){
+        $headers = [
+            'Content-Type: application/x-www-form-urlencoded',
+            'User-Agent:PostmanRuntime/7.18.0'
         ];
-
-        
-
-        $message = json_encode($message, 320);
-        return $message;
-        $response = httpsPost($url, $message);
-        dump($response);
+        $curl = curl_init(); // 启动一个CURL会话
+        curl_setopt($curl, CURLOPT_URL, $url); // 要访问的地址
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0); // 对认证证书来源的检查
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0); // 从证书中检查SSL加密算法是否存在
+        // curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); // 模拟用户使用的浏览器
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); // 使用自动跳转
+        curl_setopt($curl, CURLOPT_AUTOREFERER, 1); // 自动设置Referer
+        curl_setopt($curl, CURLOPT_POST, 1); // 发送一个常规的Post请求
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data)); // Post提交的数据包
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30); // 设置超时限制防止死循环
+        curl_setopt($curl, CURLOPT_HEADER, 0); // 显示返回的Header区域内容
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // 获取的信息以文件流的形式返回
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        $result = curl_exec($curl); // 执行操作
+        if (curl_errno($curl)) {
+            echo 'Errno'.curl_error($curl);//捕抓异常
+        }
+        curl_close($curl); // 关闭CURL会话
+        // echo($result);
+        return $result;
     }
 
     public function jiezhong(){
-        $url = 'http://192.168.1.249:9500';
 
-        $array12 = [
-            'deviceId'=>12,
-            'data'=>[
-                ['number'=>'A001', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1']
-            ]
-        ];
-        $json12 = json_encode($array12, 320);
-        $response12 = httpsPost($url, $json12);
-        dump($response12);
+
+
+        // $url = 'http://192.168.1.249:9500';
+
+        // $array12 = [
+        //     'deviceId'=>12,
+        //     'data'=>[
+        //         ['number'=>'A001', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1']
+        //     ]
+        // ];
+        // $json12 = json_encode($array12, 320);
+        // $response12 = httpsPost($url, $json12);
+        // dump($response12);
         
     }
     
