@@ -4,6 +4,7 @@
  */
 
 namespace app\admin\logic;
+use think\Db;
 
 class Users extends AdminBase
 {
@@ -16,8 +17,14 @@ class Users extends AdminBase
     {
 
         // $where['IsActive'] = 1;
+        $this->modelUsers->alias('u');
+
+        $this->modelUsers->join = [
+            [SYS_DB_PREFIX . 'auth_group_access a', 'u.Id = a.member_id', 'LEFT'],
+        ];
+
         
-        $userList = $this->modelUsers->getList($where, $field, 'UserName asc', 15);
+        $userList = $this->modelUsers->getList($where, $field, 'u.UserName asc', 15);
 
         return $userList;
 
@@ -48,10 +55,42 @@ class Users extends AdminBase
             $isActive = 1;
         }
 
-        $result = $this->modelUsers->updateInfo(['Id'=>$Id], ['IsActive'=>$isActive]);
+        // 启动事务
+        Db::startTrans();
+        try{
 
-        return $result ? ['code'=>200,'msg'=>'操作成功'] : ['code'=>400,'msg'=>$this->modelUsers->getError()];
-        // return $result ? [RESULT_SUCCESS, '操作成功'] : [RESULT_ERROR, $this->modelUsers->getError()];
+            $data = [
+                'Id'=>$Id,
+                'UserName'=>$userInfo['UserName'],
+                'IsActive'=>$isActive,
+            ];
+
+            Db::name('users')->where(['Id'=>$Id])->update(['IsActive'=>$isActive]);
+
+            $return = $this->postUserInfo($data);
+            if(is_array($return)){
+                // 回滚事务
+                Db::rollback();
+                return $return;
+            }
+            if($return === true){
+                // 提交事务
+                Db::commit(); 
+                $result = true;
+            }else{
+                // 回滚事务
+                Db::rollback();
+                $result = false;
+            }
+               
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            $result = false;
+        }
+
+        return $result ? ['code'=>200, 'msg'=>'操作成功'] : ['code'=>400, 'msg'=>'操作失败'];
+
     }
 
     /**
@@ -82,20 +121,61 @@ class Users extends AdminBase
             return ['code'=>400,'msg'=> $this->validateUsers->getError()];
         }
 
-        // dump($param);die;
-        $data = [
-            'Id'=>$param['Id'],
-            'UserName'=>$param['UserName'],
-            'Name'=>$param['Name'],
-            'EmailAddress'=>$param['EmailAddress'],
-            'IsActive'=>$param['IsActive'],
-            'NormalizedUserName'=>strtoupper($param['UserName']),
-            'NormalizedEmailAddress'=>strtoupper($param['EmailAddress']),
-        ];
+        $result = false;
 
-        $result = $this->modelUsers->setInfo($data);
+        // 启动事务
+        Db::startTrans();
+        try{
 
-        return $result ? ['code'=>200, 'msg'=>'操作成功'] :['code'=>0, 'msg'=>'操作失败'];
+            $data = [
+                'Id'=>$param['Id'],
+                'UserName'=>$param['UserName'],
+                'Name'=>$param['Name'],
+                // 'EmailAddress'=>$param['EmailAddress'],
+                'IsActive'=>$param['IsActive'],
+                'NormalizedUserName'=>strtoupper($param['UserName']),
+                // 'NormalizedEmailAddress'=>strtoupper($param['EmailAddress']),
+            ];
+
+            Db::name('users')->where(['Id'=>$param['Id']])->update($data);
+
+            $authGroupInfo = [
+                'member_id'=>$param['Id'],
+                'group_id'=>$param['auth_id'],
+                'status'=>1
+            ];
+
+            $userGroupAccess = Db::name('auth_group_access')->where(['member_id'=>$param['Id']])->find();
+
+            if($userGroupAccess){
+                Db::name('auth_group_access')->where(['member_id'=>$param['Id']])->update($authGroupInfo);
+            }else{
+                Db::name('auth_group_access')->insert($authGroupInfo);
+            }
+
+            $return = $this->postUserInfo($param);
+            if(is_array($return)){
+                // 回滚事务
+                Db::rollback();
+                return $return;
+            }
+            if($return === true){
+                // 提交事务
+                Db::commit(); 
+                $result = true;
+            }else{
+                // 回滚事务
+                Db::rollback();
+                $result = false;
+            }
+               
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            $result = false;
+        }
+
+        return $result ? ['code'=>200, 'msg'=>'操作成功'] : ['code'=>400, 'msg'=>'操作失败'];
     }
 
     /**
@@ -103,16 +183,56 @@ class Users extends AdminBase
      */
     public function editUserPwd($param = [])
     {
-        if(empty($param['md5_password'])){
-            return ['code'=>400, 'msg'=>'请输入新密码'];
+
+        $validate_result = $this->validateUsers->scene('editpwd')->check($param);
+        
+        if (!$validate_result) {
+            return ['code'=>400,'msg'=> $this->validateUsers->getError()];
         }
 
-        $data = [
-            'Id'=>$param['Id'],
-            'md5_password'=>md5($param['md5_password']),
-        ];
+        $Id = $param['Id'];
 
-        $result = $this->modelUsers->setInfo($data);
+        $userInfo = $this->modelUsers->getInfo(['Id'=>$Id]);
+
+        $result = false;
+
+        // 启动事务
+        Db::startTrans();
+        try{
+
+            $data = [
+                'md5_password'=>md5($param['md5_password']),
+            ];
+
+            Db::name('users')->where(['Id'=>$param['Id']])->update($data);
+
+            $uData = [
+                'UserName'=>$userInfo['UserName'],
+                'md5_password'=>$data['md5_password'],
+            ];
+
+            $return = $this->postUserInfo($uData);
+
+            if(is_array($return)){
+                // 回滚事务
+                Db::rollback();
+                return $return;
+            }
+            if($return === true){
+                // 提交事务
+                Db::commit(); 
+                $result = true;
+            }else{
+                // 回滚事务
+                Db::rollback();
+                $result = false;
+            }
+               
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            $result = false;
+        }
 
         return $result ? ['code'=>200, 'msg'=>'操作成功'] : ['code'=>400, 'msg'=>'操作失败'];
     }
@@ -122,7 +242,6 @@ class Users extends AdminBase
      */
     public function addUserInfo($param = [])
     {
-        // dump($param);die;
 
         $validate_result = $this->validateUsers->scene('add')->check($param);
         
@@ -138,7 +257,7 @@ class Users extends AdminBase
             'UserName'=>$param['UserName'],
             'md5_password'=>md5($param['md5_password']),
             'Name'=>$param['Name'],
-            'EmailAddress'=>$param['EmailAddress'],
+            // 'EmailAddress'=>$param['EmailAddress'],
             'IsActive'=>$param['IsActive'],
             'CreationTime'=>$time,
             'IsDeleted'=>0,
@@ -150,11 +269,53 @@ class Users extends AdminBase
             'IsTwoFactorEnabled'=>0,
             'IsEmailConfirmed'=>0,
             'NormalizedUserName'=>strtoupper($param['UserName']),
-            'NormalizedEmailAddress'=>strtoupper($param['EmailAddress']),
+            // 'NormalizedEmailAddress'=>strtoupper($param['EmailAddress']),
 
         ];
 
-        $result = $this->modelUsers->setInfo($data);
+        $result = false;
+
+        // 启动事务
+        Db::startTrans();
+        try{
+            $uId = Db::name('users')->insertGetId($data);
+
+            $authGroupInfo = [
+                'member_id'=>$uId,
+                'group_id'=>$param['auth_id'],
+                'status'=>1
+            ];
+
+            $userGroupAccess = Db::name('auth_group_access')->where(['member_id'=>$uId])->find();
+
+            if($userGroupAccess){
+                Db::name('auth_group_access')->where(['member_id'=>$uId])->update($authGroupInfo);
+            }else{
+                Db::name('auth_group_access')->insert($authGroupInfo);
+            }
+
+            $return = $this->postUserInfo($param);
+
+            if(is_array($return)){
+                // 回滚事务
+                Db::rollback();
+                return $return;
+            }
+            if($return === true){
+                // 提交事务
+                Db::commit(); 
+                $result = true;
+            }else{
+                // 回滚事务
+                Db::rollback();
+                $result = false;
+            }
+               
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            $result = false;
+        }
 
         return $result ? ['code'=>200, 'msg'=>'操作成功'] : ['code'=>400, 'msg'=>'操作失败'];
     }
@@ -167,5 +328,43 @@ class Users extends AdminBase
     public function setUserValue($where = [], $field = '', $value = '')
     {
         return $this->modelUsers->setFieldValue($where, $field, $value);
+    }
+
+
+    /**
+     * 添加/修改用户信息后，同时更新到服务端
+     * add by fqm in 19.10.30
+     */
+    public function postUserInfo($param)
+    {
+
+        // 当前接种点id
+        $positionId = $this->modelSettings->getValue(['Name'=>'App.InjectPositionId'],'Value');
+
+        if(empty($positionId)) return ['code'=>0,'msg'=>'请先注册接种点'];
+
+        $data = [
+            'position_id'=>$positionId,
+        ];
+
+        !empty($param['auth_id']) ? $data['user_type']=$param['auth_id'] : '';
+        !empty($param['UserName']) ? $data['mobile']=$param['UserName'] : '';
+        !empty($param['md5_password']) ? $data['password']=md5($param['md5_password']) : '';
+        !empty($param['IsActive']) ? $data['status']=$param['IsActive'] : '';
+
+        // dump($data);die;
+
+        $appUrl = $this->modelSettings->getValue(['Name'=>'App.appUrl'], 'Value');
+
+        $result = httpsPost($appUrl, $data);
+
+        $result = json_decode($result, true);
+
+        if($result['code'] == 200){
+            return true;
+        }else{
+            return false;
+        }
+
     }
 }

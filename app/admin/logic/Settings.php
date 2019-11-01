@@ -85,10 +85,9 @@ class Settings extends AdminBase
             return ['code'=>400, 'msg'=>$this->validateSettings->getError()];
         }
 
-        $url = 'http://192.168.0.120:8088/registinpo';
+        $appUrl = $this->modelSettings->getValue(['Name'=>'App.appUrl'], 'Value');
 
         $data = [
-            'accesstoken' => get_access_token(),
             'id'=>$param['inject_position_id'],
             'account' => $param['account'],
             'password' => $param['password'],
@@ -102,7 +101,7 @@ class Settings extends AdminBase
             'province_city_district' => $param['province_city_district'],
         ];
 
-        $result = httpsPost($url,$data);
+        $result = httpsPost($appUrl . '/registinpo', $data);
 
         // $result = json_decode($result,true);
 

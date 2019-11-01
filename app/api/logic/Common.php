@@ -45,6 +45,40 @@ class Common extends ApiBase
         return $result;
     }
 
+    /**
+     * 冰箱用户登录
+     * add by fqm in 19.10.30
+     */
+    public function userLogin($param = [])
+    {
+        
+        if(empty($param['account'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '请填写账号'];
+        if(empty($param['password'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '请填写密码'];
+        
+        $user_info = $this->modelUsers->getInfo(['UserName'=>$param['account']], 'Id, UserName, md5_password');
+        
+        if($user_info){
+
+            if(md5($param['password']) !== $user_info['md5_password']){
+                return [API_CODE_NAME => 40001, API_MSG_NAME => '密码错误'];
+            }else{
+                return $user_info;
+            } 
+
+        }else{
+            return [API_CODE_NAME => 40001, API_MSG_NAME => '账号不存在'];
+        }
+        
+
+
+
+
+
+
+        
+    }
+    
+
     /**+------------------------
      * | 前台用户操作接口
      * |

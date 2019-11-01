@@ -27,6 +27,15 @@ class Common extends ApiBase
 
     }
 
+    /**
+     * 冰箱用户登录
+     * add by fqm in 19.10.30
+     */
+    public function userLogin()
+    {
+        return $this->apiReturn($this->logicCommon->userLogin($this->param));
+    }
+
 
 
 

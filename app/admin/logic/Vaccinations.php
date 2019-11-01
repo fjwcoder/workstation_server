@@ -314,7 +314,7 @@ class Vaccinations extends AdminBase
         $data = [
             'deviceId'=>1,
             'data'=>[
-                'number'=>$param['number'],
+                'number'=>$param['number'], 
                 'writingDesk'=>$param['WritingDesk']
             ]
 

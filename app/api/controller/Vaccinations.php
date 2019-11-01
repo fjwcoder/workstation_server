@@ -15,4 +15,12 @@ class Vaccinations extends ApiBase
     {
         return $this->apiReturn($this->logicVaccinations->getWaitingInjectList());
     }
+
+    /**
+     * 完成接种
+     */
+    public function completeInject()
+    {
+        return $this->apiReturn($this->logicVaccinations->completeInject($this->param));
+    }
 }

@@ -25,4 +25,8 @@ use think\Route;
 Route::rule([
 
     'api/queue/push'                   => '@api/queue/push',
+    'callname'                         => '@api/common/callName',
+    'getWaitingInjectList'             => '@api/Vaccinations/getWaitingInjectList',
+    'completeInject'                   => '@api/Vaccinations/completeInject',
+    'userLogin'                        => '@api/Common/userLogin',
 ]);

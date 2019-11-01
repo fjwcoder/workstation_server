@@ -95,11 +95,46 @@
         </fieldset>
         <div style="width: 60%">
                 <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">叫号机地址：</label>
+                    <label class="layui-form-label label_w">叫号机地址UR：</label>
                     <div class="layui-input-block">
                         <input type="text" class="layui-input input_w" name="App.QueueServerAddress" value="{$info['App.QueueServerAddress']|default=''}">
                     </div>
                 </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">冰箱服务地址URL：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.refrigeratorUrl" value="{$info['App.refrigeratorUrl']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">小程序地址URL：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.appUrl" value="{$info['App.appUrl']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">实时队列URL：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.immediatelyQueueUrl" value="{$info['App.immediatelyQueueUrl']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">实时队列频率(秒)：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.immediatelyQueueRate" value="{$info['App.immediatelyQueueRate']|default=''}">
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">服务执行时间：</label>
+                    <div class="layui-input-block">
+                        <select class="layui-input input_w un-select" name="App.serverBeginTime" style="width: 100px;float: left;"></select>
+                        <span style="float: left;margin: 0 15px;line-height: 38px;">——</span>
+                        <select class="layui-input input_w un-select"  name="App.serverEndTime" style="width: 100px;float: left;"></select>
+                    </div>
+                </div>
+
                 <div class="layui-form-item margin_top">
                     <label class="layui-form-label label_w">登记大屏显示行数：</label>
                     <div class="layui-input-block">
@@ -160,9 +195,32 @@
 layui.use(['layer','jquery'], function(){
     var layer = layui.layer,
     $ = layui.jquery;
-  
 
+    var serverBeginTimeHtml = '';
+    var serverBeginTime = "{$info['App.serverBeginTime']|default='8'}";
+    var serverBeginTimeSelected = '';
+    for (let i = 6; i < 21; i++) {
+        if(serverBeginTime == i){
+            serverBeginTimeSelected = 'selected';
+        }else{
+            serverBeginTimeSelected = '';
+        }
+        serverBeginTimeHtml += '<option value="'+i+'" '+serverBeginTimeSelected+'>'+i+'点</option>';
+    }
+    $('select[name="App.serverBeginTime"]').html(serverBeginTimeHtml);
 
+    var serverEndTimeHtml = '';
+    var serverEndTime = "{$info['App.serverEndTimeHtml']|default='16'}";
+    var serverEndTimeSelected = '';
+    for (let i = 6; i < 21; i++) {
+        if(serverEndTime == i){
+            serverEndTimeSelected = 'selected';
+        }else{
+            serverEndTimeSelected = '';
+        }
+        serverEndTimeHtml += '<option value="'+i+'" '+serverEndTimeSelected+'>'+i+'点</option>';
+    }
+    $('select[name="App.serverEndTime"]').html(serverEndTimeHtml);
 
     $('.unajax-post').on('click',function(){
 
@@ -205,7 +263,18 @@ layui.use(['layer','jquery'], function(){
                 inject_position_id:inject_position_id,
             };
 
-            $.post('{:url("settings/setSettingsInfo")}',data,function(res){
+            // 不修改需要传到线上的数据直接提交保存
+            if(
+                adminId !== "{$info['App.AdminId']}" ||
+                data.inject_position_type !== "{$info['APP.InjectPositionType']}" ||
+                data.province !== "{$info['province.Id']}" ||
+                data.city !== "{$info['city.Id']}" ||
+                data.district !== "{$info['county.Id']}" ||
+                data.address !== "{$info['App.InjectPositionAddress']}" ||
+                data.name !== "{$info['App.WorkstationName']}" ||
+                data.inject_position_id !== "{$info['App.InjectPositionId']}"
+            ){
+                $.post('{:url("settings/setSettingsInfo")}',data,function(res){
                 // console.log(res);
                 if(res.code == 200){
                     console.log(res)
@@ -220,19 +289,15 @@ layui.use(['layer','jquery'], function(){
                     $(that).removeClass('disabled').prop('disabled',false);
                 }
 
-
             },'json');
-            
+            }else{
+                $('.ajax-post').trigger("click");
+            }
+
         });
 
-
     })
-
-
-
-        
-
-       
+  
 
 });  
     

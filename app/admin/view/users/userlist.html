@@ -38,6 +38,7 @@
 
 <script>
     let searchData = {};
+    let authList = {};
 
     if(searchData.search_data !== undefined){
         $('input[name="search_data"]').val(searchData.search_data);
@@ -49,6 +50,10 @@
         layer = layui.layer,
         laydate = layui.laydate,
         $ = layui.jquery;
+
+        $.post('{:url("auth/getAuthList")}','',function(res){
+            authList = res;
+        })
 
         // 数据表格
         table.render({
@@ -66,7 +71,7 @@
 
                 { field: 'UserName', title: '名称', width:120,sort: true },
                 { field: 'Name', title: '昵称', width:120, sort: true },
-                { field: 'EmailAddress', title: '邮箱', sort: true },
+                // { field: 'EmailAddress', title: '邮箱', sort: true },
                 { field: 'CreationTime', title: '创建时间', sort: true},
                 { title: '状态', align:'center', width:100, templet :function(d){
                     if(d.IsActive == 1){
@@ -240,6 +245,7 @@
 
         });
 
+
         // 添加/编辑弹出层html
         function getContentHtml(res = {}){
 
@@ -247,6 +253,24 @@
                 res.Id = '';
             }
 
+            if(res.group_id == undefined){
+                res.group_id = '';
+            }
+
+            var authHtml = '';
+            if(authList){
+                var optionHtml = '';
+                for (let i = 0; i < authList.length; i++) {
+                    if(authList[i]['id'] == res.group_id){
+                        optionHtml = 'selected';
+                    }
+                    authHtml += '<option value="'+authList[i]['id']+'" '+optionHtml+'>'+authList[i]['name']+'</option>';
+                }
+            }
+
+            var authAllHtml = '<div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>权限</label><div class="col-md-10"><select class="form-control" name="auth_id"><option value="0">请选择权限</option>'+authHtml+'</select></div></div>';
+
+            
             if(res.UserName == undefined){
                 res.UserName = '';
             }
@@ -255,9 +279,9 @@
                 res.Name = '';
             }
 
-            if(res.EmailAddress == undefined){
-                res.EmailAddress = '';
-            }
+            // if(res.EmailAddress == undefined){
+            //     res.EmailAddress = '';
+            // }
 
             var pwdHtml = '';
 
@@ -276,8 +300,8 @@
                 isActiveHtml = '<input type="radio" name="IsActive" value="0"> 否</label><label><input type="radio" name="IsActive" value="1" checked="checked"> 是';
             }
 
-            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:600px;"><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>账号</label><div class="col-md-10"><input class="form-control" name="UserName" placeholder="请输入账号" type="text" value="'+res.UserName+'"></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>昵称</label><div class="col-md-10"><input class="form-control" name="Name" placeholder="请输入昵称" type="text" value="'+res.Name+'"></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>邮箱</label><div class="col-md-10"><input  class="form-control" typr="text" name="EmailAddress" placeholder="请输入邮箱" value="'+res.EmailAddress+'"></div></div>'+pwdHtml+'<div class="form-group"><label class="col-md-2 control-label">启用</label><div class="col-md-10">'+isActiveHtml+'</div></div></div></form>';
-
+            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:600px;"><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>账号</label><div class="col-md-10"><input class="form-control" name="UserName" placeholder="请输入账号" type="text" value="'+res.UserName+'"></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>昵称</label><div class="col-md-10"><input class="form-control" name="Name" placeholder="请输入昵称" type="text" value="'+res.Name+'"></div></div>'+authAllHtml+''+pwdHtml+'<div class="form-group"><label class="col-md-2 control-label">启用</label><div class="col-md-10">'+isActiveHtml+'</div></div></div></form>';
+            // <div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>邮箱</label><div class="col-md-10"><input  class="form-control" typr="text" name="EmailAddress" placeholder="请输入邮箱" value="'+res.EmailAddress+'"></div></div>
             return cHtml;
 
         }
@@ -288,8 +312,9 @@
             var UserName = $('input[name="UserName"]').val(),
                 Name = $('input[name="Name"]').val(),
                 EmailAddress = $('input[name="EmailAddress"]').val();
+                auth_id = $('select[name="auth_id"] option:checked').val();
 
-            if(UserName =='' || Name == '' || EmailAddress == ''){
+            if(UserName =='' || Name == '' || EmailAddress == '' || auth_id == 0){
                 return '必填项不能为空';
             }else{
                 return true;

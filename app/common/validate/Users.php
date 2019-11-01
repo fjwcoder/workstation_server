@@ -13,8 +13,9 @@ class Users extends ValidateBase
         'UserName'  => 'require|unique:users',
         'md5_password'  => 'require|length:6,12',
         'Name'  => 'require',
-        'EmailAddress'  => 'require|email',
+        // 'EmailAddress'  => 'require|email',
         'IsActive'  => 'require|in:0,1',
+        'auth_id'   => 'require|number',
     ];
 
     // 验证提示
@@ -24,16 +25,19 @@ class Users extends ValidateBase
         'md5_password.require'    => '请输入密码',
         'md5_password.length'    => '密码长度为6-12位',
         'Name.require'    => '请输入昵称',
-        'EmailAddress.require'    => '请输入邮箱',
-        'EmailAddress.email'    => '邮箱格式不正确',
+        // 'EmailAddress.require'    => '请输入邮箱',
+        // 'EmailAddress.email'    => '邮箱格式不正确',
         'IsActive.require'    => '请选择是否启用',
         'IsActive.in'    => '请重新选择是否启用',
+        'auth_id.require' =>'请选择用户权限',
+        'auth_id.number' =>'用户权限不正确',
     ];
 
     // 应用场景
     protected $scene = [
-        'add'  =>  ['UserName','md5_password','Name','EmailAddress','IsActive'],
-        'edit'  =>  ['UserName','Name','EmailAddress','IsActive'],
+        'add'  =>  ['UserName','md5_password','Name','IsActive','auth_id'],
+        'edit'  =>  ['UserName','Name','IsActive','auth_id'],
+        'editpwd'  =>  ['md5_password'],
     ];
 
 

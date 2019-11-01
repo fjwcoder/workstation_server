@@ -20,6 +20,14 @@ use think\Cache;
 class Script extends IndexBase
 {
 
+    public function test9(){
+        $data = '我是谁';
+
+        $data = rawurlencode($data);
+
+        dump($data);
+    }
+
     public function test3(){
         $where = [
             'IsDeleted' => 0,
@@ -115,37 +123,21 @@ class Script extends IndexBase
 
     public function test11(){
 
-        $data = '{
-            "deviceId":11,
-            "data":{
-                "number":"A001",
-                "writingDesk":"111"
-            }
-        }';
 
-        // $data = [
-        //     'deviceId'=>'11',
-        //     'data'=>[
-        //         'number'=>'0001',
-        //         'writingDesk'=>'登记台1',
-        //     ],
-        //     'targetUrl'=>Null,
-        //     'success'=>True,
-        //     'error'=>Null,
-        //     'unAuthorizedRequest'=>False,
-        //     '__abp'=>True
-        // ];
 
-        // $data = [
-        //     'deviceId'=>11,
-        //     'data'=>[
-        //         'number'=>'0001',
-        //         'writingDesk'=>'登记台1'
-        //     ],
-        // ];
+        $data = [
+            'deviceId'=>1,
+            'data'=>[
+                'number'=>'A1',
+                'writingDesk'=>'1'
+            ]
+        ];
 
-        // $result = httpsPost('http://192.168.0.249:9500', json_encode($data) );
-        $result = httpsPost('http://192.168.0.249:9500', $data );
+        $data = json_encode($data);
+
+        dump($data);
+
+        $result = httpsPost('http://192.168.1.249:9500', $data );
 
         dump($result);
 
@@ -154,44 +146,21 @@ class Script extends IndexBase
 
     public function test12(){
 
-        $data = '{
-            "deviceId":12,
-            "data":{
-                "number":"11",
-                "childName":"22",
-                "consultingRoom":"333"
-            }
-        }';
 
-        // $data = [
-        //     'deviceId'=>'12',
-        //     'data'=>[
-        //         'number'=>'A001',
-        //         'childName'=>'小红',
-        //         'consultingRoom'=>'诊室1',
-        //     ],
-        //     'targetUrl'=>Null,
-        //     'success'=>True,
-        //     'error'=>Null,
-        //     'unAuthorizedRequest'=>False,
-        //     '__abp'=>True
-        // ];
+        $data = [
+            'deviceId'=>2,
+            'data'=>[
+                'number'=>'222',
+                'childName'=>'13as1d5a',
+                'consultingRoom'=>'asdad'
+            ],
+        ];
 
-        // $data = [
-        //     'deviceId'=>12,
-        //     'data'=>[
-        //         'number'=>'0001',
-        //         'childName'=>'111',
-        //         'consultingRoom'=>'1111'
-        //     ],
-        // ];
+        $data = json_encode($data);
 
-        // dump($data);
+        dump($data);
 
-        // dump(json_encode($data));die;
-
-        $result = httpsPost('http://192.168.0.249:9500',$data);
-        // $result = httpsPost('http://192.168.0.249:9500',json_encode($data));
+        $result = httpsPost('http://192.168.1.249:9500',$data);
 
         dump($result);
 

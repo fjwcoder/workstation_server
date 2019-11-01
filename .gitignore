@@ -2,6 +2,7 @@
 /runtime
 /log
 /data
+/public/upload/Attachments
 # /public/upload/file
 # /public/upload/picture
 /app/database.php

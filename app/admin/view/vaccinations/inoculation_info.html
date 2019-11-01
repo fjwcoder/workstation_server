@@ -172,12 +172,13 @@
                 var a = {$info.vaccinationDeskCount};
                 // a = 登记台个数
                 var num = a * 210 / 2;
+                var j_html = '';
                 for ( i = 0; i < a; i++) {
                     // console.log(i)
-                    j_html = '<div class="j_item" data='+ (i+1) +'><div class="j_item_title">接种台</div><div class="j_item_number">'+ (i+1) +'</div></div>';
-                    $('.fix_box').append(j_html);
+                    j_html += '<div class="j_item" data='+ (i+1) +'><div class="j_item_title">接种台</div><div class="j_item_number">'+ (i+1) +'</div></div>';
                     
                 }
+                $('.fix_box').html(j_html);
                 $(".fix_box").css('left', 'calc(50% - ' + num + 'px)')
             });
             

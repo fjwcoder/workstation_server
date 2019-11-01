@@ -20,6 +20,16 @@ use app\api\error\CodeBase;
 class ApiBase extends LogicBase
 {
 
+    /*
+     * 白名单不验证token 如果传入token执行验证获取信息，没有获取到用户信息
+     * */
+    public static function whiteList()
+    {
+        return [
+            // 'vaccine/scanappointmentqrcode',
+        ];
+    }
+
     /**
      * API返回数据
      * change by fjw in 19.7.30
@@ -106,9 +116,16 @@ class ApiBase extends LogicBase
          * (empty($param['access_token']) || $param['access_token'] != get_access_token()) && $this->apiError(CodeBase::$accessTokenError);
          */
         // dump($param); die;
-        $access_token = isset($_SERVER['HTTP_ACCESSTOKEN'])?$_SERVER['HTTP_ACCESSTOKEN']:$param['accesstoken'];
+        // $access_token = isset($_SERVER['HTTP_ACCESSTOKEN'])?$_SERVER['HTTP_ACCESSTOKEN']:$param['accesstoken'];
 
-        (empty($access_token) || $access_token != get_access_token()) && $this->apiError(CodeBase::$accessTokenError);
+        // (empty($access_token) || $access_token != get_access_token()) && $this->apiError(CodeBase::$accessTokenError);
+        $whiteList = $this->whiteList();
+
+        if(!in_array(URL,$whiteList)){
+            $access_token = isset($_SERVER['HTTP_ACCESSTOKEN'])?$_SERVER['HTTP_ACCESSTOKEN']:$param['accesstoken'];
+
+            (empty($access_token) || $access_token != get_access_token()) && $this->apiError(CodeBase::$accessTokenError);
+        }
         
         /**
          * edit by fjw in 19.7.30

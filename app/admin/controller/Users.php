@@ -37,9 +37,9 @@ class Users extends AdminBase
 
         $data = $this->param;
 
-        !empty($data['search_data']) && $where['UserName|Name|EmailAddress'] = ['like', '%'.$data['search_data'].'%'];
+        !empty($data['search_data']) && $where['u.UserName|u.Name|u.EmailAddress'] = ['like', '%'.$data['search_data'].'%'];
 
-        $field = 'Id, UserName, EmailAddress, CreationTime, Name, IsActive, md5_password';
+        $field = 'u.Id, u.UserName, u.EmailAddress, u.CreationTime, u.Name, u.IsActive, u.md5_password, a.group_id';
 
         return $this->logicUsers->getUserList($where, $field);
     }

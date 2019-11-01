@@ -87,4 +87,14 @@ class Auth extends AdminBase
         
         return $this->fetch('menu_auth');
     }
+
+
+    /**
+     * 获取权限组
+     * add by fqm in 19.10.30
+     */
+    public function getAuthList()
+    {
+        return $this->logicAuthGroup->getAuthGroupList(['status' => 1], 'id, name', 'id asc', false);
+    }
 }

@@ -56,7 +56,8 @@ class Vaccinationdetails extends AdminBase
         }
 
         $where = [
-            'VaccinationDate' => ['like'.'%'.NOW_DATE.'%']
+            'VaccinationId' => $param['VaccinationId'],
+            'VaccinationDate' => ['like','%'.NOW_DATE.'%']
         ];
 
         foreach ($param['vaccineDate'] as $k => $v) {
