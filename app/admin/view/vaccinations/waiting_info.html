@@ -126,8 +126,8 @@
                                     <th>剂次</th>
                                     <th>疫苗批号</th>
                                     <th>生产企业</th>
-                                    <th>接种部位</th>
                                     <th>接种地址</th>
+                                    <th>接种部位</th>
                                     <th>免费</th>
                                     <th>操作</th>
                                 </tr> 
@@ -138,7 +138,7 @@
                                         <tr>
                                             <td style="display: none;"><input type="hidden" name="Id" value="{$vo.Id}"></td>
                                             <td>
-                                                <select class="layui-input" name="VaccineId">
+                                                <select class="layui-input un-select" name="VaccineId">
                                                     <option>请选择</option>
                                                     {volist name="info.vaccines" id="voo"}
                                                     <option value="{$voo.Id}" {if condition="$vo['VaccineId'] == $voo['Id']"} selected {/if}>{$voo.ShortName}</option>
@@ -155,7 +155,7 @@
                                                 <input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company" value="{$vo.Company}">
                                             </td>
                                             <td>
-                                                <input class="layui-input" type="text" placeholder="请填写疫苗地址" name="VaccinationPlace" value="{$vo.VaccinationPlace}">
+                                                <input class="layui-input" type="text" placeholder="请填写接种地址" name="VaccinationPlace" value="{$vo.VaccinationPlace}">
                                             </td>
                                             <td>
                                                 <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition" value="{$vo.VaccinationPosition}">
@@ -292,7 +292,7 @@
             // 添加 tr
             $('.add_vaccination').on('click',function(){
 
-                html = '<tr><td style="display: none;"><input type="hidden" name="Id" value="0"></td><td><select class="layui-input un-select" name="VaccineId"><option>请选择</option>{volist name="info.vaccines" id="vo"}<option value="{$vo.Id}">{$vo.ShortName}</option>{/volist}</select></td><td><input class="layui-input" type="text" name="Times" value="1"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗地址" name="VaccinationPlace"></td><td><input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition"></td><td><input type="checkbox" lay-skin="primary" name="IsFree" value="1"></td><td><a class="del_vaccination" id="0">删除</a></td></tr>';
+                html = '<tr><td style="display: none;"><input type="hidden" name="Id" value="0"></td><td><select class="layui-input un-select" name="VaccineId"><option>请选择</option>{volist name="info.vaccines" id="vo"}<option value="{$vo.Id}">{$vo.ShortName}</option>{/volist}</select></td><td><input class="layui-input" type="text" name="Times" value="1"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company"></td><td><input class="layui-input" type="text" placeholder="请填写接种地址" name="VaccinationPlace"></td><td><input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition"></td><td><input type="checkbox" lay-skin="primary" name="IsFree" value="1"></td><td><a class="del_vaccination" id="0">删除</a></td></tr>';
 
                 $('#test').find('tbody').append(html);
                 

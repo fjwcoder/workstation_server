@@ -61,6 +61,8 @@ class Queue extends ApiBase
             'CreationTime'=>$time,
             'VaccinationDate'=>$time,
             'State'=>0,
+            'status'=>1,
+            'appointment_order' => $param['Oid'],
         ];
 
         $requestData = [
@@ -68,9 +70,9 @@ class Queue extends ApiBase
             'info' => 1,
         ];
 
-        $refrigeratorUrl = $this->modelSettings->getValue(['Name'=>'App.refrigeratorUrl'], 'Value');
+        $appUrl = $this->modelSettings->getValue(['Name'=>'App.appUrl'], 'Value');
 
-        $baby_order = httpsPost($refrigeratorUrl . '/scaptmtqrcode', $requestData);
+        $baby_order = httpsPost($appUrl . '/scaptmtqrcode', $requestData);
 
         $baby_order = json_decode($baby_order, true);
 

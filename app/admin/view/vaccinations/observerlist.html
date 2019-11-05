@@ -43,9 +43,9 @@
                         <td>{$vo.Number}</td>
                         <td>{$vo.child_name}</td>
                         <td>{$vo.VaccinationFinishTime}</td>
-                        <td>时间倒计时</td>
+                        <td>接种完成起30分钟</td>
                         <td class="col-md-3 text-center">
-                            <ob_link><a href="{:url('index/index')}" class="btn"><i class="fa fa-edit"></i>登记资料</a></ob_link>
+                            <ob_link><a href="{:url('vaccinations/checkInVaInfo')}?Id={$vo.Id}" class="btn btn-sm">查看资料</a></ob_link>
                         </td>
                       </tr>
                   {/volist}

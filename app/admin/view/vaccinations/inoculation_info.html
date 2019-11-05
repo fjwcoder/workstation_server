@@ -9,7 +9,7 @@
                         <button class="btn btn_item btn_item_left submit" State="4">完成</button>
                         <!-- <button class="btn btn_item btn_item_left submit_prev">完成并呼叫上一位</button> -->
                         <!-- <button class="btn btn_item btn_item_left submit_next">完成并呼叫下一位</button> -->
-                        <button class="btn btn_item btn_item_left">呼叫</button>
+                        <button class="btn btn_item btn_item_left call_number">呼叫</button>
 
                         <div class="un_number">{$info.registerInfo.Number}号</div>
 
@@ -261,6 +261,30 @@
 
             });
 
+            /**
+            * 呼叫
+            */
+            $('.call_number').on('click',function(){
+                // var Id  = $('input[name="Id"]').val();
+                var Number = '{$info.registerInfo.Number}';
+                var Name = $('input[name="Name"]').val();
+
+                var data = {
+                    Number:Number,
+                    Name:Name,
+                    WritingDesk:WritingDesk,
+                };
+
+                $.post('{:url("Vaccinations/callInjectNumber")}',data,function(res){
+                    // console.log(res);
+                    if(res.code == 200){
+                        layer.msg(res.msg,{icon:1});
+                    }else{
+                        layer.msg(res.msg,{icon:2});
+                    }
+                });
+            });
+
 
             // 点击完成按钮
             $('.submit').on('click',function(e){
@@ -275,16 +299,24 @@
                     ConsultationRoom:ConsultationRoom,
                 };
 
-                $.post('{:url("Vaccinations/setInjectVaccineComplete")}',data,function(res){
-                    if(res.code == 200){
-                        $('.fakeloader').hide();
-                        layer.msg(res.msg);
-                    }else{
-                        $('.fakeloader').hide();
-                        layer.msg(res.msg);
-                    }
-
+                layer.confirm("确定要完成吗？建议接种台完成!!!", {icon: 3, title:'提示'}, function(index){
+                
+                    $.post('{:url("Vaccinations/setInjectVaccineComplete")}',data,function(res){
+                        if(res.code == 200){
+                            $('.fakeloader').hide();
+                            layer.msg(res.msg);
+                            layer.close(index);
+                        }else{
+                            $('.fakeloader').hide();
+                            layer.msg(res.msg);
+                            layer.close(index);
+                        }
+                    });
                 });
+
+                $('.fakeloader').hide();
+
+               
             });
 
             // 点击完成并下一位按钮

@@ -217,6 +217,14 @@ class Vaccinations extends AdminBase
     {
         return $this->logicVaccinations->callNumber($this->param);
     }
+
+    /**
+     * 接种台叫号
+     */
+    public function callInjectNumber()
+    {
+        return $this->logicVaccinations->callInjectNumber($this->param);
+    }
     
 
 

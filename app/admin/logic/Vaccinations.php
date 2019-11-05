@@ -96,6 +96,8 @@ class Vaccinations extends AdminBase
     public function setVaccinationsInfo($param = [])
     {
 
+        $result = false;
+
         if(empty($param['ChildId'])){
             return ['code'=>400,'msg'=>'请先填写儿童信息'];
         }
@@ -117,8 +119,12 @@ class Vaccinations extends AdminBase
             'RegistrantId' => MEMBER_ID,
             'State'=>1
         ];
-        
-        $result = $this->modelVaccinations->setInfo($data);
+
+        $app_result = $this->editOrderInfo($param['Id'], 2);
+
+        if($app_result){
+            $result = $this->modelVaccinations->setInfo($data);
+        }
 
         return $result ? ['code'=>200,'msg'=>'操作成功'] : ['code'=>400,'msg'=>'操作失败'];
     }
@@ -216,7 +222,10 @@ class Vaccinations extends AdminBase
     public function observationList($where = [])
     {
         $where['v.RegistrationFinishTime'] = ['like', '%'.NOW_DATE.'%'];
-        $where['v.State'] = 3;
+        $where['v.State'] = ['>=',2];
+        
+        $d_time = date('Y-m-d H:i:s',time() - 1800);
+        $where['v.VaccinationFinishTime'] = ['>=',$d_time];
 
         $this->modelVaccinations->alias('v');
 
@@ -300,6 +309,8 @@ class Vaccinations extends AdminBase
     public function setInjectVaccineComplete($param = [])
     {
 
+        $result = false;
+
         $time = date("Y-m-d H:i:s");
 
         $data = [
@@ -312,7 +323,11 @@ class Vaccinations extends AdminBase
             'State'=>$param['State'],
         ];
 
-        $result = $this->modelVaccinations->setInfo($data);
+        $app_result = $this->editOrderInfo($param['Id'], 3);
+
+        if($app_result){
+            $result = $this->modelVaccinations->setInfo($data);
+        }
 
         return $result ? ['code'=>200,'msg'=>'接种成功'] : ['code'=>400,'msg'=>'操作失败'];
 
@@ -395,11 +410,75 @@ class Vaccinations extends AdminBase
             return ['code'=>400,'msg'=>'叫号失败'];
         }
 
-
-
-        
     }
 
+    /**
+     * 接种台叫号
+     */
+    public function callInjectNumber($param = [])
+    {
+        
+        $data = [
+            'deviceId'=>2,
+            'data' =>[
+                'number'=>$param['Number'],
+                'childName'=>$param['Name'],
+                'consultingRoom'=>$param['WritingDesk']
+            ]
+        ];
+
+        $url = $this->modelSettings->getValue(['Name'=>'App.QueueServerAddress'],'Value');
+
+        $result = httpsPost($url, json_encode($data));
+
+        $result = json_decode($result,true);
+
+        if($result['sucess'] == true){
+            return ['code'=>200,'msg'=>'叫号成功'];
+        }else{
+            return ['code'=>400,'msg'=>'叫号失败'];
+        }
+
+    }
+
+
+    /**
+     * 登记资料 / 接种完成 时  判断是不是在线预约的订单
+     * 是 修改小程序数据库信息， 不是 不操作
+     */
+    public function editOrderInfo($id,$step)
+    {
+
+        $orderId = $this->modelVaccinations->getValue(['Id'=>$id], 'appointment_order');
+
+        if(!empty($orderId)){
+
+            $data = [
+                'order_id'=>$orderId,
+                'step'=>$step,
+            ];
+
+            $appUrl = $this->modelSettings->getValue(['Name'=>'App.appUrl'], 'Value');
+
+            $app_result = httpsPost($appUrl . '/editorderstep', $data);
+
+            $app_result = json_decode($app_result, true);
+
+            if($app_result['code'] == 200){
+                return true;
+            }else{
+                return false;
+            }
+
+        }else{
+            return true;
+        }
+
+    }
+
+
+
+    
     
 
 
