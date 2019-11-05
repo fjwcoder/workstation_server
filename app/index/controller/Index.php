@@ -32,8 +32,9 @@ class Index extends IndexBase
 
 
     public function dengji(){
-        $hour = intval(date('H'));
-        dump(intval($hour));
+        $inoculabilityTime = '2019-11-05 11:44:00'; //substr($v['VaccinationFinishTime'], -15, 8);
+        $remainingTime = 30 - floor((time()-strtotime($inoculabilityTime))%86400/60);
+        echo $remainingTime;
         // $url = 'https://vaccine.mamitianshi.com/fridgeheartbeat?accesstoken=ed333de121fd2ba6cb6a489fef5c521b';
         // $url .= '&time=123456&temp=987654';
 

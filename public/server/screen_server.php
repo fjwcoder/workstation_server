@@ -214,7 +214,8 @@ function sendWaitingQueue()
 
             foreach($send_queue as $k=>$v){
                 $inoculabilityTime = substr($v['VaccinationFinishTime'], -15, 8);
-                $remainingTime = floor((time()-strtotime($inoculabilityTime))%86400/60);
+                $remainingTime = 30 - floor((time()-strtotime($inoculabilityTime))%86400/60);
+                $remainingTime = ($remainingTime >= 0)?$remainingTime:0;
                 $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
             }
             $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));

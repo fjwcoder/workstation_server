@@ -136,8 +136,8 @@ $task->count = 1;
 $task->onWorkerStart = function($task){
     
     // NN秒后执行发送邮件任务，最后一个参数传递false，表示只运行一次
-    // Timer::add($GLOBALS['immediatelyQueueRate'], 'sendCurrentQueue', array(), true);
-    Timer::add(5, 'sendCurrentQueue', array(), true);
+    Timer::add($GLOBALS['immediatelyQueueRate'], 'sendCurrentQueue', array(), true);
+    // Timer::add(5, 'sendCurrentQueue', array(), true);
 
 };
 // 运行worker
