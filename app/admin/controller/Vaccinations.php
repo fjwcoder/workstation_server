@@ -158,6 +158,7 @@ class Vaccinations extends AdminBase
     {
         $where = [
             'v.RegistrationFinishTime' => ['like', '%'.NOW_DATE.'%'],
+            'v.State' => ['>=', 2],
         ];
 
         $data = $this->param;

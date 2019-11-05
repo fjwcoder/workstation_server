@@ -499,19 +499,18 @@
                             $('select[name="Sex"]').find('option[value="2"]').attr('selected',"true");
                         }
                         layui.form.render();
+                        // 刷新历史接种表格 表格重载
+                        table.reload('test1', {
+                            url: '{:url("childvaccines/getChildvaccines")}'
+                            ,where: {
+                                ChildId:res.Id
+                            }
+
+                        });
                     }
 
                 },'json');
-
-                ChildId = inputChildId.val();
-
-                table.reload('test1', {
-                    url: '{:url("childvaccines/getChildvaccines")}'
-                    ,where: {
-                        ChildId:ChildId
-                    }
-
-                });
+                
             }
 
         });
