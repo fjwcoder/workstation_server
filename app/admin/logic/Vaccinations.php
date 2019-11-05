@@ -13,13 +13,23 @@ class Vaccinations extends AdminBase
     /**
      * 获取登记队列
      */
-    public function getWaitingList($where = [], $field = true, $order = '', $paginate = 15)
+    public function getWaitingList($where = [], $field = true, $order = '', $paginate = 1, $limit = 15)
     {
 
         $where['VaccinationDate'] = ['like', '%'.NOW_DATE.'%'];
         $where['State'] = 0;
 
-        $list = $this->modelVaccinations->getList($where, $field, $order, $paginate);
+        $where['Number'] = ['like', '%V%'];
+        // $Vlist = $this->modelVaccinations->getList($where, $field, $order, $paginate);
+        $Vlist = Db::name('vaccinations')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
+        // dump($Vlist);
+
+        $where['Number'] = ['like', '%A%'];
+        // $Alist = $this->modelVaccinations->getList($where, $field, $order, $paginate);
+        $Alist = Db::name('vaccinations')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
+        // dump($Alist);
+
+        $list = array_merge($Vlist,$Alist);
 
         return $list;
     }
@@ -42,6 +52,20 @@ class Vaccinations extends AdminBase
         // 当前点击的号码的信息
         $registerInfo = $this->modelVaccinations->getInfo(['v.Id'=>$param['Id']],$field);
 
+        // $registerInfo['pic'] = $this->modelVaccinationattachments->getList(, );
+
+        $head_fingerprint_pic = Db::name('vaccinationattachments')->where(['VaccinationId'=>$param['Id']])->field('Name,DiplayName,Path')->select();
+
+        $head_fingerprint_path = [];
+
+        if($head_fingerprint_pic !== null){
+            foreach ($head_fingerprint_pic as $k => $v) {
+                $head_fingerprint_path[$v['Name']] = $v['Path'];
+            }
+        }
+
+        // dump($head_fingerprint_path);die;
+
         $registerInfoDefilds = $this->logicVaccinationdetails->getVIdObVdetail(['VaccinationId' => $registerInfo['Id']]);
         
         // 当前点击的号码的上一个号码，下一个号码
@@ -58,6 +82,7 @@ class Vaccinations extends AdminBase
             'registerInfo' => $registerInfo,
             'registerInfoDefilds'=>$registerInfoDefilds,
             'writingdeskcount' => $writingdeskcount,
+            'head_fingerprint_path' => $head_fingerprint_path,
         ];
 
         return $data;
@@ -133,6 +158,16 @@ class Vaccinations extends AdminBase
         // 当前点击的号码的信息
         $registerInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],$field);
 
+        $head_fingerprint_pic = Db::name('vaccinationattachments')->where(['VaccinationId'=>$param['Id']])->field('Name,DiplayName,Path')->select();
+
+        $head_fingerprint_path = [];
+
+        if($head_fingerprint_pic !== null){
+            foreach ($head_fingerprint_pic as $k => $v) {
+                $head_fingerprint_path[$v['Name']] = $v['Path'];
+            }
+        }
+
         // 当前点击的号码的上一个号码，下一个号码
         $peevNext = $this->prevNextNum($registerInfo['Id'], ['VaccinationDate' => ['like', '%'.NOW_DATE.'%'],'State'=>['in','1']]);
 
@@ -166,6 +201,7 @@ class Vaccinations extends AdminBase
             'todayInjectList' => $todayInjectList,
             'registerInfo' => $registerInfo,
             'vaccinationDeskCount' => $vaccinationDeskCount,
+            'head_fingerprint_path' => $head_fingerprint_path,
         ];
 
         return $data;
@@ -217,6 +253,7 @@ class Vaccinations extends AdminBase
      */
     public function checkInVaInfo($where, $where_np)
     {
+        // dump($where);die;
 
         $this->modelVaccinations->alias('v');
 
@@ -229,6 +266,16 @@ class Vaccinations extends AdminBase
         // 当前点击的号码的信息
         $registerInfo = $this->modelVaccinations->getInfo($where, $field);
 
+        $head_fingerprint_pic = Db::name('vaccinationattachments')->where(['VaccinationId'=>$where['v.Id']])->field('Name,DiplayName,Path')->select();
+
+        $head_fingerprint_path = [];
+
+        if($head_fingerprint_pic !== null){
+            foreach ($head_fingerprint_pic as $k => $v) {
+                $head_fingerprint_path[$v['Name']] = $v['Path'];
+            }
+        }
+
         $registerInfoDefilds = $this->logicVaccinationdetails->getVIdObVdetail(['VaccinationId' => $registerInfo['Id']]);
         
         // 当前点击的号码的上一个号码，下一个号码
@@ -239,6 +286,7 @@ class Vaccinations extends AdminBase
             'prev' => json_encode($peevNext['prev']),
             'registerInfo' => $registerInfo,
             'registerInfoDefilds'=>$registerInfoDefilds,
+            'head_fingerprint_path' => $head_fingerprint_path,
         ];
 
         return $data;
@@ -282,19 +330,36 @@ class Vaccinations extends AdminBase
 
         $where_n = $where_p = $where;
         
-        $where_n['Id'] = ['>', $id];
+        // $n_data = Db::name('vaccinations')->where(['Id'=>$id])->find();
 
-        $next = Db::name('Vaccinations')->where($where_n)->field($field)->order('VaccinationDate asc')->find();
+        $Number = $this->modelVaccinations->getValue(['Id'=>$id], 'Number');
+        
+        if(strtoupper($Number[0]) == 'V'){
+            $where_n['Number'] = ['like','%V%'];
+            $where_p['Number'] = ['like','%V%'];
+        }else{
+            $where_n['Number'] = ['like','%A%'];
+            $where_p['Number'] = ['like','%A%'];
+        }
+
+        $where_n['Id'] = ['>', $id];
+        $next = Db::name('vaccinations')->where($where_n)->field($field)->order('VaccinationDate asc')->find();
+        if($next == null){
+            unset($where_n['Number']);
+            $next = Db::name('vaccinations')->where($where_n)->field($field)->order('VaccinationDate asc')->find();
+        }
 
         $where_p['Id'] = ['<', $id];
-
-        $prev = Db::name('Vaccinations')->where($where_p)->field($field)->order('VaccinationDate desc')->find();
+        $prev = Db::name('vaccinations')->where($where_p)->field($field)->order('VaccinationDate desc')->find();
+        if($next == null){
+            unset($where_p['Number']);
+            $prev = Db::name('vaccinations')->where($where_p)->field($field)->order('VaccinationDate asc')->find();
+        }
 
         $data = [
             'next'=>$next['Id'],
             'prev'=>$prev['Id'],
         ];
-        
 
         return $data;
 

@@ -36,15 +36,16 @@ class Vaccinations extends AdminBase
 
         !empty($data['search_data']) && $where['Number'] = ['like', '%'.$data['search_data'].'%'];
 
-        $paginate = 15;
+        $paginate = !empty($data['page']) ? $data['page'] : 1;
+        $limit = !empty($data['limit']) ? $data['limit'] : 15;
 
-        !empty($data['limit']) && $paginate = $data['limit'];
+        // !empty($data['limit']) && $paginate = $data['limit'];
 
         $field = 'Id, VaccinationDate, Number';
 
         $order = 'VaccinationDate asc';
 
-        return $this->logicVaccinations->getWaitingList($where, $field, $order, $paginate);
+        return $this->logicVaccinations->getWaitingList($where, $field, $order, $paginate, $limit);
     }
 
     

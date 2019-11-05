@@ -1122,7 +1122,7 @@ function saveImg($base64, $file_name)
 
         if(file_put_contents($new_file, base64_decode(str_replace($result[1], '', $base64_img)))){
             // return $new_file;
-            return '/upload/Attachments/'.NOW_DATE.$file_name;
+            return DS . 'upload' . DS . 'Attachments' . DS . NOW_DATE . DS . $file_name ;
         }
 
     }

@@ -139,13 +139,13 @@ class Queue extends ApiBase
 
             $file_name = $param['number'].'-'.$v['name'];
 
-            $file_path = saveImg($v['content'], $file_name);
+            $file_path = saveImg($v['content'], $v['name']);
 
             $attachmentsData = [
                 'CreationTime'=>$time,
                 'IsDeleted'=>0,
                 'VaccinationId'=>$VaccinationId,
-                'Name'=>$file_name,
+                'Name'=>$v['name'],
                 'DiplayName'=>$file_name,
                 'Path'=>$file_path,
             ];

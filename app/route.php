@@ -29,4 +29,5 @@ Route::rule([
     'getWaitingInjectList'             => '@api/Vaccinations/getWaitingInjectList',
     'completeInject'                   => '@api/Vaccinations/completeInject',
     'userLogin'                        => '@api/Common/userLogin',
+    'getWaitingInjectInfo'             => '@api/Vaccinations/getWaitingInjectInfo',
 ]);

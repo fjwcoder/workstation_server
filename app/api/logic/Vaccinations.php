@@ -4,6 +4,7 @@
  */
 
 namespace app\api\logic;
+use think\Db;
 
 class Vaccinations extends ApiBase
 {
@@ -15,24 +16,56 @@ class Vaccinations extends ApiBase
     public function getWaitingInjectList()
     {
 
-        $where = [
+        $where_v = [
             'v.RegistrationFinishTime'=>['like', '%'.NOW_DATE.'%'],
+            'v.Number'=>['like', '%V%'],
             'v.State'=>1,
         ];
 
-        $field = 'v.Id, v.Number, v.RegistrationFinishTime, c.Name, c.Sex, y.ShortName';
+        $where_a = [
+            'v.RegistrationFinishTime'=>['like', '%'.NOW_DATE.'%'],
+            'v.Number'=>['like', '%A%'],
+            'v.State'=>1,
+        ];
 
-        $this->modelVaccinations->alias('v');
+        $field = 'v.Id, v.Number, v.RegistrationFinishTime, c.Name, c.Sex';
 
-        $this->modelVaccinations->join = [
-            [SYS_DB_PREFIX . 'childs c', 'c.Id = v.ChildId','LEFT'],
-            [SYS_DB_PREFIX . 'vaccinationdetails d', 'd.VaccinationId = v.Id','LEFT'],
+        $where['v.Number'] = ['Number',];
+
+        $dataVList = Db::name('vaccinations')->alias('v')->join('childs c','c.Id = v.ChildId','LEFT')->where($where_v)->field($field)->order('v.RegistrationFinishTime asc')->select();
+
+        $dataAList = Db::name('vaccinations')->alias('v')->join('childs c','c.Id = v.ChildId','LEFT')->where($where_a)->field($field)->order('v.RegistrationFinishTime asc')->select();
+
+        $dataList = array_merge($dataVList,$dataAList);
+
+        return $dataList;
+
+    }
+
+
+    /**
+     * 查看待接种详情
+     */
+    public function getWaitingInjectInfo($param = [])
+    {
+
+        if(empty($param['Id'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '查询失败'];
+
+        $where = [
+            'VaccinationId' => $param['Id']
+        ];
+
+        $field = 'y.ShortName';
+
+        $this->modelVaccinationdetails->alias('d');
+
+        $this->modelVaccinationdetails->join = [
             [SYS_DB_PREFIX . 'vaccines y', 'd.VaccineId = y.Id','LEFT'],
         ];
 
-        $dataList = $this->modelVaccinations->getList($where, $field, 'v.RegistrationFinishTime asc' ,false);
+        $data = $this->modelVaccinationdetails->getList($where, $field, '', false);
 
-        return $dataList;
+        return $data;
 
 
     }

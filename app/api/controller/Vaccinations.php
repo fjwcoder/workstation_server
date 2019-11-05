@@ -17,6 +17,14 @@ class Vaccinations extends ApiBase
     }
 
     /**
+     * 查看待接种详情
+     */
+    public function getWaitingInjectInfo()
+    {
+        return $this->apiReturn($this->logicVaccinations->getWaitingInjectInfo($this->param));
+    }
+
+    /**
      * 完成接种
      */
     public function completeInject()
