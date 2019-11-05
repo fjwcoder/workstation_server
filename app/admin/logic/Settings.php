@@ -85,7 +85,7 @@ class Settings extends AdminBase
             return ['code'=>400, 'msg'=>$this->validateSettings->getError()];
         }
 
-        $appUrl = $this->modelSettings->getValue(['Name'=>'App.appUrl'], 'Value');
+        $refrigeratorUrl = $this->modelSettings->getValue(['Name'=>'App.refrigeratorUrl'], 'Value');
 
         $data = [
             'id'=>$param['inject_position_id'],
@@ -101,7 +101,7 @@ class Settings extends AdminBase
             'province_city_district' => $param['province_city_district'],
         ];
 
-        $result = httpsPost($appUrl . '/registinpo', $data);
+        $result = httpsPost($refrigeratorUrl . '/registinpo', $data);
 
         // $result = json_decode($result,true);
 
