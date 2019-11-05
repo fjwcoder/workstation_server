@@ -1,6 +1,6 @@
 <?php
 /**
- * Childs 孩子信息验证器
+ * Childs 儿童信息验证器
  */
 
 namespace app\common\validate;
@@ -24,8 +24,8 @@ class Childs extends ValidateBase
     protected $message = [
         'CardNo.require'    => '请输入卡号',
         // 'CardNo.unique'    => '卡号已存在',
-        'Name.require'    => '请填写孩子姓名',
-        'Sex.require'    => '请选择孩子性别',
+        'Name.require'    => '请填写儿童姓名',
+        'Sex.require'    => '请选择儿童性别',
         'Sex.in'    => '性别格式不正确',
         'BirthDate.require'    => '请选择出生日期',
         'BirthDate.date'    => '出生日期格式不正确',

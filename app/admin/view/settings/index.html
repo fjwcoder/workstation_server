@@ -21,6 +21,19 @@
                 <input type="hidden" name="App.InjectPositionId" value="{$info['App.InjectPositionId']|default='0'}">
 
                 <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种点地址：</label>
+                    <div class="layui-input-block">
+                        {:widget('Region/index',['name'=>'Id', 'province'=>$info['province.Id'], 'city'=>$info['city.Id'], 'county'=>$info['county.Id']])}
+                    </div>
+                </div>
+                <div class="layui-form-item margin_top">
+                    <label class="layui-form-label label_w">接种点详细地址：</label>
+                    <div class="layui-input-block">
+                        <input type="text" class="layui-input input_w" name="App.InjectPositionAddress" value="{$info['App.InjectPositionAddress']|default=''}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item margin_top">
                     <label class="layui-form-label label_w">接种点类型：</label>
                     <div class="layui-input-block">
                         <?php
@@ -39,16 +52,18 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">接种点地址：</label>
+                    <label class="layui-form-label label_w ">接种点名称：</label>
                     <div class="layui-input-block">
-                        {:widget('Region/index',['name'=>'Id', 'province'=>$info['province.Id'], 'city'=>$info['city.Id'], 'county'=>$info['county.Id']])}
+                        <input type="text" class="layui-input input_w" name="App.WorkstationName" value="{$info['App.WorkstationName']|default=''}">
                     </div>
                 </div>
+
                 <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">接种点详细地址：</label>
+                    <label class="layui-form-label label_w ">接种点电话：</label>
                     <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.InjectPositionAddress" value="{$info['App.InjectPositionAddress']|default=''}">
+                        <input type="text" class="layui-input input_w" name="App.InjectPositionPhone" value="{$info['App.InjectPositionPhone']|default=''}">
                     </div>
                 </div>
 
@@ -60,20 +75,6 @@
                             <option value="{$vo.Id}" <?php if(!empty($info['App.AdminId']) && $info['App.AdminId'] == $vo['Id']){ echo 'selected'; }else if(empty($info['App.AdminId'])){ if($vo['Id'] == 1){ echo 'selected'; }} ?>>{$vo.Name}</option>
                             {/volist}
                         </select>
-                    </div>
-                </div>
-
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w ">工作站点：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.WorkstationName" value="{$info['App.WorkstationName']|default=''}">
-                    </div>
-                </div>
-
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w ">接种点电话：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.InjectPositionPhone" value="{$info['App.InjectPositionPhone']|default=''}">
                     </div>
                 </div>
 
@@ -135,7 +136,7 @@
                     </div>
                 </div>
 
-                <div class="layui-form-item margin_top">
+                <!-- <div class="layui-form-item margin_top">
                     <label class="layui-form-label label_w">登记大屏显示行数：</label>
                     <div class="layui-input-block">
                         <input type="text" class="layui-input input_w" name="App.WritingDeskScreenRows" value="{$info['App.WritingDeskScreenRows']|default=''}">
@@ -159,7 +160,7 @@
                     <div class="layui-input-block">
                         <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenInterval" value="{$info['App.VaccinationDeskScreenInterval']|default=''}">
                     </div>
-                </div>
+                </div> -->
                 <div class="layui-form-item margin_top">
                     <label class="layui-form-label label_w">留观大屏显示行数：</label>
                     <div class="layui-input-block">

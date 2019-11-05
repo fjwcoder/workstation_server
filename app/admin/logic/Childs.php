@@ -38,7 +38,7 @@ class Childs extends AdminBase
         if($childInfo){
             return $childInfo;
         }else{
-            return ['code'=>0,'msg'=>'请填写孩子信息'];
+            return ['code'=>0,'msg'=>'请填写儿童信息'];
         }
 
         

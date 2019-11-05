@@ -26,7 +26,7 @@
                     </div>
                     <div class="center_box">
                         <div class="cen_left">
-                            <div class="cen_title"> 孩子信息</div>
+                            <div class="cen_title"> 儿童信息</div>
                             <div class="form_box">
                                 <form class="layui-form" action="" id="form">
                                     <div class="form_left">
@@ -339,7 +339,7 @@
             // 点击完成按钮
             $('.submit').on('click',function(){
                 $('.fakeloader').show();
-                // 孩子信息
+                // 儿童信息
                 var child_id = inputChildId.val();
                 var CardNo = inputCardNo.val();
                 var Name = inputName.val();
@@ -464,7 +464,7 @@
                 getChildInfo();
             });
 
-            // 点击搜索框 获取 卡号的输入框失去焦点市  进行查询孩子信息
+            // 点击搜索框 获取 卡号的输入框失去焦点市  进行查询儿童信息
             function getChildInfo(){
                 // 卡号
                 CardNo = inputCardNo.val();
@@ -476,7 +476,7 @@
 
                 $.post('{:url("childs/cardNoGetInfo")}',{CardNo:CardNo},function(res){
                     if(res.code == 0){
-                        layer.msg('暂无该卡号信息，请先填写孩子信息');
+                        layer.msg('暂无该卡号信息，请先填写儿童信息');
 
                     }else{
                         

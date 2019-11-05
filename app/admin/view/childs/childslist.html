@@ -7,7 +7,7 @@
         <script type="text/html" id="toolbarDemo">
             <div class="row">
                 <div class="col-sm-5">
-                    <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="addInfo">新建孩子</button>
+                    <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="addInfo">新建儿童</button>
                 </div>
                 
                 <div class="col-sm-7">
@@ -60,7 +60,7 @@
             title: '用户数据表',
             cols: [[
 
-                { field: 'Name', title: '孩子', width:120, align:'center' },
+                { field: 'Name', title: '儿童姓名', width:130, align:'center' },
                 { field: 'CardNo', title: '卡号', align:'center', sort: true },
                 { field: 'ParentName', title: '联系人', width:120, align:'center' },
                 { field: 'Mobile', title: '联系电话', width:120, align:'center'},
@@ -102,7 +102,7 @@
                 contentHtml = getContentHtml(data)
 
                 layer.prompt({
-                    title: '孩子信息编辑',
+                    title: '儿童信息编辑',
                     content: contentHtml,
                     yes: function(index, layero){
 
@@ -162,7 +162,7 @@
                 contentHtml = getContentHtml();
 
                 layer.prompt({
-                    title: '添加孩子信息',
+                    title: '添加儿童信息',
                     content: contentHtml,
                     yes: function(index, layero){
                         
@@ -251,7 +251,7 @@
                 res.Address = '';
             }
 
-            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:900px;"><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>卡号</label><div class="col-md-8"><input class="form-control" name="CardNo" placeholder="请输入卡号" type="text" value="'+res.CardNo+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>名称</label><div class="col-md-8"><input class="form-control" name="Name" placeholder="请输入孩子姓名" type="text" value="'+res.Name+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>性别</label><div class="col-md-8">'+sexHtml+'</div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>出生日期</label><div class="col-md-8"><input class="form-control BirthDate" name="BirthDate" placeholder="请选择出生日期" type="text" value="'+res.BirthDate+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">家长</label><div class="col-md-8"><input class="form-control" name="ParentName" placeholder="请输入家长姓名" type="text" value="'+res.ParentName+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">电话</label><div class="col-md-8"><input class="form-control" name="Mobile" placeholder="请输入联系电话" type="text" value="'+res.Mobile+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">地址</label><div class="col-md-8"><textarea name="Address" class="form-control" placeholder="请输入家庭住址" rows="5">'+res.Address+'</textarea></div></div></div></form>';
+            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:900px;"><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>卡号</label><div class="col-md-8"><input class="form-control" name="CardNo" placeholder="请输入卡号" type="text" value="'+res.CardNo+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>名称</label><div class="col-md-8"><input class="form-control" name="Name" placeholder="请输入儿童姓名" type="text" value="'+res.Name+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>性别</label><div class="col-md-8">'+sexHtml+'</div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label"><span style="color:red;">*</span>出生日期</label><div class="col-md-8"><input class="form-control BirthDate" name="BirthDate" placeholder="请选择出生日期" type="text" value="'+res.BirthDate+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">家长</label><div class="col-md-8"><input class="form-control" name="ParentName" placeholder="请输入家长姓名" type="text" value="'+res.ParentName+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">电话</label><div class="col-md-8"><input class="form-control" name="Mobile" placeholder="请输入联系电话" type="text" value="'+res.Mobile+'"></div></div><div class="col-md-6 form-group"><label class="col-md-4 control-label">地址</label><div class="col-md-8"><textarea name="Address" class="form-control" placeholder="请输入家庭住址" rows="5">'+res.Address+'</textarea></div></div></div></form>';
 
             return cHtml;
 

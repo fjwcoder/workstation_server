@@ -97,7 +97,7 @@ class Vaccinations extends AdminBase
     {
 
         if(empty($param['ChildId'])){
-            return ['code'=>400,'msg'=>'请先填写孩子信息'];
+            return ['code'=>400,'msg'=>'请先填写儿童信息'];
         }
         if(empty($param['WritingDesk'])){
             return ['code'=>400,'msg'=>'请先选择登记台'];
