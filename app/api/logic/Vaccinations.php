@@ -78,11 +78,6 @@ class Vaccinations extends ApiBase
     {
         $result = false;
 
-        $param = [
-            'Id'=>1908,
-            'VaccinationUserId'=>1
-        ];
-
         if(empty($param['Id'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
         
         if(empty($param['VaccinationUserId'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
@@ -118,7 +113,6 @@ class Vaccinations extends ApiBase
             $vaccine_list = Db::name('vaccinationdetails')->where($v_where)->field($field)->select();
 
             $vaccine_json = json_encode($vaccine_list);
-            // dump($dasdas);die;
 
             foreach ($vaccine_list as $k => $v) {
                 $vaccine_list[$k]['CreationTime']=$time;
@@ -127,10 +121,9 @@ class Vaccinations extends ApiBase
                 $vaccine_list[$k]['CreatorUserId']=$param['VaccinationUserId'];
             }
 
-            // Db::name('childvaccines')->insertAll($vaccine_list);
+            Db::name('childvaccines')->insertAll($vaccine_list);
 
             $childInfo = $this->modelChilds->getInfo(['Id'=>$childId]);
-            // dump($childInfo);die;
 
             $parent_info = [
                 'parent_name'=>$childInfo['ParentName'],
