@@ -32,23 +32,22 @@ class Index extends IndexBase
 
 
     public function dengji(){
-        $data = [
-            'uc'=>'203',
-            'mac'=>'203',
-            'ql'=>json_encode(["A007","A003","A002","A001"])
-        ];
-        // $ql = json_encode(["A007","A003","A002","A001"]);
+        $hour = intval(date('H'));
+        dump(intval($hour));
+        // $url = 'https://vaccine.mamitianshi.com/fridgeheartbeat?accesstoken=ed333de121fd2ba6cb6a489fef5c521b';
+        // $url .= '&time=123456&temp=987654';
 
-        $url = 'http://xiaoai.server/positionInjectQueue';
+        // for($i=0; $i<600; $i++){
+        //     $response = httpsPost($url, '');
+        //     $len = strlen($response);
+
+        //     if($len > 100){
+        //         file_put_contents('response.txt', $response);
+        //         dump($response);
+        //         break;
+        //     }
+        // }
         
-        // echo $url; die;
-        $response = $this->formPost($url, $data);
-        dump($response); die;
-
-        // $temp = 'aa550bf0f80b07d9020200000000000000000000000000000000000000000000';
-
-        // dump($this->hexToStr($temp)); die;
-
 
 
     }

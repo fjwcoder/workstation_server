@@ -9,8 +9,8 @@
 global $log_file; // 服务文件
 global $db_conn; // 数据库连接对象
 
-global $refrigeratorUrl; // 冰箱服务域名
-global $appUrl; // 小程序/app 服务域名
+// global $refrigeratorUrl; // 冰箱服务域名
+// global $appUrl; // 小程序/app 服务域名
 global $serverBeginTime; // 服务执行开始时间
 global $serverEndTime; // 服务执行结束时间
 
@@ -22,6 +22,7 @@ global $ObseverRoomScreenRows; // 留观队列屏幕显示条数
 global $ObseveScreenRefreshRate; // 留观队列屏幕刷新频率
 global $QueueServerAddress; // 留观队列推送推送地址
 global $waitting_queue; // 留观队列
+
 
 $date = date('Y-m-d');
 $log_path = __DIR__ . '/serverlog/screen_push/';
@@ -98,28 +99,22 @@ $waitting_queue = [];
 //         or `Name`='App.ObseveScreenRefreshRate' 
 //         or `Name`='App.QueueServerAddress'";
 
+
+
+
 $sql = "SELECT `Name`, `Value` FROM settings 
         WHERE `Name`='App.ObseverRoomScreenRows' 
         or `Name`='App.ObseveScreenRefreshRate' 
-        or `Name`='App.QueueServerAddress'";
+        or `Name`='App.QueueServerAddress' 
+        or `Name`='App.serverBeginTime' 
+        or `Name`='App.serverEndTime' 
+        ";
 
 $result = $db_conn->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         switch($row['Name']){
-            // case 'App.WritingDeskScreenRows':
-            //     $WritingDeskScreenRows = $row['Value'];
-            // break;
-            // case 'App.WritingDeskScreenInterval':
-            //     $WritingDeskScreenInterval = $row['Value'];
-            // break;
-            // case 'App.VaccinationDeskScreenRows': 
-            //     $VaccinationDeskScreenRows = $row['Value'];
-            // break;
-            // case 'App.VaccinationDeskScreenInterval':
-            //     $VaccinationDeskScreenInterval = $row['Value'];
-            // break;
             case 'App.ObseverRoomScreenRows':
                 $ObseverRoomScreenRows = $row['Value'];
             break;
@@ -128,6 +123,18 @@ if ($result->num_rows > 0) {
             break;
             case 'App.QueueServerAddress':
                 $QueueServerAddress = $row['Value'];
+            break;
+            // case 'App.refrigeratorUrl':
+            //     $refrigeratorUrl = $row['Value'];
+            // break;
+            // case 'App.appUrl':
+            //     $appUrl = $row['Value'];
+            // break;
+            case 'App.serverBeginTime': 
+                $serverBeginTime = $row['Value'];
+            break;
+            case 'App.serverEndTime':
+                $serverEndTime = $row['Value'];
             break;
             default:  break;
         }
@@ -155,69 +162,78 @@ Worker::runAll();
 // 发送留观队列
 function sendWaitingQueue()
 {
-    //  查询留观中
-    if(empty($GLOBALS['waitting_queue'])){
-        serverLog('------- 内存留观队列为空，重新查询 -------');
-        /**
-         * condition：
-         *  a.State >= 2
-         *  
-         */
-        $today = date('Y-m-d');
-        $old_time = date('Y-m-d H:i:s', intval(time())-1800);
+    // 获取当前小时数
+    $hour = intval(date('H'));
+    if($hour >= intval($GLOBALS['serverBeginTime']) && $hour < intval($GLOBALS['serverEndTime'])){
+        //  查询留观中
+        if(empty($GLOBALS['waitting_queue'])){
+            serverLog('------- 内存留观队列为空，重新查询 -------');
+            /**
+             * condition：
+             *  State >= 2
+             *  
+             */
+            $today = date('Y-m-d');
+            $old_time = date('Y-m-d H:i:s', intval(time())-1800);
 
-        $sql = "SELECT `Number`, `ChildId`, `Name`, `VaccinationFinishTime`   
-            FROM vaccinations as a left join childs as b on a.ChildId=b.id 
-            WHERE a.CreationTime LIKE '$today%'
-            and `State` >= 2 
-            and `VaccinationFinishTime` >= '$old_time' 
-        ";
+            $sql = "SELECT `Number`, `ChildId`, `Name`, `VaccinationFinishTime`   
+                FROM vaccinations as a left join childs as b on a.ChildId=b.id 
+                WHERE a.CreationTime LIKE '$today%'
+                and `State` >= 2 
+                and `VaccinationFinishTime` >= '$old_time' 
+            ";
 
-        $result = $GLOBALS['db_conn']->query($sql);
+            $result = $GLOBALS['db_conn']->query($sql);
 
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                
-                $GLOBALS['waitting_queue'][$row['Number']] = $row;
-    
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    
+                    $GLOBALS['waitting_queue'][$row['Number']] = $row;
+        
+                }
+            
+            } else {
+                serverLog('******* 数据库留观队列为空 *******');
+                serverEcho("******* 数据库留观队列为空 *******");
             }
-        
-        } else {
-            serverLog('******* 数据库留观队列为空 *******');
-            serverEcho("******* 数据库留观队列为空 *******");
         }
-    }
 
-// var_export($GLOBALS['waitting_queue']);
-    $data = ['deviceId'=>13, 'data'=>[]];
-    if(empty($GLOBALS['waitting_queue'])){
-        serverLog('------- 内存留观队列为空 -------');
-        serverEcho('------- 内存留观队列为空 -------');
-        
-        $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
-        serverLog('空数据推送返回：'.$send_response);
-    }else{
-        // var_export($GLOBALS['waitting_queue']); die;
-        // $send_queue = array_slice($GLOBALS['waitting_queue'], 0, $GLOBALS['ObseverRoomScreenRows']); // 取出前N个数据
-        $send_queue = array_slice($GLOBALS['waitting_queue'], 0, 2);
+        // var_export($GLOBALS['waitting_queue']);
+        $data = ['deviceId'=>13, 'data'=>[]];
+        if(empty($GLOBALS['waitting_queue'])){
+            serverLog('------- 内存留观队列为空 -------');
+            serverEcho('------- 内存留观队列为空 -------');
+            
+            $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
+            serverLog('空数据推送返回：'.$send_response);
+        }else{
+            // var_export($GLOBALS['waitting_queue']); die;
+            // $send_queue = array_slice($GLOBALS['waitting_queue'], 0, 2);
+            $send_queue = array_slice($GLOBALS['waitting_queue'], 0, $GLOBALS['ObseverRoomScreenRows']); // 取出前N个数据
+            
 
-        foreach($send_queue as $k=>$v){
-            $inoculabilityTime = substr($v['VaccinationFinishTime'], -15, 8);
-            $remainingTime = floor((time()-strtotime($inoculabilityTime))%86400/60);
-            $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
-        }
-        $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
-        serverLog('队列数据推送返回：'.$send_response);
-        $send_response = json_decode($send_response, true);
-        if($send_response['sucess'] == true){ // 发送成功
             foreach($send_queue as $k=>$v){
-                unset($GLOBALS['waitting_queue'][$k]);
+                $inoculabilityTime = substr($v['VaccinationFinishTime'], -15, 8);
+                $remainingTime = floor((time()-strtotime($inoculabilityTime))%86400/60);
+                $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
             }
+            $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
+            serverLog('队列数据推送返回：'.$send_response);
+            $send_response = json_decode($send_response, true);
+            if($send_response['sucess'] == true){ // 发送成功
+                foreach($send_queue as $k=>$v){
+                    unset($GLOBALS['waitting_queue'][$k]);
+                }
 
+            }
         }
+    }else{
+        serverLog('未到服务开始时间');
+        serverEcho('未到服务开始时间');
     }
+    
 
-    // var_export($GLOBALS['waitting_queue']);
+
 
 }
 

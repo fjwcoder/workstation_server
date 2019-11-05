@@ -9,8 +9,8 @@
 global $log_file;
 global $db_conn;
 
-global $refrigeratorUrl; // 冰箱服务域名
-global $appUrl; // 小程序/app 服务域名
+// global $refrigeratorUrl; // 冰箱服务域名
+// global $appUrl; // 小程序/app 服务域名
 global $immediatelyQueueUrl;  // 实时队列发送地址
 global $immediatelyQueueRate; // 实时队列发送频率，秒数
 global $serverBeginTime; // 服务执行开始时间
@@ -75,11 +75,18 @@ if ($db_conn->connect_error) {
 $immediatelyQueueRate = 300; // 
 $immediatelyQueueUrl = 'http://xiaoai.mamitianshi.com/positionInjectQueue'; // 
 $InjectPositionID = '';
-// $waitting_queue = [];
 
 
 $sql = "SELECT `Name`, `Value` FROM settings 
-        WHERE `Name`='App.InjectPositionId'";
+        WHERE `Name`='App.InjectPositionId' 
+        or `Name`='App.refrigeratorUrl' 
+        or `Name`='App.appUrl' 
+        or `Name`='App.serverBeginTime' 
+        or `Name`='App.serverEndTime' 
+        or `Name`='App.immediatelyQueueUrl' 
+        or `Name`='App.immediatelyQueueRate' 
+        ";
+         
         // or `Name`='App.ObseveScreenRefreshRate' 
         // or `Name`='App.QueueServerAddress'
 
@@ -91,12 +98,24 @@ if ($result->num_rows > 0) {
             case 'App.InjectPositionId':
                 $InjectPositionID = $row['Value'];
             break;
-            // case 'App.ObseveScreenRefreshRate':
-            //     $ObseveScreenRefreshRate = $row['Value'];
-            // break;
-            // case 'App.QueueServerAddress':
-            //     $QueueServerAddress = $row['Value'];
-            // break;
+            case 'App.refrigeratorUrl':
+                $refrigeratorUrl = $row['Value'];
+            break;
+            case 'App.appUrl':
+                $appUrl = $row['Value'];
+            break;
+            case 'App.serverBeginTime':
+                $serverBeginTime = $row['Value'];
+            break;
+            case 'App.serverEndTime':
+                $serverEndTime = $row['Value'];
+            break;
+            case 'App.immediatelyQueueUrl':
+                $immediatelyQueueUrl = $row['Value'];
+            break;
+            case 'App.immediatelyQueueRate':
+                $immediatelyQueueRate = $row['Value'];
+            break;
             default:  break;
         }
     }
@@ -117,8 +136,8 @@ $task->count = 1;
 $task->onWorkerStart = function($task){
     
     // NN秒后执行发送邮件任务，最后一个参数传递false，表示只运行一次
-    Timer::add($GLOBALS['immediatelyQueueRate'], 'sendCurrentQueue', array(), true);
-    // Timer::add(5, 'serverLog', array(), true);
+    // Timer::add($GLOBALS['immediatelyQueueRate'], 'sendCurrentQueue', array(), true);
+    Timer::add(5, 'sendCurrentQueue', array(), true);
 
 };
 // 运行worker
@@ -127,54 +146,60 @@ Worker::runAll();
 // 发送当前接种点的排队队列
 function sendCurrentQueue()
 {
+    $hour = intval(date('H'));
+    if($hour >= intval($GLOBALS['serverBeginTime']) && $hour < intval($GLOBALS['serverEndTime'])){
 
-    // var_export($GLOBALS);
-    // die;
+        /**
+         * condition：
+         *  
+         *  
+         */
+        $queue_list = [];
+        $today = date('Y-m-d');
 
-    /**
-     * condition：
-     *  
-     *  
-     */
-    $queue_list = [];
-    $today = date('Y-m-d');
+        // $old_time = date('Y-m-d H:i:s', intval(time())-1800);
 
-    // $old_time = date('Y-m-d H:i:s', intval(time())-1800);
+        $sql = "SELECT `Number` 
+            FROM vaccinations 
+            WHERE CreationTime LIKE '$today%' and VaccinationDate LIKE '$today%' and `State` < 2 and status = 1 
+            ORDER BY Id desc
+        ";
 
-    $sql = "SELECT `Number` 
-        FROM vaccinations 
-        WHERE CreationTime LIKE '$today%' and VaccinationDate LIKE '$today%' and `State` < 2 and status = 1 
-        ORDER BY Id desc
-    ";
+        $result = $GLOBALS['db_conn']->query($sql);
 
-    $result = $GLOBALS['db_conn']->query($sql);
-
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            $queue_list[] = $row['Number'];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $queue_list[] = $row['Number'];
+            }
+        } else {
+            serverLog('******* 数据库queue队列为空 *******');
+            serverEcho("******* 数据库queue队列为空 *******");
         }
-    } else {
-        serverLog('******* 数据库queue队列为空 *******');
-        serverEcho("******* 数据库queue队列为空 *******");
-    }
-    
-    if(!empty($queue_list)){
-        $data = [
-            'uc'=>$GLOBALS['InjectPositionID'], 'mac'=>$GLOBALS['InjectPositionID'],
-            'ql'=>json_encode($queue_list)
-        ];
+        
+        if(!empty($queue_list)){
+            $data = [
+                'uc'=>$GLOBALS['InjectPositionID'], 'mac'=>$GLOBALS['InjectPositionID'],
+                'ql'=>json_encode($queue_list)
+            ];
 
-        $send_url = explode(';', $GLOBALS['immediatelyQueueUrl']);
-        foreach($send_url as $v){
-            $send_response = formPost($v, $data);
-            serverEcho($v.' / '.$send_response);
-            serverLog($v.' / '.$send_response);
+            $send_url = explode(';', $GLOBALS['immediatelyQueueUrl']);
+            foreach($send_url as $v){
+                $send_response = formPost($v, $data);
+                serverEcho($v.' / '.$send_response);
+                serverLog($v.' / '.$send_response);
 
+            }
+        }else{
+            serverEcho('队列为空，不发送');
+            serverLog('队列为空，不发送');
         }
+
     }else{
-        serverEcho('队列为空，不发送');
-        serverLog('队列为空，不发送');
+        serverLog('未到服务开始时间');
+        serverEcho('未到服务开始时间');
     }
+
+    
 
 }
 
