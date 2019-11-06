@@ -31,15 +31,16 @@ class Queue extends ApiBase
                 '__abp'=>True
             ];
 
-            return json_encode($result);
+            return json_encode($result, 320);
         }
 
-        if(empty($param['oid'])){
+        if(isset($param['oid']) || isset($param['Oid'])){
 
-            $queueLength = $this->addSceneOrder($param);
+            $queueLength = $this->addAppointmentOrder($param);
+            
         }else{
             
-            $queueLength = $this->addAppointmentOrder($param);
+            $queueLength = $this->addSceneOrder($param);
         }
 
         // $url = 'http://xiaoai.fjwcoder.com/api.php/Injectqueue/urlToShort';
@@ -73,7 +74,7 @@ class Queue extends ApiBase
         }
         
 
-        return json_encode($result);
+        return json_encode($result, 320);
 
 
     }
@@ -98,8 +99,9 @@ class Queue extends ApiBase
             'appointment_order' => $param['oid'],
         ];
 
+
         $requestData = [
-            'Oid' => $param['oid'],
+            'oid' => $param['oid'],
             'info' => 1,
         ];
 
@@ -109,14 +111,14 @@ class Queue extends ApiBase
 
         $baby_order = json_decode($baby_order, true);
 
-        if($baby_order['code'] !== 200){
+        if(empty($baby_order['data']) || $baby_order['data'] == null){
             return false;
         }
 
         $babyOrder = $baby_order['data'];
 
         $child_info = $this->modelChilds->getInfo(['CardNo'=>$babyOrder['card_no']]);
-
+        // dump($child_info); die;
         // 有孩子信息
         if($child_info){
             $data['ChildId'] = $child_info['Id'];
@@ -134,12 +136,13 @@ class Queue extends ApiBase
                 'Address'=>$babyOrder['address_detail'],
                 'Mobile'=>$babyOrder['mobile'],
                 'status'=>1,
+                'No'=>''
             ];
 
             $data['ChildId'] = Db::name('childs')->insertGetId($childInfo);
 
         }
-
+// dump($data); die;
         $VaccinationId = Db::name('vaccinations')->insertGetId($data);
 
         $where = [

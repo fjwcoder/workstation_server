@@ -22,7 +22,7 @@ class Index extends IndexBase
         $data = '
         {
                 "number":"0001",
-                "Oid": "1232394802398049"
+                "oid": "V4B12AIB01690239084080"
         }';
         $url = 'http://workstation.server/api/queue/push';
         $response = httpsPost($url, $data);
