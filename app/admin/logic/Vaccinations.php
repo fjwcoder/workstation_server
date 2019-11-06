@@ -72,7 +72,7 @@ class Vaccinations extends AdminBase
         $writingdeskcount = $this->modelSettings->getValue(['Name'=>'App.WritingDeskCount'],'Value');
         // 当前登记台缓存
         $WritingDesk = cache('WritingDesk');
-        // 进行叫号
+        // 进行登记叫号
         $this->callNumber(['number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
 
         $data = [
@@ -277,9 +277,6 @@ class Vaccinations extends AdminBase
             }
         }
 
-        // 当前点击的号码的上一个号码，下一个号码
-        $peevNext = $this->prevNextNum($registerInfo['Id'], ['VaccinationDate' => ['like', '%'.NOW_DATE.'%'],'State'=>['in','1']]);
-
         // 当前号码的孩子信息
         $childInfo = $this->modelChilds->getInfo(['Id'=>$registerInfo['ChildId']]);
 
@@ -303,9 +300,15 @@ class Vaccinations extends AdminBase
         // 诊室数量
         $vaccinationDeskCount = $this->modelSettings->getValue(['Name'=>'App.VaccinationDeskCount'],'Value');
 
+        // 当前接种室缓存
+        $VaccinationDesk = cache('VaccinationDesk');
+
+        // 进行接种叫号
+        $this->callInjectNumber(['Number'=>$registerInfo['Number'],'Name'=>$childInfo['Name'],'WritingDesk'=>$VaccinationDesk]);
+
+
         $data = [
-            'next' => json_encode($peevNext['next']),
-            'prev' => json_encode($peevNext['prev']),
+            'VaccinationDesk'=>$VaccinationDesk,
             'childInfo' => $childInfo,
             'todayInjectList' => $todayInjectList,
             'registerInfo' => $registerInfo,
@@ -430,9 +433,13 @@ class Vaccinations extends AdminBase
 
         if($app_result){
             $result = $this->modelVaccinations->setInfo($data);
+            $nextId = '';
+            if($param['noNext'] == 2){
+                $nextId = $this->nextNumber(['Id'=>$param['Id'],'State'=>1]);
+            }
         }
 
-        return $result ? ['code'=>200,'msg'=>'接种成功'] : ['code'=>400,'msg'=>'操作失败'];
+        return $result ? ['code'=>200,'msg'=>'接种成功','data'=>$nextId] : ['code'=>400,'msg'=>'操作失败','data'=>''];
 
 
     }

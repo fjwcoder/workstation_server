@@ -252,7 +252,17 @@ class Vaccinations extends AdminBase
         $data = $this->param;
 
         cache('WritingDesk',$data['WritingDesk'],43200);
-        
+
+    }
+
+    /**
+     * 选择接种台后进行缓存
+     */
+    public function setCacheVaccinationDesk()
+    {
+        $data = $this->param;
+
+        cache('VaccinationDesk',$data['VaccinationDesk'],43200);
     }
     
 
