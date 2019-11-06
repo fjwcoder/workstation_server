@@ -18,13 +18,12 @@ use app\common\controller\ControllerBase;
  */
 class Index extends ControllerBase
 {
-    
+
     /**
      * 首页方法
      */
     public function index()
     {
-        
         $list = $this->logicDocument->getApiList([], true, 'sort');
         
         $code_list = $this->logicDocument->apiErrorCodeData();

@@ -17,6 +17,17 @@ namespace app\index\controller;
  */
 class Index extends IndexBase
 {
+
+    public function test(){
+        $data = '
+        {
+                "number":"0001",
+                "Oid": "1232394802398049"
+        }';
+        $url = 'http://workstation.server/api/queue/push';
+        $response = httpsPost($url, $data);
+        dump($response);
+    }
     /**
      * 工作台首页
      * create by fjw in 19.9.28
