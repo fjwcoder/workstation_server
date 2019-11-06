@@ -1,6 +1,7 @@
 <style>
     .label_w{width:170px;}
     .un-select{-webkit-appearance: menulist;}
+    .layui-form select{display: inline;}
 </style>
 <div id="content-container">
 
@@ -9,8 +10,8 @@
                 <div class="big_box">
                     <div class="btn_box">
                         <!-- <div class="btn_item btn_item_left">保存草稿</div> -->
-                        <button class="btn btn_item btn_item_left submit">完成</button>
-                        <!-- <button class="btn btn_item btn_item_left submit_next">完成并下一位</button> -->
+                        <button class="btn btn_item btn_item_left submit" data="1">完成</button>
+                        <button class="btn btn_item btn_item_left submit" data="2">完成并下一位</button>
                         <button class="btn btn_item btn_item_left call_number">呼叫</button>
 
                         <div class="un_number">{$info.registerInfo.Number}号</div>
@@ -77,7 +78,7 @@
                                         <div class="layui-form-item">
                                             <label class="layui-form-label" style="color:#666">性别：</label>
                                             <div class="layui-input-block" lay-filter="Sex">
-                                                <select name="Sex">
+                                                <select name="Sex" style="display: none;">
                                                     <option value="1" {if condition="$info['registerInfo']['Sex'] == 1"} selected {/if}>男</option>
                                                     <option value="2" {if condition="$info['registerInfo']['Sex'] == 2"} selected {/if}>女</option>
                                                 </select>
@@ -92,7 +93,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </form>
+                                <!-- </form> -->
                             </div>
                         </div>
                         <div class="cen_right">
@@ -117,7 +118,7 @@
                     </div>
                     <div class="today_box">
                         <div class="cen_title"> <span>今日接种疫苗</span>
-                            <button class="btn btn_item btn_item_right add_vaccination">添加</button>
+                            <button type="button" class="btn btn_item btn_item_right add_vaccination">添加</button>
                         </div>
                         <table class="layui-table" id="test">
                             <thead>
@@ -126,7 +127,7 @@
                                     <th>剂次</th>
                                     <th>疫苗批号</th>
                                     <th>生产企业</th>
-                                    <th>接种地址</th>
+                                    <!-- <th>接种地址</th> -->
                                     <th>接种部位</th>
                                     <th>免费</th>
                                     <th>操作</th>
@@ -154,11 +155,20 @@
                                             <td>
                                                 <input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company" value="{$vo.Company}">
                                             </td>
-                                            <td>
+                                            <!-- <td>
                                                 <input class="layui-input" type="text" placeholder="请填写接种地址" name="VaccinationPlace" value="{$vo.VaccinationPlace}">
-                                            </td>
+                                            </td> -->
                                             <td>
-                                                <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition" value="{$vo.VaccinationPosition}">
+                                                <select class="layui-input un-select" name="VaccinationPosition">
+                                                    <option value="左上臂" {if condition="$vo['VaccinationPosition'] == '左上臂'"}selected{/if}>左上臂</option>
+                                                    <option value="右上臂" {if condition="$vo['VaccinationPosition'] == '右上臂'"}selected{/if}>右上臂</option>
+                                                    <option value="左臀" {if condition="$vo['VaccinationPosition'] == '左臀'"}selected{/if}>左臀</option>
+                                                    <option value="右臀" {if condition="$vo['VaccinationPosition'] == '右臀'"}selected{/if}>右臀</option>
+                                                    <option value="左大腿" {if condition="$vo['VaccinationPosition'] == '左大腿'"}selected{/if}>左大腿</option>
+                                                    <option value="右大腿" {if condition="$vo['VaccinationPosition'] == '右大腿'"}selected{/if}>右大腿</option>
+                                                    <option value="口服" {if condition="$vo['VaccinationPosition'] == '口服'"}selected{/if}>口服</option>
+                                                </select>
+                                                <!-- <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition" value="{$vo.VaccinationPosition}"> -->
                                             </td>
                                             <td>
                                                 {if condition="$vo['IsFree'] == 1"}
@@ -178,6 +188,7 @@
                             </tbody>
                         </table>
                     </div>
+                </form>
                     <div class="today_box">
                         <div class="cen_title"> <span>历史接种疫苗</span> </div>
                         <table class="layui-hide" id="test1"></table>
@@ -200,7 +211,7 @@
     <div id="black"></div>
     <script>
         var ChildId = '{$info["registerInfo"]["ChildId"]|default=""}';
-        var WritingDesk = '';
+        var WritingDesk = '{$info["WritingDesk"]|default=""}';
         var VaccinationId={$info.registerInfo.Id};
 
         var inputChildId = $('input[name="ChildId"]');
@@ -218,35 +229,50 @@
             laydate= layui.laydate,
             $ = layui.jquery;
 
-            // 显示接种台
-            $(document).ready(function () {
-                $("#black").css('display', "block");
-                $(".fix_box").css('display', "block");
-                var a = {$info.writingdeskcount};
-                // a = 登记台个数
-                var num = a * 210 / 2;
-                var j_html = '';
-                for ( i = 0; i < a; i++) {
-                    // console.log(i)
-                    j_html += '<div class="j_item" data='+ (i+1) +'><div class="j_item_title">登记台</div><div class="j_item_number">'+ (i+1) +'</div></div>';
-                }
-                $('.fix_box').html(j_html);
-                $(".fix_box").css('left', 'calc(50% - ' + num + 'px)')
-            });
-            
-            // 选中接种台
-            $('.j_item').on('click',function(e){
-    
-                WritingDesk = e.currentTarget.attributes.data.value;
-                // console.log(WritingDesk)
+            layui.form.render();
+
+            if(WritingDesk == '' || WritingDesk == null){
+                // 显示接种台
+                $(document).ready(function () {
+                    $("#black").css('display', "block");
+                    $(".fix_box").css('display', "block");
+                    var a = {$info.writingdeskcount};
+                    // a = 登记台个数
+                    var num = a * 210 / 2;
+                    var j_html = '';
+                    for ( i = 0; i < a; i++) {
+                        // console.log(i)
+                        j_html += '<div class="j_item" data='+ (i+1) +'><div class="j_item_title">登记台</div><div class="j_item_number">'+ (i+1) +'</div></div>';
+                    }
+                    $('.fix_box').html(j_html);
+                    $(".fix_box").css('left', 'calc(50% - ' + num + 'px)')
+                });
+                // 选中接种台
+                $('.j_item').on('click',function(e){
+                    WritingDesk = e.currentTarget.attributes.data.value;
+                    // console.log(WritingDesk)
+                    $('input[name="WritingDesk"]').val(WritingDesk);
+                    $('.fix_box').hide();
+                    $('#black').hide();
+                    $('.un_number').show();
+                    $('.un_writingdesk').text('登记台'+WritingDesk);
+                    $('.un_writingdesk').show();
+                    $.post('{:url("vaccinations/setCacheWritingDesk")}',{WritingDesk:WritingDesk},function(res){
+                        console.log('WritingDesk写入缓存');
+                    })
+
+                });
+            }else{
                 $('input[name="WritingDesk"]').val(WritingDesk);
                 $('.fix_box').hide();
                 $('#black').hide();
                 $('.un_number').show();
                 $('.un_writingdesk').text('登记台'+WritingDesk);
                 $('.un_writingdesk').show();
-
-            });
+            }
+            
+            
+            
             
 
             table.render({
@@ -262,7 +288,7 @@
                     ,{field:'LotNumber', title: '疫苗批号',  }
                     ,{field:'Company', title: '生产企业'}
                     ,{field:'VaccinationPosition', title: '接种部位'}
-                    ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
+                    // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
                     ,{title: '免费',   align: 'center',templet:function(d){
                         if(d.IsFree == 0){
                             return '不免费';
@@ -292,10 +318,14 @@
             // 添加 tr
             $('.add_vaccination').on('click',function(){
 
-                html = '<tr><td style="display: none;"><input type="hidden" name="Id" value="0"></td><td><select class="layui-input un-select" name="VaccineId"><option>请选择</option>{volist name="info.vaccines" id="vo"}<option value="{$vo.Id}">{$vo.ShortName}</option>{/volist}</select></td><td><input class="layui-input" type="text" name="Times" value="1"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company"></td><td><input class="layui-input" type="text" placeholder="请填写接种地址" name="VaccinationPlace"></td><td><input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition"></td><td><input type="checkbox" lay-skin="primary" name="IsFree" value="1"></td><td><a class="del_vaccination" id="0">删除</a></td></tr>';
+                html = '<tr><td style="display: none;"><input type="hidden" name="Id" value="0"></td><td><select class="layui-input un-select" name="VaccineId"><option value="0">请选择</option>{volist name="info.vaccines" id="vo"}<option value="{$vo.Id}">{$vo.ShortName}</option>{/volist}</select></td><td><input class="layui-input" type="text" name="Times" value="1"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company"></td><td><select class="layui-input un-select" name="VaccinationPosition"><option value="0">请选择接种部位</option><option value="左上臂">左上臂</option><option value="右上臂">右上臂</option><option value="左臀">左臀</option><option value="右臀">右臀</option><option value="左大腿">左大腿</option><option value="右大腿">右大腿</option><option value="口服">口服</option></select></td><td><input type="checkbox" lay-skin="primary" name="IsFree" value="1"></td><td><a class="del_vaccination" id="0">删除</a></td></tr>';
+
+                // <td><input class="layui-input" type="text" placeholder="请填写接种地址" name="VaccinationPlace"></td>
+                // <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition">
 
                 $('#test').find('tbody').append(html);
                 
+                // <option value="左上臂">左上臂</option><option value="左上臂">左上臂</option><option value="右上臂">右上臂</option><option value="左臀">左臀</option><option value="右臀">右臀</option><option value="左大腿">左大腿</option><option value="右大腿">右大腿</option><option value="口服">口服</option>
             });
 
 
@@ -312,34 +342,45 @@
 
             // 点击下一个按钮
             $('.next_number').on('click',function(){
-                var next = {$info.next};
+                var data = {
+                    Id:{$info.registerInfo.Id},
+                    State:0,
+                };
 
-                if(next == '' || next == null){
-                    layer.msg('已经到最后一位啦!');
-                }else{
-                    window.location.href = "{:url()}?Id="+next;
+                $.post('{:url("vaccinations/nextNumber")}',data,function(res){
+                    if(res.code == 200){
+                        window.location.href = "{:url()}?Id="+res.msg;
 
-                }
+                    }else{
+                        layer.msg(res.msg,{icon:2});
+                    }
+                });
 
             });
 
             // 点击上一个按钮
             $('.prev_number').on('click',function(){
-                var prev = {$info.prev};
+                var data = {
+                    Id:{$info.registerInfo.Id},
+                    State:0,
+                };
 
-                if(prev == '' || prev == null){
-                    layer.msg('已经到第一位啦!');
-                }else{
-                    window.location.href = "{:url()}?Id="+prev;
-                }
+                $.post('{:url("vaccinations/prevNumber")}',data,function(res){
+                    if(res.code == 200){
+                        window.location.href = "{:url()}?Id="+res.msg;
+
+                    }else{
+                        layer.msg(res.msg,{icon:2});
+                    }
+                });
 
             });
 
 
-            // 点击完成按钮
+            // 点击完成 / 完成并下一位 按钮
             $('.submit').on('click',function(){
-                $('.fakeloader').show();
-                // 儿童信息
+                var noNext = $(this).attr('data');
+                // 孩子资料
                 var child_id = inputChildId.val();
                 var CardNo = inputCardNo.val();
                 var Name = inputName.val();
@@ -348,7 +389,7 @@
                 var Mobile = inputMobile.val();
                 var Sex = selectSex.val();
                 var Address = textareaAddress.val();
-
+                // 孩子信息
                 var childInfo = {
                     Id:child_id,
                     CardNo:CardNo,
@@ -359,92 +400,89 @@
                     Sex:Sex,
                     Address:Address,
                 };
+                // 今日接种疫苗
+                vacccineTbody = $('#test').find('tbody');
+                var trNum = vacccineTbody.children('tr').length;
+                var vaccinesDate = {};
+                vaccinesDate.vaccineDate = [];
+                vaccinesDate.VaccinationId = VaccinationId;
+                var vDate = {};
+                // 添加的疫苗信息
+                for ( i = 0; i < trNum; i++) {
+                    v_data = {};
 
-                $.post('{:url("childs/addChildInfo")}',childInfo,function(res){
-
-                    if(res.code == 400){
+                    v_data.Id = vacccineTbody.find('tr:eq('+i+')').find('input[name="Id"]').val();
+                    
+                    v_data.VaccineId = vacccineTbody.find('tr:eq('+i+')').find('select[name="VaccineId"] option:selected').val();
+                    if(v_data.VaccineId == 0){
+                        layer.msg('请选择要接种的疫苗',{icon:2});
                         $('.fakeloader').hide();
-                        layer.msg(res.msg);
-                    }else{
-                        var dataInfo = {
-                            Id:VaccinationId,
-                            ChildId:res.childId,
-                            WritingDesk:WritingDesk,
-                        };
-                        $.post('{:url("vaccinations/setVaccinationsInfo")}',dataInfo,function(ress){
-                            // console.log(ress)
-                            if(ress.code == 200){
-                                
-                                vacccineTbody = $('#test').find('tbody');
-
-                                var trNum = vacccineTbody.children('tr').length;
-                                
-                                var vaccinesDate = {};
-
-                                vaccinesDate.vaccineDate = [];
-
-                                vaccinesDate.VaccinationId = VaccinationId;
-
-                                var vDate = {};
-
-                                for ( i = 0; i < trNum; i++) {
-                                    data = {};
-
-                                    data.Id = vacccineTbody.find('tr:eq('+i+')').find('input[name="Id"]').val();
-                                    
-                                    data.VaccineId = vacccineTbody.find('tr:eq('+i+')').find('select[name="VaccineId"] option:selected').val();
-                                    data.Times = vacccineTbody.find('tr:eq('+i+')').find('input[name="Times"]').val();
-                                    data.LotNumber = vacccineTbody.find('tr:eq('+i+')').find('input[name="LotNumber"]').val();
-                                    data.Company = vacccineTbody.find('tr:eq('+i+')').find('input[name="Company"]').val();
-                                    data.VaccinationPosition = vacccineTbody.find('tr:eq('+i+')').find('input[name="VaccinationPosition"]').val();
-                                    data.VaccinationPlace = vacccineTbody.find('tr:eq('+i+')').find('input[name="VaccinationPlace"]').val();
-                                    if($(vacccineTbody.find('tr:eq('+i+')').find('input[name="IsFree"]')).is(':checked')) {
-                                        data.IsFree = 1;
-                                    }else{
-                                        data.IsFree = 0;
-                                    }
-                                    vDate[i] = data;
-                                    
-                                }
-                                // vDate 为空
-                                if($.isEmptyObject(vDate) == true){
-                                    console.log(111)
-                                    layer.msg('请选择要接种的疫苗',{icon:2});
-                                    return false;
-                                }
-                                vaccinesDate.vaccineDate = vDate;
-                                console.log(vDate);
-                                return false
-
-                                // console.log(vaccinesDate)
-
-                                $.post('{:url("vaccinationdetails/setVaccinationDetail")}',vaccinesDate,function(resss){
-                                    if(resss.code==200){
-                                        $('.fakeloader').hide();
-                                        layer.msg(resss.msg);
-                                    }else{
-                                        $('.fakeloader').hide();
-                                        layer.msg(resss.msg)
-                                    }
-                                })
-
-                            }else{
-                                layer.msg(ress.msg);
-                            }
-
-                        })
-
-
+                        return false;
                     }
-                })
+                    v_data.Times = vacccineTbody.find('tr:eq('+i+')').find('input[name="Times"]').val();
+                    v_data.LotNumber = vacccineTbody.find('tr:eq('+i+')').find('input[name="LotNumber"]').val();
+                    v_data.Company = vacccineTbody.find('tr:eq('+i+')').find('input[name="Company"]').val();
+                    // data.VaccinationPosition = vacccineTbody.find('tr:eq('+i+')').find('input[name="VaccinationPosition"]').val();
+                    v_data.VaccinationPosition = vacccineTbody.find('tr:eq('+i+')').find('select[name="VaccinationPosition"] option:selected').val();
+                    if(v_data.VaccinationPosition == 0){
+                        layer.msg('请选择接种部位',{icon:2});
+                        $('.fakeloader').hide();
+                        return false;
+                    }
+                    // data.VaccinationPlace = vacccineTbody.find('tr:eq('+i+')').find('input[name="VaccinationPlace"]').val();
+                    if($(vacccineTbody.find('tr:eq('+i+')').find('input[name="IsFree"]')).is(':checked')) {
+                        v_data.IsFree = 1;
+                    }else{
+                        v_data.IsFree = 0;
+                    }
+                    vDate[i] = v_data;
+                    
+                }
+                // vDate 为空
+                if($.isEmptyObject(vDate) == true){
+                    layer.msg('请选择要接种的疫苗',{icon:2});
+                    $('.fakeloader').hide();
+                    return false;
+                }
                 
+                // 提交的数据
+                var data = {
+                    // 孩子信息
+                    ChildInfo:childInfo,
+                    // 当前登记台
+                    WritingDesk:WritingDesk,
+                    // 接种流水Id
+                    Id:VaccinationId,
+                    // 疫苗信息
+                    vaccineDate:vDate,
+                    // 是否要下一位
+                    noNext:noNext
+                };
+
+                $.post('{:url("vaccinations/setVaccinationsInfo")}',data,function(res){
+                    if(res.code == 200){
+                        if(noNext == 2){
+                            if(res.data.code == 200){
+                                layer.msg(res.msg,{icon:1});
+                                setTimeout('window.location.href = "{:url()}?Id="+'+res.data.msg, 500);
+                                return false;
+                            }else{
+                                $('.fakeloader').hide();
+                                layer.msg(res.msg,{icon:1});
+                                return false;
+                            }
+                        }
+                        $('.fakeloader').hide();
+                        layer.msg(res.msg,{icon:1});
+                    }else{
+                        $('.fakeloader').hide();
+                        layer.msg(res.msg,{icon:1});
+                    }
+                });
+
 
             });
 
-            // 点击完成并下一位按钮
-            $('.submit_next').on('click',function(){
-                layer.msg('完成并下一位')
-            });
 
             /**
             * 呼叫

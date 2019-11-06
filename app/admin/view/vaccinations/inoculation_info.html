@@ -117,7 +117,7 @@
                                     <th>疫苗批号</th>
                                     <th>生产企业</th>
                                     <th>接种部位</th>
-                                    <th>接种地址</th>
+                                    <!-- <th>接种地址</th> -->
                                     <th>免费</th>
                                 </tr> 
                             </thead>
@@ -129,7 +129,7 @@
                                     <td>{$vo.LotNumber}</td>
                                     <td>{$vo.Company}</td>
                                     <td>{$vo.VaccinationPosition}</td>
-                                    <td>{$vo.VaccinationPlace}</td>
+                                    <!-- <td>{$vo.VaccinationPlace}</td> -->
                                     <td>
                                         {if condition="$vo['IsFree'] == 1"}
                                         <input type="checkbox" lay-skin="primary" checked disabled>
@@ -216,7 +216,7 @@
                     ,{field:'LotNumber', title: '疫苗批号',  }
                     ,{field:'Company', title: '生产企业'}
                     ,{field:'VaccinationPosition', title: '接种部位'}
-                    ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
+                    // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
                     ,{title: '免费',   align: 'center',templet:function(d){
                         if(d.IsFree == 0){
                             return '不免费';

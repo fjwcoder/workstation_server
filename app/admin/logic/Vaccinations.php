@@ -64,20 +64,19 @@ class Vaccinations extends AdminBase
             }
         }
 
-        // dump($head_fingerprint_path);die;
-
         $registerInfoDefilds = $this->logicVaccinationdetails->getVIdObVdetail(['VaccinationId' => $registerInfo['Id']]);
         
-        // 当前点击的号码的上一个号码，下一个号码
-        $peevNext = $this->prevNextNum($registerInfo['Id'], ['VaccinationDate' => ['like', '%'.NOW_DATE.'%'],'State'=>['in','0']]);
         // 所有疫苗列表
         $vaccineList = $this->modelVaccines->getList(['IsDeleted'=>0],'Id,ShortName,IsFree','Id asc',false);
         // 登记台数量
         $writingdeskcount = $this->modelSettings->getValue(['Name'=>'App.WritingDeskCount'],'Value');
+        // 当前登记台缓存
+        $WritingDesk = cache('WritingDesk');
+        // 进行叫号
+        $this->callNumber(['number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
 
         $data = [
-            'next' => json_encode($peevNext['next']),
-            'prev' => json_encode($peevNext['prev']),
+            'WritingDesk'=>$WritingDesk,
             'vaccines' => $vaccineList,
             'registerInfo' => $registerInfo,
             'registerInfoDefilds'=>$registerInfoDefilds,
@@ -98,14 +97,118 @@ class Vaccinations extends AdminBase
 
         $result = false;
 
-        if(empty($param['ChildId'])){
+        $time = date("Y-m-d H:i:s");
+
+        if(empty($param['ChildInfo'])){
             return ['code'=>400,'msg'=>'请先填写儿童信息'];
         }
         if(empty($param['WritingDesk'])){
             return ['code'=>400,'msg'=>'请先选择登记台'];
         }
+
+        if(empty($param['vaccineDate'])){
+            return ['code'=>400,'msg'=>'请添加要接种的疫苗'];
+        }
+
+        // 启动事务
+        Db::startTrans();
+        try{
+            // 添加/修改孩子信息
+            if(!empty($param['ChildInfo']['Id'])){
+                $param['ChildInfo']['LastModificationTime'] = $time;
+                $param['ChildInfo']['LastModifierUserId'] = MEMBER_ID;
+                Db::name('childs')->where('Id',$param['ChildInfo']['Id'])->update($param['ChildInfo']);
+                $ChildId = $param['ChildInfo']['Id'];
+            }else{
+                $param['ChildInfo']['CreationTime'] = $time;
+                $param['ChildInfo']['CreatorUserId'] = MEMBER_ID;
+                $param['ChildInfo']['IsDeleted'] = 0;
+                $param['ChildInfo']['No'] = '';
+                $ChildId = Db::name('childs')->where('Id',$param['ChildInfo']['Id'])->insertGetId($param['ChildInfo']);
+                
+            }
+
+            $v_data = [
+                'Id' => $param['Id'],
+                'ChildId' => $ChildId,
+                'WritingDesk' => $param['WritingDesk'],
+                'LastModificationTime' => $time,
+                'LastModifierUserId' => MEMBER_ID,
+                'RegistrantId' => MEMBER_ID,
+                'RegistrationFinishTime' => $time,
+                'RegistrantId' => MEMBER_ID,
+                'RegistrantId' => MEMBER_ID,
+                'State'=>1
+            ];
+
+            $app_result = $this->editOrderInfo($param['Id'], 2);
+            if(!$app_result){
+                Db::rollback();
+            }
+
+            Db::name('vaccinations')->where('Id',$param['Id'])->update($v_data);
+
+            $where_v = [
+                'VaccinationId' => $param['Id'],
+                'VaccinationDate' => ['like','%'.NOW_DATE.'%']
+            ];
+    
+            foreach ($param['vaccineDate'] as $k => $v) {
+                $data_v = [
+                    'CreationTime'=>$time,
+                    'CreatorUserId'=>MEMBER_ID,
+                    'LastModificationTime'=>$time,
+                    'LastModifierUserId'=>MEMBER_ID,
+                    'VaccinationDate'=>$time,
+                    'IsDeleted'=>0,
+                    'VaccinationId'=>$param['Id'],
+                ];
+    
+                // 验证疫苗信息是否添加
+                $where_v['VaccineId'] = empty($v['VaccineId']) ? 0: $v['VaccineId'];
+    
+                if(empty($v['VaccineId'])){
+                    return ['code'=>400,'msg'=>'请选择需要接种的疫苗'];
+                }
         
-        $time = date("Y-m-d h:i:s");
+                $vaccineInfo = $this->modelVaccinationdetails->getInfo($where_v);
+
+                if($vaccineInfo && empty($v['Id'])){
+                    Db::rollback();
+                    return ['code'=>400,'msg'=>'请勿重复登记'];
+                }
+    
+                $data_v['Id'] = !empty($v['Id']) ? $v['Id'] : 0;
+                $data_v['VaccineId'] = $v['VaccineId'];
+                $data_v['Times'] = !empty($v['Times']) ? $v['Times'] : 1;
+                $data_v['LotNumber'] = !empty($v['LotNumber']) ? $v['LotNumber'] :'';
+                $data_v['Company'] = !empty($v['Company'])? $v['Company']:'';
+                $data_v['VaccinationPosition'] = !empty($v['VaccinationPosition']) ?$v['VaccinationPosition']:'';
+                $data_v['IsFree'] = $v['IsFree'];
+                // $data['VaccinationPlace'] = $v['VaccinationPlace'];
+                if(empty($data_v['Id'])){
+                    Db::name('vaccinationdetails')->insert($data_v);
+                }else{
+                    Db::name('vaccinationdetails')->update($data_v);
+                }
+            }
+
+            $nextId = '';
+            if($param['noNext'] == 2){
+                $nextId = $this->nextNumber(['Id'=>$param['Id'],'State'=>0]);
+            }
+
+            // 提交事务
+            Db::commit();
+            $result = true;
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+        }
+
+        return $result ? ['code'=>200,'msg'=>'操作成功','data'=>$nextId] : ['code'=>400,'msg'=>'操作失败','data'=>''];
+
+
 
         $data = [
             'Id' => $param['Id'],
@@ -474,6 +577,72 @@ class Vaccinations extends AdminBase
             return true;
         }
 
+    }
+
+
+    /**
+     * 上一位
+     */
+    public function prevNumber($param = [])
+    {
+        if(empty($param['Id'])) return ['code'=>400,'msg'=>'参数错误'];
+
+        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State');
+        $where = [
+            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'State'=>$param['State'],
+        ];
+        
+        if(strtoupper($vInfo['Number'][0]) == 'V'){
+            $where['Number'] = ['like','%V%'];
+        }else{
+            $where['Number'] = ['like','%A%'];
+        }
+
+        $field = 'Id';
+
+        $where['Id'] = ['<', $param['Id']];
+        $prev = Db::name('vaccinations')->where($where)->order('VaccinationDate desc')->value('Id');
+        if($prev == null){
+            unset($where['Number']);
+            $prev = Db::name('vaccinations')->where($where)->order('VaccinationDate asc')->value('Id');
+        }
+
+        return $prev ? ['code'=>200,'msg'=>$prev] : ['code'=>400,'msg'=>'已经到第一位了!!!'];
+
+
+
+    }
+
+    /**
+     * 下一位
+     */
+    public function nextNumber($param = [])
+    {
+        if(empty($param['Id'])) return ['code'=>400,'msg'=>'参数错误'];
+
+        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State');
+        $where = [
+            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'State'=>$param['State'],
+        ];
+
+        if(strtoupper($vInfo['Number'][0]) == 'V'){
+            $where['Number'] = ['like','%V%'];
+        }else{
+            $where['Number'] = ['like','%A%'];
+        }
+
+        $field = 'Id';
+
+        $where['Id'] = ['>', $param['Id']];
+        $next = Db::name('vaccinations')->where($where)->order('VaccinationDate asc')->value('Id');
+        if($next == null){
+            unset($where['Number']);
+            $next = Db::name('vaccinations')->where($where)->order('VaccinationDate asc')->value('Id');
+        }
+
+        return $next ? ['code'=>200,'msg'=>$next] : ['code'=>400,'msg'=>'已经到最后一位了!!!'];
     }
 
 
