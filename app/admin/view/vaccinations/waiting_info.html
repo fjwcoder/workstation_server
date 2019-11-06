@@ -199,7 +199,7 @@
     </div>
     <div id="black"></div>
     <script>
-        var ChildId = '';
+        var ChildId = '{$info["registerInfo"]["ChildId"]|default=""}';
         var WritingDesk = '';
         var VaccinationId={$info.registerInfo.Id};
 
@@ -406,7 +406,15 @@
                                     vDate[i] = data;
                                     
                                 }
+                                // vDate 为空
+                                if($.isEmptyObject(vDate) == true){
+                                    console.log(111)
+                                    layer.msg('请选择要接种的疫苗',{icon:2});
+                                    return false;
+                                }
                                 vaccinesDate.vaccineDate = vDate;
+                                console.log(vDate);
+                                return false
 
                                 // console.log(vaccinesDate)
 
