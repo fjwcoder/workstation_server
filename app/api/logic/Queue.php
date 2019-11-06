@@ -18,7 +18,23 @@ class Queue extends ApiBase
     {
         $param = json_decode($param, true);
 
-        if(empty($param['Oid'])){
+        if(empty($param['number'])){
+            $result = [
+                'result'=>[
+                    'queueLength'=>'',
+                    'qrCodeImageUrl'=>'',
+                ],
+                'targetUrl'=>Null,
+                'success'=>False,
+                'error'=>'取号失败',
+                'unAuthorizedRequest'=>False,
+                '__abp'=>True
+            ];
+
+            return json_encode($result);
+        }
+
+        if(empty($param['oid'])){
 
             $queueLength = $this->addSceneOrder($param);
         }else{
@@ -28,17 +44,34 @@ class Queue extends ApiBase
 
         // $url = 'http://xiaoai.fjwcoder.com/api.php/Injectqueue/urlToShort';
 
-        $result = [
-            'result'=>[
-                'queueLength'=>$queueLength,
-                'qrCodeImageUrl'=>'',
-            ],
-            'targetUrl'=>Null,
-            'success'=>True,
-            'error'=>Null,
-            'unAuthorizedRequest'=>False,
-            '__abp'=>True
-        ];
+        if($queueLength === false){
+            $result = [
+                'result'=>[
+                    'queueLength'=>'',
+                    'qrCodeImageUrl'=>'',
+                ],
+                'targetUrl'=>Null,
+                'success'=>False,
+                'error'=>'取号失败',
+                'unAuthorizedRequest'=>False,
+                '__abp'=>True
+            ];
+
+        }else{
+            $result = [
+                'result'=>[
+                    'queueLength'=>$queueLength,
+                    'qrCodeImageUrl'=>'',
+                ],
+                'targetUrl'=>Null,
+                'success'=>True,
+                'error'=>Null,
+                'unAuthorizedRequest'=>False,
+                '__abp'=>True
+            ];
+
+        }
+        
 
         return json_encode($result);
 
@@ -62,11 +95,11 @@ class Queue extends ApiBase
             'VaccinationDate'=>$time,
             'State'=>0,
             'status'=>1,
-            'appointment_order' => $param['Oid'],
+            'appointment_order' => $param['oid'],
         ];
 
         $requestData = [
-            'oid' => $param['Oid'],
+            'Oid' => $param['oid'],
             'info' => 1,
         ];
 
@@ -75,6 +108,10 @@ class Queue extends ApiBase
         $baby_order = httpsPost($appUrl . '/scaptmtqrcode', $requestData);
 
         $baby_order = json_decode($baby_order, true);
+
+        if($baby_order['code'] !== 200){
+            return false;
+        }
 
         $babyOrder = $baby_order['data'];
 
