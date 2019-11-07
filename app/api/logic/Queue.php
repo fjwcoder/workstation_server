@@ -43,7 +43,19 @@ class Queue extends ApiBase
             $queueLength = $this->addSceneOrder($param);
         }
 
-        // $url = 'http://xiaoai.fjwcoder.com/api.php/Injectqueue/urlToShort';
+        $shortUrl = '';
+        // 请求短链
+        $positionId = $this->modelSettings->getValue(['Name'=>'App.InjectPositionId'],'Value');
+        $url = $this->modelSettings->getValue(['Name'=>'App.shortUrl'],'Value');
+        $re_data = [
+            'uc'=>$positionId,
+            'no'=>$param['number'],
+        ];
+        $requestData = formPost($url, $re_data);
+        $requestData = json_decode($requestData, true);
+        if($requestData['data']['errcode'] == 0){
+            $shortUrl = $requestData['data']['short_url'];
+        }
 
         if($queueLength === false){
             $result = [
@@ -62,7 +74,7 @@ class Queue extends ApiBase
             $result = [
                 'result'=>[
                     'queueLength'=>$queueLength,
-                    'qrCodeImageUrl'=>'',
+                    'qrCodeImageUrl'=>$shortUrl,
                 ],
                 'targetUrl'=>Null,
                 'success'=>True,

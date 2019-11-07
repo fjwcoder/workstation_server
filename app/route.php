@@ -30,4 +30,5 @@ Route::rule([
     'completeInject'                   => '@api/Vaccinations/completeInject',
     'userLogin'                        => '@api/Common/userLogin',
     'getWaitingInjectInfo'             => '@api/Vaccinations/getWaitingInjectInfo',
+    'nextNumber'                       => '@api/Vaccinations/nextNumber',
 ]);

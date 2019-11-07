@@ -30,8 +30,6 @@ class Vaccinations extends ApiBase
 
         $field = 'v.Id, v.Number, v.RegistrationFinishTime, c.Name, c.Sex';
 
-        $where['v.Number'] = ['Number',];
-
         $dataVList = Db::name('vaccinations')->alias('v')->join('childs c','c.Id = v.ChildId','LEFT')->where($where_v)->field($field)->order('v.RegistrationFinishTime asc')->select();
 
         $dataAList = Db::name('vaccinations')->alias('v')->join('childs c','c.Id = v.ChildId','LEFT')->where($where_a)->field($field)->order('v.RegistrationFinishTime asc')->select();
@@ -82,7 +80,7 @@ class Vaccinations extends ApiBase
         
         if(empty($param['VaccinationUserId'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
         // status 1完成按钮 2完成并呼叫下一个按钮
-        // if(empty($param['status'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
+        if(empty($param['status'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
 
         // if(empty($param['ConsultationRoom'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
 
@@ -91,6 +89,11 @@ class Vaccinations extends ApiBase
         $where = [
             'Id'=>$param['Id'],
         ];
+        // 当前接种流水信息
+        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+        if($vInfo['State'] >= 2){
+            return [API_CODE_NAME => 40001, API_MSG_NAME => '请勿重复操作'];
+        }
 
         // 启动事务
         Db::startTrans();
@@ -113,8 +116,6 @@ class Vaccinations extends ApiBase
             // 对接种流水表继续修改数据
             Db::name('vaccinations')->where($where)->update($data);
 
-            // 当前接种流水信息
-            $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
             // 接种疫苗列表
             $vaccine_list = [];
             $v_where = ['VaccinationId'=>$param['Id']];
@@ -158,11 +159,17 @@ class Vaccinations extends ApiBase
             // 提交成功
             if($refridgeData['code'] == 200){
                 // 如果是完成并下一个按钮
-                // if($param['status'] == 2){
+                $nextData = [];
+                if($param['status'] == 2){
 
-                //     $nextData = $this->nextNumber(['Id'=>$param['Id'],'ConsultationRoom'=>$param['ConsultationRoom']]);
+                    $nextData = $this->nextNumber(['Id'=>$param['Id'],'ConsultationRoom'=>$param['ConsultationRoom']]);
+                    if(isset($nextData['code'])){
+                        // $nextData = [];
+                        Db::rollback();
+                        return [API_CODE_NAME => 44444, API_MSG_NAME => '接种成功']; 
+                    }
                     
-                // }
+                }
                 // 提交事务
                 Db::commit();
                 
@@ -175,8 +182,8 @@ class Vaccinations extends ApiBase
             // 回滚事务
             Db::rollback();
         }
-        // 'data'=>$nextData
-        return $result ? [API_CODE_NAME => 200, API_MSG_NAME => '接种成功'] : [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
+        
+        return $result ? [API_CODE_NAME => 200, API_MSG_NAME => '接种成功','data'=>$nextData] : [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
 
 
     }
@@ -222,7 +229,7 @@ class Vaccinations extends ApiBase
         if(empty($param['Id'])) return [API_CODE_NAME => 40002, API_MSG_NAME => '缺少参数'];
 
         $where = ['Id'=>$param['Id']];
-        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State,RegistrationFinishTime')->find();
 
         // 下一个的查询条件 
         $n_where = [
@@ -230,28 +237,27 @@ class Vaccinations extends ApiBase
             'a.State'=>1,
         ];
 
-        if(strtoupper($vInfo['Number'][0]) == 'V'){
-            $n_where['a.Number'] = ['like','%V%'];
-        }else{
-            $n_where['a.Number'] = ['like','%A%'];
-        }
+        $n_where['a.Number'] = reNumO($vInfo['Number']);
 
         $n_field = 'a.Id,a.Number,c.Sex,C.Name';
 
-        $n_where['a.Id'] = ['>', $param['Id']];
+        $n_where['a.RegistrationFinishTime'] = ['>', $vInfo['RegistrationFinishTime']];
         $nextData = [];
         // 查询有没有和当前取号号码开头一样的数据
         $nextData = Db::name('vaccinations')->alias('a')->join('childs c','a.ChildId = c.Id','LEFT')->where($n_where)->order('VaccinationDate asc')->field($n_field)->find();
         // 没有和当前取号号码开头一样的数据，不查询 Number 条件
         if($nextData == null){
-            unset($where['a.Number']);
-            $nextData = Db::name('vaccinations')->alias('a')->join('childs c','a.ChildId = c.Id','LEFT')->where($n_where)->order('a.VaccinationDate asc')->field($n_field)->find();
+            $n_where['a.Number'] = reNumT($vInfo['Number']);
+            unset($n_where['a.RegistrationFinishTime']);
+            $nextData = Db::name('vaccinations')->alias('a')->join('childs c','a.ChildId = c.Id','LEFT')->where($n_where)->order('a.RegistrationFinishTime asc')->field($n_field)->find();
         }
         // 如果有下一个
         if($nextData !== null){
             $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('v.ShortName')->select();
             // 进行叫号
             $this->logicCommon->callName(['deviceId'=>2,'number'=>$nextData['Number'],'childName'=>$nextData['Name'],'consultingRoom'=>$param['ConsultationRoom']]);
+        }else{
+            return [API_CODE_NAME => 40002, API_MSG_NAME => '已经到最后一个了!!!'];
         }
 
         return $nextData;
