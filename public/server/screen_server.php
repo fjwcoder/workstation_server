@@ -213,11 +213,21 @@ function sendWaitingQueue()
             
 
             foreach($send_queue as $k=>$v){
-                $inoculabilityTime = substr($v['VaccinationFinishTime'], -15, 8);
-                $remainingTime = 30 - floor((time()-strtotime($inoculabilityTime))%86400/60);
-                $remainingTime = ($remainingTime >= 0)?$remainingTime:0;
-                $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
+                // $inoculabilityTime = substr($v['VaccinationFinishTime'], -15, 8);
+                $inoculabilityTime = substr($v['VaccinationFinishTime'], -8);
+                // echo $inoculabilityTime;
+                // echo PHP_EOL;
+                $remainingTime = floor((time()-strtotime($inoculabilityTime))%86400/60);
+                if($remainingTime > 31){
+                    continue;
+                }else{
+                    $remainingTime = ($remainingTime >= 30) ? 0 : (30-$remainingTime); 
+                    $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
+                }
+
             }
+            // var_export($data);
+
             $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
             serverLog('队列数据推送返回：'.$send_response);
             $send_response = json_decode($send_response, true);

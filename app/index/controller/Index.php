@@ -19,13 +19,12 @@ class Index extends IndexBase
 {
 
     public function test(){
-        $data = '
-        {
-                "number":"0001",
-                "oid": "V4B12AIB01690239084080"
-        }';
-        $url = 'http://workstation.server/api/queue/push';
-        $response = httpsPost($url, $data);
+        $data = [
+            'uc'=>203,
+            'no'=>'A001'
+        ];
+        $url = 'http://xiaoai.mamitianshi.com/queueUrlToShort';
+        $response = $this->formPost($url, $data);
         dump($response);
     }
     /**
@@ -95,17 +94,17 @@ class Index extends IndexBase
 
 
 
-        // $url = 'http://192.168.1.249:9500';
+        $url = 'http://192.168.1.249:9500';
 
-        // $array12 = [
-        //     'deviceId'=>12,
-        //     'data'=>[
-        //         ['number'=>'A001', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1']
-        //     ]
-        // ];
-        // $json12 = json_encode($array12, 320);
-        // $response12 = httpsPost($url, $json12);
-        // dump($response12);
+        $array12 = [
+            'deviceId'=>2,
+            'data'=>[
+                ['number'=>'A001', 'childName'=>'登记台1', 'consultingRoom'=>'诊室1']
+            ]
+        ];
+        $json12 = json_encode($array12, 320);
+        $response12 = httpsPost($url, $json12);
+        dump($response12);
         
     }
     
