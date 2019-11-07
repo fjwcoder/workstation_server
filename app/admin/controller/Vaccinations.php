@@ -50,7 +50,7 @@ class Vaccinations extends AdminBase
 
     
     /**
-     * 获取登记队列某一条的信息进行登记
+     * 查询一条登记记录并且叫号
      */
     public function getWaitingInfo()
     {
@@ -63,7 +63,7 @@ class Vaccinations extends AdminBase
 
 
     /**
-     * 登记资料时，修改登记的信息
+     * 修改登记资料信息
      */
     public function setVaccinationsInfo()
     {
@@ -93,9 +93,8 @@ class Vaccinations extends AdminBase
 
         !empty($data['search_data']) && $where['Number'] = ['like', '%'.$data['search_data'].'%'];
 
-        $paginate = 15;
-
-        !empty($data['limit']) && $paginate = $data['limit'];
+        $paginate = !empty($data['page']) ? $data['page'] : 1;
+        $limit = !empty($data['limit']) ? $data['limit'] : 15;
 
         $field = 'v.Id, v.Number, v.ChildId, v.ConsultationRoom, v.RegistrationFinishTime, c.Name as child_name';
 
@@ -107,7 +106,7 @@ class Vaccinations extends AdminBase
 
     
     /**
-     * 获取接种队列中某一条的信息
+     * 查询一条接种记录并叫号
      */
     public function getInoculationInfo()
     {
@@ -178,7 +177,7 @@ class Vaccinations extends AdminBase
     }
 
     /**
-     * 查看接种完成的孩子资料
+     * 查看留观/完成队列一条记录
      */
     public function checkInVaInfo()
     {
@@ -203,7 +202,7 @@ class Vaccinations extends AdminBase
 
 
     /**
-     * 接种疫苗完成
+     * 设置接种完成
      */
     public function setInjectVaccineComplete()
     {
@@ -266,9 +265,9 @@ class Vaccinations extends AdminBase
     {
         $data = $this->param;
 
-        cache('VaccinationDesk',$data['VaccinationDesk'],43200);
+        cache('VaccinationDesk',$data['WritingDesk'],43200);
 
-        $result = $this->logicVaccinations->callInjectNumber(['Number'=>$data['Number'],'Name'=>$data['Name'],'WritingDesk'=>$data['VaccinationDesk']]);
+        $result = $this->logicVaccinations->callInjectNumber(['Number'=>$data['Number'],'Name'=>$data['Name'],'WritingDesk'=>$data['WritingDesk']]);
 
         return $result;
     }

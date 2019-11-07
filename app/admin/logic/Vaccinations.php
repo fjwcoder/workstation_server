@@ -36,7 +36,7 @@ class Vaccinations extends AdminBase
 
 
     /**
-     * 获取登记队列某一条的信息进行登记
+     * 获取登记队列中的一条数据
      */
     public function getWaitingInfo($param = [])
     {
@@ -72,8 +72,11 @@ class Vaccinations extends AdminBase
         $writingdeskcount = $this->modelSettings->getValue(['Name'=>'App.WritingDeskCount'],'Value');
         // 当前登记台缓存
         $WritingDesk = cache('WritingDesk');
-        // 进行登记叫号
-        $this->callNumber(['number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
+        if($WritingDesk){
+            // 进行登记叫号
+            $this->callNumber(['number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
+        }
+        
 
         $data = [
             'WritingDesk'=>$WritingDesk,
@@ -90,7 +93,7 @@ class Vaccinations extends AdminBase
 
     
     /**
-     * 登记资料时，修改登记的信息
+     * 修改登记信息
      */
     public function setVaccinationsInfo($param = [])
     {
@@ -99,9 +102,15 @@ class Vaccinations extends AdminBase
 
         $time = date("Y-m-d H:i:s");
 
+        // 验证孩子信息
         if(empty($param['ChildInfo'])){
             return ['code'=>400,'msg'=>'请先填写儿童信息'];
         }
+        $child_result = $this->validateChilds->scene('add')->check($param['ChildInfo']);
+        if (!$child_result) {
+            return ['code'=>400, 'msg'=>$this->validateChilds->getError()];
+        }
+
         if(empty($param['WritingDesk'])){
             return ['code'=>400,'msg'=>'请先选择登记台'];
         }
@@ -114,17 +123,33 @@ class Vaccinations extends AdminBase
         Db::startTrans();
         try{
             // 添加/修改孩子信息
-            if(!empty($param['ChildInfo']['Id'])){
-                $param['ChildInfo']['LastModificationTime'] = $time;
-                $param['ChildInfo']['LastModifierUserId'] = MEMBER_ID;
-                Db::name('childs')->where('Id',$param['ChildInfo']['Id'])->update($param['ChildInfo']);
-                $ChildId = $param['ChildInfo']['Id'];
+            $childInfo = Db::name('childs')->where(['CardNo'=>$param['ChildInfo']['CardNo']])->find();
+            $param['ChildInfo']['LastModificationTime'] = $time;
+            $param['ChildInfo']['LastModifierUserId'] = MEMBER_ID;
+            if($childInfo){
+                unset($param['ChildInfo']['Id']);
+                Db::name('childs')->where('CardNo',$param['ChildInfo']['CardNo'])->update($param['ChildInfo']);
+                $ChildId = $childInfo['Id'];
             }else{
-                $param['ChildInfo']['CreationTime'] = $time;
-                $param['ChildInfo']['CreatorUserId'] = MEMBER_ID;
-                $param['ChildInfo']['IsDeleted'] = 0;
-                $param['ChildInfo']['No'] = '';
-                $ChildId = Db::name('childs')->where('Id',$param['ChildInfo']['Id'])->insertGetId($param['ChildInfo']);
+                if(!empty($param['ChildInfo']['Id'])){
+                    $childInfo = Db::name('childs')->where(['Id'=>$param['ChildInfo']['Id']])->find();
+                    if($childInfo){
+                        Db::name('childs')->where('Id',$param['ChildInfo']['Id'])->update($param['ChildInfo']);
+                        $ChildId = $childInfo['Id'];
+                    }else{
+                        $param['ChildInfo']['CreationTime'] = $time;
+                        $param['ChildInfo']['CreatorUserId'] = MEMBER_ID;
+                        $param['ChildInfo']['IsDeleted'] = 0;
+                        $param['ChildInfo']['No'] = '';
+                        $ChildId = Db::name('childs')->insertGetId($param['ChildInfo']);
+                    }
+                }else{
+                    $param['ChildInfo']['CreationTime'] = $time;
+                    $param['ChildInfo']['CreatorUserId'] = MEMBER_ID;
+                    $param['ChildInfo']['IsDeleted'] = 0;
+                    $param['ChildInfo']['No'] = '';
+                    $ChildId = Db::name('childs')->insertGetId($param['ChildInfo']);
+                }
                 
             }
 
@@ -236,19 +261,23 @@ class Vaccinations extends AdminBase
     /**
      * 获取接种队列
      */
-    public function getInoculationList($where = [], $field = true, $order = '', $paginate = 15)
+    public function getInoculationList($where = [], $field = true, $order = '', $paginate = 1, $limit = 15)
     {
 
         $where['v.RegistrationFinishTime'] = ['like', '%'.NOW_DATE.'%'];
         $where['v.State'] = 1;
 
-        $this->modelVaccinations->alias('v');
+        // 预约列表
+        $where['Number'] = ['like', '%V%'];
+        $Vlist = Db::name('vaccinations')->alias('v')->join('childs c','v.ChildId = c.Id','LEFT')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
+        // 本地取号列表
+        $where['Number'] = ['like', '%A%'];
+        $Alist = Db::name('vaccinations')->alias('v')->join('childs c','v.ChildId = c.Id','LEFT')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
+        // dump($Alist);
 
-        $this->modelVaccinations->join = [
-            [SYS_DB_PREFIX . 'childs c', 'v.ChildId = c.Id','LEFT'],
-        ];
+        $list = array_merge($Vlist,$Alist);
 
-        return $this->modelVaccinations->getList($where, $field, $order, $paginate);
+        return $list;
 
     }
 
@@ -303,8 +332,10 @@ class Vaccinations extends AdminBase
         // 当前接种室缓存
         $VaccinationDesk = cache('VaccinationDesk');
 
-        // 进行接种叫号
-        $this->callInjectNumber(['Number'=>$registerInfo['Number'],'Name'=>$childInfo['Name'],'WritingDesk'=>$VaccinationDesk]);
+        if($VaccinationDesk){
+            // 进行接种叫号
+            $this->callInjectNumber(['Number'=>$registerInfo['Number'],'Name'=>$childInfo['Name'],'WritingDesk'=>$VaccinationDesk]);
+        }
 
 
         $data = [
@@ -349,7 +380,7 @@ class Vaccinations extends AdminBase
     /**
      * 获取完成队列
      */
-    public function getFinishedList($where = [], $field = true, $order = 'v.VaccinationFinishTime asc', $paginate = 15)
+    public function getFinishedList($where = [], $field = true, $order = 'v.VaccinationDate asc', $paginate = 15)
     {
 
         $this->modelVaccinations->alias('v');
@@ -364,7 +395,7 @@ class Vaccinations extends AdminBase
 
 
     /**
-     * 查看接种完成的孩子资料
+     * 查看接种完成 / 留观队列的一条信息
      */
     public function checkInVaInfo($where, $where_np)
     {
@@ -393,12 +424,8 @@ class Vaccinations extends AdminBase
 
         $registerInfoDefilds = $this->logicVaccinationdetails->getVIdObVdetail(['VaccinationId' => $registerInfo['Id']]);
         
-        // 当前点击的号码的上一个号码，下一个号码
-        $peevNext = $this->prevNextNum($registerInfo['Id'], $where_np);
 
         $data = [
-            'next' => json_encode($peevNext['next']),
-            'prev' => json_encode($peevNext['prev']),
             'registerInfo' => $registerInfo,
             'registerInfoDefilds'=>$registerInfoDefilds,
             'head_fingerprint_path' => $head_fingerprint_path,
@@ -410,38 +437,110 @@ class Vaccinations extends AdminBase
 
 
     /**
-     * 设置接种疫苗完成
+     * 设置接种完成
      */
     public function setInjectVaccineComplete($param = [])
     {
 
         $result = false;
 
-        $time = date("Y-m-d H:i:s");
+        if(empty($param['Id'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
 
-        $data = [
+        $time = date('Y-m-d H:i:s');
+
+        $where = [
             'Id'=>$param['Id'],
-            'ConsultationRoom'=>$param['ConsultationRoom'],
-            'VaccinationFinishTime'=>$time,
-            'VaccinationUserId'=>MEMBER_ID,
-            'LastModificationTime'=>$time,
-            'LastModifierUserId'=>MEMBER_ID,
-            'State'=>$param['State'],
         ];
-
-        $app_result = $this->editOrderInfo($param['Id'], 3);
-
-        if($app_result){
-            $result = $this->modelVaccinations->setInfo($data);
-            $nextId = '';
-            if($param['noNext'] == 2){
-                $nextId = $this->nextNumber(['Id'=>$param['Id'],'State'=>1]);
-            }
+        // 当前接种流水信息
+        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+        if($vInfo['State'] >= 2){
+            return [API_CODE_NAME => 40001, API_MSG_NAME => '请勿重复操作'];
         }
 
+        // 启动事务
+        Db::startTrans();
+        try{
+            
+            // 判断是不是预约订单
+            $app_result = $this->editOrderInfo($param['Id'], 3);
+
+            if($app_result === false){
+                return [API_CODE_NAME => 400, API_MSG_NAME => '接种失败'];
+            }
+
+            // 接种流水数据 完成时间 接种用户Id 接种台名称
+            $data = [
+                'VaccinationFinishTime'=>$time,
+                'VaccinationUserId'=>MEMBER_ID,
+                'ConsultationRoom'=>!empty($param['ConsultationRoom'])? $param['ConsultationRoom']:'',
+                'State'=>4,
+            ];
+            // 对接种流水表继续修改数据
+            Db::name('vaccinations')->where($where)->update($data);
+
+            // 当前接种流水信息
+            
+            // 接种疫苗列表
+            $vaccine_list = [];
+            $v_where = ['VaccinationId'=>$param['Id']];
+            $field = 'VaccineId,Times,VaccinationDate,VaccinationPlace,LotNumber,Company,IsFree,VaccinationPosition,Flag';
+            $vaccine_list = Db::name('vaccinationdetails')->where($v_where)->field($field)->select();
+            $vaccine_json = json_encode($vaccine_list);
+            foreach ($vaccine_list as $k => $v) {
+                $vaccine_list[$k]['CreationTime']=$time;
+                $vaccine_list[$k]['IsDeleted']=0;
+                $vaccine_list[$k]['ChildId']=$vInfo['ChildId'];
+                $vaccine_list[$k]['CreatorUserId']=MEMBER_ID;
+            }
+            // 把今天接种的疫苗插入到历史接种表中
+            Db::name('childvaccines')->insertAll($vaccine_list);
+
+            // 孩子信息
+            $childInfo = Db::name('childs')->where(['Id'=>$vInfo['ChildId']])->find();
+            // 家长信息
+            $parent_info = [
+                'parent_name'=>$childInfo['ParentName'],
+                'phone'=>$childInfo['Mobile'],
+                'address'=>$childInfo['Address']
+            ];
+            // 接种点Id
+            $position_id = Db::name('settings')->where(['Name'=>'App.InjectPositionId'])->value('Value');
+            // 提交数据
+            $r_data = [
+                'card_no' => $childInfo['CardNo'],
+                'name' => $childInfo['Name'],
+                'vaccine_list'=>$vaccine_json,
+                'sex'=>$childInfo['Sex'],
+                'birth_date' => $childInfo['BirthDate'],
+                'parent_info' => json_encode($parent_info),
+                'position_id'=>$position_id,
+                'room_name'=>$data['ConsultationRoom'],
+            ];
+            // 把当前接种信息 添加到线上数据库中
+            $refrigeratorUrl = Db::name('settings')->where(['Name'=>'App.refrigeratorUrl'])->value('Value');
+            $refridgeData = httpsPost($refrigeratorUrl . '/setInjectCompleteInfo', $r_data);
+            $refridgeData = json_decode($refridgeData, true);
+            // 提交成功
+            if($refridgeData['code'] == 200){
+                // 如果是完成并下一个按钮
+                $nextId = '';
+                if($param['noNext'] == 2){
+                    $nextId = $this->nextNumber(['Id'=>$param['Id'],'State'=>1]);
+                }
+                // 提交事务
+                Db::commit();
+                
+                $result = true;
+            }else{
+                // 回滚事务
+                Db::rollback();
+            }
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+        }
+        
         return $result ? ['code'=>200,'msg'=>'接种成功','data'=>$nextId] : ['code'=>400,'msg'=>'操作失败','data'=>''];
-
-
     }
 
 
@@ -602,26 +701,42 @@ class Vaccinations extends AdminBase
     {
         if(empty($param['Id'])) return ['code'=>400,'msg'=>'参数错误'];
 
-        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State');
-        $where = [
-            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
-            'State'=>$param['State'],
-        ];
-        
-        if(strtoupper($vInfo['Number'][0]) == 'V'){
-            $where['Number'] = ['like','%V%'];
-        }else{
-            $where['Number'] = ['like','%A%'];
-        }
+        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State,VaccinationDate,RegistrationFinishTime,VaccinationFinishTime');
 
         $field = 'Id';
 
-        $where['Id'] = ['<', $param['Id']];
-        $prev = Db::name('vaccinations')->where($where)->order('VaccinationDate desc')->value('Id');
-        if($prev == null){
-            unset($where['Number']);
-            $prev = Db::name('vaccinations')->where($where)->order('VaccinationDate asc')->value('Id');
+        $where = [
+            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'State'=>$param['State'],
+            'Number'=>reNumO($vInfo['Number']),
+        ];
+
+        if($param['State'] == 0){
+            $vdate = 'VaccinationDate';
+            $order = $vdate.' desc';
+        }elseif($param['State'] == 1){
+            $vdate = 'RegistrationFinishTime';
+            $order = $vdate.' desc';
         }
+
+        $where[$vdate] = ['<', $vInfo[$vdate]];
+
+        // dump($where);
+        // dump($order);
+
+        $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
+
+        if($prev == null){
+            $where['Number'] = reNumT($vInfo['Number']);
+            unset($where[$vdate]);
+            // $order = $vdate.' asc';
+            
+            $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
+
+        }
+
+        // dump($prev);
+        // die;
 
         return $prev ? ['code'=>200,'msg'=>$prev] : ['code'=>400,'msg'=>'已经到第一位了!!!'];
 
@@ -636,25 +751,33 @@ class Vaccinations extends AdminBase
     {
         if(empty($param['Id'])) return ['code'=>400,'msg'=>'参数错误'];
 
-        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State');
-        $where = [
-            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
-            'State'=>$param['State'],
-        ];
-
-        if(strtoupper($vInfo['Number'][0]) == 'V'){
-            $where['Number'] = ['like','%V%'];
-        }else{
-            $where['Number'] = ['like','%A%'];
-        }
+        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State,VaccinationDate,RegistrationFinishTime,VaccinationFinishTime');
 
         $field = 'Id';
 
-        $where['Id'] = ['>', $param['Id']];
-        $next = Db::name('vaccinations')->where($where)->order('VaccinationDate asc')->value('Id');
+        $where = [
+            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'State'=>$param['State'],
+            'Number'=>reNumO($vInfo['Number']),
+        ];
+
+        if($param['State'] == 0){
+            $vdate = 'VaccinationDate';
+            $order = $vdate.' asc';
+        }elseif($param['State'] == 1){
+            $vdate = 'RegistrationFinishTime';
+            $order = $vdate.' asc';
+        }
+
+        $where[$vdate] = ['>', $vInfo[$vdate]];
+
+        $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
         if($next == null){
-            unset($where['Number']);
-            $next = Db::name('vaccinations')->where($where)->order('VaccinationDate asc')->value('Id');
+            $where['Number'] = reNumT($vInfo['Number']);
+            unset($where[$vdate]);
+            // $order = $vdate.' desc';
+            
+            $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
         }
 
         return $next ? ['code'=>200,'msg'=>$next] : ['code'=>400,'msg'=>'已经到最后一位了!!!'];
@@ -662,8 +785,6 @@ class Vaccinations extends AdminBase
 
 
 
-    
-    
 
-
+    
 }
