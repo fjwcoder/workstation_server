@@ -512,6 +512,10 @@ class Vaccinations extends AdminBase
 
         $result = httpsPost($url, json_encode($data));
 
+        if($result === false){
+            return ['code'=>400,'msg'=>'连接超时'];
+        }
+
         $result = json_decode($result,true);
 
         if($result['sucess'] == true){
@@ -540,6 +544,10 @@ class Vaccinations extends AdminBase
         $url = $this->modelSettings->getValue(['Name'=>'App.QueueServerAddress'],'Value');
 
         $result = httpsPost($url, json_encode($data));
+
+        if($result === false){
+            return ['code'=>400,'msg'=>'连接超时'];
+        }
 
         $result = json_decode($result,true);
 

@@ -250,6 +250,7 @@
                 // 选中接种台
                 $('.j_item').on('click',function(e){
                     WritingDesk = e.currentTarget.attributes.data.value;
+                    var number = '{$info.registerInfo.Number}';
                     // console.log(WritingDesk)
                     $('input[name="WritingDesk"]').val(WritingDesk);
                     $('.fix_box').hide();
@@ -257,8 +258,13 @@
                     $('.un_number').show();
                     $('.un_writingdesk').text('登记台'+WritingDesk);
                     $('.un_writingdesk').show();
-                    $.post('{:url("vaccinations/setCacheWritingDesk")}',{WritingDesk:WritingDesk},function(res){
-                        console.log('WritingDesk写入缓存');
+                    $.post('{:url("vaccinations/setCacheWritingDesk")}',{number:number,WritingDesk:WritingDesk},function(res){
+                        if(res.code == 200){
+                            layer.msg(res.msg,{icon:1});
+                        }else{
+                            layer.msg(res.msg,{icon:2});
+                        }
+                        // console.log('WritingDesk写入缓存');
                     })
 
                 });

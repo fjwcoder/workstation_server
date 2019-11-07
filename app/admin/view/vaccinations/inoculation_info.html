@@ -191,8 +191,16 @@
                 });
                 // 选中接种台
                 $('.j_item').on('click',function(e){
-        
                     VaccinationDesk = e.currentTarget.attributes.data.value;
+                    var Number = '{$info.registerInfo.Number}';
+                    var Name = $('input[name="Name"]').val();
+
+                    var data = {
+                        Number:Number,
+                        Name:Name,
+                        WritingDesk:VaccinationDesk,
+                    };
+                    
                     // console.log(VaccinationDesk)
                     $('input[name="ConsultationRoom"]').val(VaccinationDesk);
                     $('.fix_box').hide();
@@ -200,8 +208,13 @@
                     $('.un_number').show();
                     $('.un_writingdesk').text('接种台'+VaccinationDesk);
                     $('.un_writingdesk').show();
-                    $.post('{:url("vaccinations/setCacheVaccinationDesk")}',{VaccinationDesk:VaccinationDesk},function(res){
-                        console.log('VaccinationDesk写入缓存');
+                    $.post('{:url("vaccinations/setCacheVaccinationDesk")}',data,function(res){
+                        if(res.code == 200){
+                            layer.msg(res.msg,{icon:1});
+                        }else{
+                            layer.msg(res.msg,{icon:2});
+                        }
+                        // console.log('VaccinationDesk写入缓存');
                     })
                 });
             }else{

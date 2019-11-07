@@ -253,6 +253,10 @@ class Vaccinations extends AdminBase
 
         cache('WritingDesk',$data['WritingDesk'],43200);
 
+        $result = $this->logicVaccinations->callNumber(['number'=>$data['number'],'WritingDesk'=>$data['WritingDesk']]);
+
+        return $result;
+
     }
 
     /**
@@ -263,6 +267,10 @@ class Vaccinations extends AdminBase
         $data = $this->param;
 
         cache('VaccinationDesk',$data['VaccinationDesk'],43200);
+
+        $result = $this->logicVaccinations->callInjectNumber(['Number'=>$data['Number'],'Name'=>$data['Name'],'WritingDesk'=>$data['VaccinationDesk']]);
+
+        return $result;
     }
     
 
