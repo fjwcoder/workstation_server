@@ -81,6 +81,8 @@ class Vaccinations extends ApiBase
         if(empty($param['Id'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
         
         if(empty($param['VaccinationUserId'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
+        // status 1完成按钮 2完成并呼叫下一个按钮
+        // if(empty($param['status'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
 
         // if(empty($param['ConsultationRoom'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '操作失败'];
 
@@ -90,49 +92,55 @@ class Vaccinations extends ApiBase
             'Id'=>$param['Id'],
         ];
 
-        $data = [
-            'VaccinationFinishTime'=>$time,
-            'VaccinationUserId'=>$param['VaccinationUserId'],
-            'ConsultationRoom'=>!empty($param['ConsultationRoom'])? $param['ConsultationRoom']:'',
-            'State'=>4,
-        ];
+        // 启动事务
+        Db::startTrans();
+        try{
+            
+            // 判断是不是预约订单
+            $app_result = $this->editOrderInfo($param['Id'], 3);
 
-        $app_result = $this->editOrderInfo($param['Id'], 3);
+            if($app_result === false){
+                return [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
+            }
 
-        if($app_result){
-            $result = $this->modelVaccinations->updateInfo($where, $data);
+            // 接种流水数据 完成时间 接种用户Id 接种台名称
+            $data = [
+                'VaccinationFinishTime'=>$time,
+                'VaccinationUserId'=>$param['VaccinationUserId'],
+                'ConsultationRoom'=>!empty($param['ConsultationRoom'])? $param['ConsultationRoom']:'',
+                'State'=>4,
+            ];
+            // 对接种流水表继续修改数据
+            Db::name('vaccinations')->where($where)->update($data);
 
-            $childId = $this->modelVaccinations->getValue($where,'ChildId');
-
+            // 当前接种流水信息
+            $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+            // 接种疫苗列表
             $vaccine_list = [];
-
             $v_where = ['VaccinationId'=>$param['Id']];
-
             $field = 'VaccineId,Times,VaccinationDate,VaccinationPlace,LotNumber,Company,IsFree,VaccinationPosition,Flag';
-
             $vaccine_list = Db::name('vaccinationdetails')->where($v_where)->field($field)->select();
-
             $vaccine_json = json_encode($vaccine_list);
-
             foreach ($vaccine_list as $k => $v) {
                 $vaccine_list[$k]['CreationTime']=$time;
                 $vaccine_list[$k]['IsDeleted']=0;
-                $vaccine_list[$k]['ChildId']=$childId;
+                $vaccine_list[$k]['ChildId']=$vInfo['ChildId'];
                 $vaccine_list[$k]['CreatorUserId']=$param['VaccinationUserId'];
             }
-
+            // 把今天接种的疫苗插入到历史接种表中
             Db::name('childvaccines')->insertAll($vaccine_list);
 
-            $childInfo = $this->modelChilds->getInfo(['Id'=>$childId]);
-
+            // 孩子信息
+            $childInfo = Db::name('childs')->where(['Id'=>$vInfo['ChildId']])->find();
+            // 家长信息
             $parent_info = [
                 'parent_name'=>$childInfo['ParentName'],
                 'phone'=>$childInfo['Mobile'],
                 'address'=>$childInfo['Address']
             ];
-
-            $position_id = $this->modelSettings->getValue(['Name'=>'App.InjectPositionId'], 'Value');
-
+            // 接种点Id
+            $position_id = Db::name('settings')->where(['Name'=>'App.InjectPositionId'])->value('Value');
+            // 提交数据
             $r_data = [
                 'card_no' => $childInfo['CardNo'],
                 'name' => $childInfo['Name'],
@@ -143,19 +151,32 @@ class Vaccinations extends ApiBase
                 'position_id'=>$position_id,
                 'room_name'=>$data['ConsultationRoom'],
             ];
+            // 把当前接种信息 添加到线上数据库中
+            $refrigeratorUrl = Db::name('settings')->where(['Name'=>'App.refrigeratorUrl'])->value('Value');
+            $refridgeData = httpsPost($refrigeratorUrl . '/setInjectCompleteInfo', $r_data);
+            $refridgeData = json_decode($refridgeData, true);
+            // 提交成功
+            if($refridgeData['code'] == 200){
+                // 如果是完成并下一个按钮
+                // if($param['status'] == 2){
 
-            $refrigeratorUrl = $this->modelSettings->getValue(['Name'=>'App.refrigeratorUrl'], 'Value');
-            
-
-            httpsPost($refrigeratorUrl . '/setInjectCompleteInfo', $r_data);
-
+                //     $nextData = $this->nextNumber(['Id'=>$param['Id'],'ConsultationRoom'=>$param['ConsultationRoom']]);
+                    
+                // }
+                // 提交事务
+                Db::commit();
+                
+                $result = true;
+            }else{
+                // 回滚事务
+                Db::rollback();
+            }
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
         }
-
+        // 'data'=>$nextData
         return $result ? [API_CODE_NAME => 200, API_MSG_NAME => '接种成功'] : [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
-        
-        
-
-        
 
 
     }
@@ -190,6 +211,51 @@ class Vaccinations extends ApiBase
         }else{
             return true;
         } 
+    }
+
+    /**
+     * 下一位
+     */
+    public function nextNumber($param = [])
+    {
+
+        if(empty($param['Id'])) return [API_CODE_NAME => 40002, API_MSG_NAME => '缺少参数'];
+
+        $where = ['Id'=>$param['Id']];
+        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+
+        // 下一个的查询条件 
+        $n_where = [
+            'a.VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'a.State'=>1,
+        ];
+
+        if(strtoupper($vInfo['Number'][0]) == 'V'){
+            $n_where['a.Number'] = ['like','%V%'];
+        }else{
+            $n_where['a.Number'] = ['like','%A%'];
+        }
+
+        $n_field = 'a.Id,a.Number,c.Sex,C.Name';
+
+        $n_where['a.Id'] = ['>', $param['Id']];
+        $nextData = [];
+        // 查询有没有和当前取号号码开头一样的数据
+        $nextData = Db::name('vaccinations')->alias('a')->join('childs c','a.ChildId = c.Id','LEFT')->where($n_where)->order('VaccinationDate asc')->field($n_field)->find();
+        // 没有和当前取号号码开头一样的数据，不查询 Number 条件
+        if($nextData == null){
+            unset($where['a.Number']);
+            $nextData = Db::name('vaccinations')->alias('a')->join('childs c','a.ChildId = c.Id','LEFT')->where($n_where)->order('a.VaccinationDate asc')->field($n_field)->find();
+        }
+        // 如果有下一个
+        if($nextData !== null){
+            $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('v.ShortName')->select();
+            // 进行叫号
+            $this->logicCommon->callName(['deviceId'=>2,'number'=>$nextData['Number'],'childName'=>$nextData['Name'],'consultingRoom'=>$param['ConsultationRoom']]);
+        }
+
+        return $nextData;
+
     }
      
 

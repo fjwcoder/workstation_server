@@ -52,7 +52,7 @@ class Vaccinationdetails extends AdminBase
 
         // $data = $this->modelVaccinationdetails->where($where)->getInfo($where);
         if(empty($param['vaccineDate'])){
-            return ['code'=>400,'msg'=>'请先选择接种疫苗'];
+            return ['code'=>400,'msg'=>'请先选择要接种的疫苗'];
         }
 
         $where = [
@@ -94,7 +94,7 @@ class Vaccinationdetails extends AdminBase
             $data['Company'] = $v['Company'];
             $data['VaccinationPosition'] = $v['VaccinationPosition'];
             $data['IsFree'] = $v['IsFree'];
-            $data['VaccinationPlace'] = $v['VaccinationPlace'];
+            // $data['VaccinationPlace'] = $v['VaccinationPlace'];
 
             $this->modelVaccinationdetails->setInfo($data);
         }

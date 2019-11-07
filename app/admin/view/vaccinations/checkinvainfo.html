@@ -108,7 +108,7 @@
                                     <th>疫苗批号</th>
                                     <th>生产企业</th>
                                     <th>接种部位</th>
-                                    <th>接种地址</th>
+                                    <!-- <th>接种地址</th> -->
                                     <th>免费</th>
                                 </tr> 
                             </thead>
@@ -128,9 +128,9 @@
                                             <td>
                                                 <input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company" value="{$vo.Company}" disabled>
                                             </td>
-                                            <td>
+                                            <!-- <td>
                                                 <input class="layui-input" type="text" placeholder="请填写疫苗地址" name="VaccinationPlace" value="{$vo.VaccinationPlace}" disabled>
-                                            </td>
+                                            </td> -->
                                             <td>
                                                 <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition" value="{$vo.VaccinationPosition}" disabled>
                                             </td>
@@ -183,7 +183,7 @@
                 ,{field:'LotNumber', title: '疫苗批号', align: 'center' }
                 ,{field:'Company', title: '生产企业', align: 'center'}
                 ,{field:'VaccinationPosition', title: '接种部位', align: 'center'}
-                ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
+                // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
                 ,{field:'IsFree', title: '免费',   align: 'center'} 
             ]],
             parseData: function(res){ //将原始数据解析成 table 组件所规定的数据

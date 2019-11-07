@@ -226,6 +226,52 @@ class Vaccinations extends AdminBase
     {
         return $this->logicVaccinations->callInjectNumber($this->param);
     }
+
+    /**
+     * 上一位
+     */
+    public function prevNumber()
+    {
+        return $this->logicVaccinations->prevNumber($this->param);
+    }
+
+    /**
+     * 下一位
+     */
+    public function nextNumber()
+    {
+        return $this->logicVaccinations->nextNumber($this->param);
+    }
+
+    /**
+     * 选择登记台后进行缓存
+     * 
+     */
+    public function setCacheWritingDesk()
+    {
+        $data = $this->param;
+
+        cache('WritingDesk',$data['WritingDesk'],43200);
+
+        $result = $this->logicVaccinations->callNumber(['number'=>$data['number'],'WritingDesk'=>$data['WritingDesk']]);
+
+        return $result;
+
+    }
+
+    /**
+     * 选择接种台后进行缓存
+     */
+    public function setCacheVaccinationDesk()
+    {
+        $data = $this->param;
+
+        cache('VaccinationDesk',$data['VaccinationDesk'],43200);
+
+        $result = $this->logicVaccinations->callInjectNumber(['Number'=>$data['Number'],'Name'=>$data['Name'],'WritingDesk'=>$data['VaccinationDesk']]);
+
+        return $result;
+    }
     
 
 

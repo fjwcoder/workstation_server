@@ -31,4 +31,12 @@ class Vaccinations extends ApiBase
     {
         return $this->apiReturn($this->logicVaccinations->completeInject($this->param));
     }
+
+    /**
+     * 下一位
+     */
+    public function nextNumber()
+    {
+        return $this->apiReturn($this->logicVaccinations->nextNumber($this->param));
+    }
 }

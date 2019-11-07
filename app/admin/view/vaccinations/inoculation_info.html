@@ -6,8 +6,8 @@
                 <div class="big_box">
                     <div class="btn_box">
                         <!-- <button class="btn btn_item btn_item_left submit" State="3">完成，留观</button> -->
-                        <button class="btn btn_item btn_item_left submit" State="4">完成</button>
-                        <!-- <button class="btn btn_item btn_item_left submit_prev">完成并呼叫上一位</button> -->
+                        <button class="btn btn_item btn_item_left submit" data="1" State="4">完成</button>
+                        <button class="btn btn_item btn_item_left submit" data="2" State="4">完成并呼叫下一位</button>
                         <!-- <button class="btn btn_item btn_item_left submit_next">完成并呼叫下一位</button> -->
                         <button class="btn btn_item btn_item_left call_number">呼叫</button>
 
@@ -117,7 +117,7 @@
                                     <th>疫苗批号</th>
                                     <th>生产企业</th>
                                     <th>接种部位</th>
-                                    <th>接种地址</th>
+                                    <!-- <th>接种地址</th> -->
                                     <th>免费</th>
                                 </tr> 
                             </thead>
@@ -129,7 +129,7 @@
                                     <td>{$vo.LotNumber}</td>
                                     <td>{$vo.Company}</td>
                                     <td>{$vo.VaccinationPosition}</td>
-                                    <td>{$vo.VaccinationPlace}</td>
+                                    <!-- <td>{$vo.VaccinationPlace}</td> -->
                                     <td>
                                         {if condition="$vo['IsFree'] == 1"}
                                         <input type="checkbox" lay-skin="primary" checked disabled>
@@ -164,7 +164,7 @@
     <div id="black"></div>
     <script>
         var ChildId = '';
-        var WritingDesk = '';
+        var VaccinationDesk = '{$info["VaccinationDesk"]|default=""}';
         var VaccinationId={$info.registerInfo.Id};
         layui.use(['jquery', 'layer','table','laydate'], function(){
             var table = layui.table,
@@ -172,35 +172,63 @@
             laydate= layui.laydate,
             $ = layui.jquery;
 
-            // 显示接种台
-            $(document).ready(function () {
-                $("#black").css('display', "block");
-                $(".fix_box").css('display', "block");
-                var a = {$info.vaccinationDeskCount};
-                // a = 登记台个数
-                var num = a * 210 / 2;
-                var j_html = '';
-                for ( i = 0; i < a; i++) {
-                    // console.log(i)
-                    j_html += '<div class="j_item" data='+ (i+1) +'><div class="j_item_title">接种台</div><div class="j_item_number">'+ (i+1) +'</div></div>';
+            if(VaccinationDesk == '' || VaccinationDesk == null){
+                // 显示接种台
+                $(document).ready(function () {
+                    $("#black").css('display', "block");
+                    $(".fix_box").css('display', "block");
+                    var a = {$info.vaccinationDeskCount};
+                    // a = 登记台个数
+                    var num = a * 210 / 2;
+                    var j_html = '';
+                    for ( i = 0; i < a; i++) {
+                        // console.log(i)
+                        j_html += '<div class="j_item" data='+ (i+1) +'><div class="j_item_title">接种台</div><div class="j_item_number">'+ (i+1) +'</div></div>';
+                        
+                    }
+                    $('.fix_box').html(j_html);
+                    $(".fix_box").css('left', 'calc(50% - ' + num + 'px)')
+                });
+                // 选中接种台
+                $('.j_item').on('click',function(e){
+                    VaccinationDesk = e.currentTarget.attributes.data.value;
+                    var Number = '{$info.registerInfo.Number}';
+                    var Name = $('input[name="Name"]').val();
+
+                    var data = {
+                        Number:Number,
+                        Name:Name,
+                        WritingDesk:VaccinationDesk,
+                    };
                     
-                }
-                $('.fix_box').html(j_html);
-                $(".fix_box").css('left', 'calc(50% - ' + num + 'px)')
-            });
-            
-            // 选中接种台
-            $('.j_item').on('click',function(e){
-    
-                WritingDesk = e.currentTarget.attributes.data.value;
-                // console.log(WritingDesk)
-                $('input[name="ConsultationRoom"]').val(WritingDesk);
+                    // console.log(VaccinationDesk)
+                    $('input[name="ConsultationRoom"]').val(VaccinationDesk);
+                    $('.fix_box').hide();
+                    $('#black').hide();
+                    $('.un_number').show();
+                    $('.un_writingdesk').text('接种台'+VaccinationDesk);
+                    $('.un_writingdesk').show();
+                    $.post('{:url("vaccinations/setCacheVaccinationDesk")}',data,function(res){
+                        if(res.code == 200){
+                            layer.msg(res.msg,{icon:1});
+                        }else{
+                            layer.msg(res.msg,{icon:2});
+                        }
+                        // console.log('VaccinationDesk写入缓存');
+                    })
+                });
+            }else{
+                $('input[name="ConsultationRoom"]').val(VaccinationDesk);
                 $('.fix_box').hide();
                 $('#black').hide();
                 $('.un_number').show();
-                $('.un_writingdesk').text('接种台'+WritingDesk);
+                $('.un_writingdesk').text('接种台'+VaccinationDesk);
                 $('.un_writingdesk').show();
-            });
+            }
+
+            
+            
+            
             
 
             table.render({
@@ -216,7 +244,7 @@
                     ,{field:'LotNumber', title: '疫苗批号',  }
                     ,{field:'Company', title: '生产企业'}
                     ,{field:'VaccinationPosition', title: '接种部位'}
-                    ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
+                    // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
                     ,{title: '免费',   align: 'center',templet:function(d){
                         if(d.IsFree == 0){
                             return '不免费';
@@ -238,26 +266,37 @@
 
             // 点击下一个按钮
             $('.next_number').on('click',function(){
-                var next = {$info.next};
+                var data = {
+                    Id:{$info.registerInfo.Id},
+                    State:1,
+                };
 
-                if(next == '' || next == null){
-                    layer.msg('已经到最后一位啦!');
-                }else{
-                    window.location.href = "{:url()}?Id="+next;
+                $.post('{:url("vaccinations/nextNumber")}',data,function(res){
+                    if(res.code == 200){
+                        window.location.href = "{:url()}?Id="+res.msg;
 
-                }
+                    }else{
+                        layer.msg(res.msg,{icon:2});
+                    }
+                });
 
             });
 
             // 点击上一个按钮
             $('.prev_number').on('click',function(){
-                var prev = {$info.prev};
+                var data = {
+                    Id:{$info.registerInfo.Id},
+                    State:1,
+                };
 
-                if(prev == '' || prev == null){
-                    layer.msg('已经到第一位啦!');
-                }else{
-                    window.location.href = "{:url()}?Id="+prev;
-                }
+                $.post('{:url("vaccinations/prevNumber")}',data,function(res){
+                    if(res.code == 200){
+                        window.location.href = "{:url()}?Id="+res.msg;
+
+                    }else{
+                        layer.msg(res.msg,{icon:2});
+                    }
+                });
 
             });
 
@@ -272,7 +311,7 @@
                 var data = {
                     Number:Number,
                     Name:Name,
-                    WritingDesk:WritingDesk,
+                    WritingDesk:VaccinationDesk,
                 };
 
                 $.post('{:url("Vaccinations/callInjectNumber")}',data,function(res){
@@ -286,8 +325,9 @@
             });
 
 
-            // 点击完成按钮
-            $('.submit').on('click',function(e){
+            // 点击完成 / 完成并下一位 按钮
+            $('.submit').on('click',function(){
+                var noNext = $(this).attr('data');
                 $('.fakeloader').show();
                 var ConsultationRoom = $('input[name="ConsultationRoom"]').val();
                 var Id = $('input[name="Id"]').val();
@@ -297,18 +337,30 @@
                     Id:Id,
                     State:State,
                     ConsultationRoom:ConsultationRoom,
+                    noNext:noNext
                 };
 
                 layer.confirm("确定要完成吗？建议接种台完成!!!", {icon: 3, title:'提示'}, function(index){
                 
                     $.post('{:url("Vaccinations/setInjectVaccineComplete")}',data,function(res){
                         if(res.code == 200){
+                            if(noNext == 2){
+                                if(res.data.code == 200){
+                                    layer.msg(res.msg,{icon:1});
+                                    setTimeout('window.location.href = "{:url()}?Id="+'+res.data.msg, 500);
+                                    return false;
+                                }else{
+                                    $('.fakeloader').hide();
+                                    layer.msg(res.data.msg,{icon:1});
+                                    return false;
+                                }
+                            }
                             $('.fakeloader').hide();
-                            layer.msg(res.msg);
+                            layer.msg(res.msg,{icon:1});
                             layer.close(index);
                         }else{
                             $('.fakeloader').hide();
-                            layer.msg(res.msg);
+                            layer.msg(res.msg,{icon:2});
                             layer.close(index);
                         }
                     });
@@ -319,10 +371,6 @@
                
             });
 
-            // 点击完成并下一位按钮
-            $('.submit_next').on('click',function(){
-                layer.msg('完成并下一位')
-            });
 
         });
 

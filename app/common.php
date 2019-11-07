@@ -982,6 +982,8 @@ function httpsPost($url, $data = null, $headers = []){
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
     }
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);   // tcp 握手时间超时       
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10);     // curl 时间超时   
     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($curl);
     curl_close($curl);
