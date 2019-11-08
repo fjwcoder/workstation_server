@@ -23,7 +23,8 @@ class Login extends AdminBase
     public function loginHandle($username = '', $password = '', $verify = '')
     {
         
-        $validate_result = $this->validateLogin->scene('admin')->check(compact('username','password','verify'));
+        $validate_result = $this->validateLogin->scene('admin')->check(compact('username','password'));
+        // $validate_result = $this->validateLogin->scene('admin')->check(compact('username','password','verify'));
         
         if (!$validate_result) {
             
