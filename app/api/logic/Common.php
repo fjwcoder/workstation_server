@@ -14,7 +14,7 @@ namespace app\api\logic;
 use app\api\error\CodeBase;
 use app\api\error\Common as CommonError;
 use \Firebase\JWT\JWT;
-
+use think\Db;
 /**
  * 接口基础逻辑
  */
@@ -56,8 +56,14 @@ class Common extends ApiBase
         if(empty($param['password'])) return [API_CODE_NAME => 40001, API_MSG_NAME => '请填写密码'];
         
         $user_info = $this->modelUsers->getInfo(['UserName'=>$param['account']], 'Id, UserName, md5_password');
-        
+
         if($user_info){
+
+            $group_id = Db::name('auth_group_access')->where('member_id',$user_info['Id'])->value('group_id');
+
+            if($group_id !== 1 && $group_id !== 3){
+                return [API_CODE_NAME => 40001, API_MSG_NAME => '没有权限'];
+            }
 
             if(md5($param['password']) !== $user_info['md5_password']){
                 return [API_CODE_NAME => 40001, API_MSG_NAME => '密码错误'];
@@ -188,6 +194,8 @@ class Common extends ApiBase
         if(md5(trim($password)) !== $userInfo['password']){
             return [API_CODE_NAME => 40003, API_MSG_NAME => '密码不正确'];
         }
+
+
 
         return $userInfo;
     }

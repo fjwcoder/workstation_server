@@ -59,9 +59,12 @@ class Users extends AdminBase
         Db::startTrans();
         try{
 
+            // 查询出原用户名
+            $userName = Db::name('users')->where(['Id'=>$Id])->value('UserName');
+
             $data = [
                 'Id'=>$Id,
-                'UserName'=>$userInfo['UserName'],
+                'UserName'=>$userName,
                 'IsActive'=>$isActive,
             ];
 
@@ -129,11 +132,12 @@ class Users extends AdminBase
 
             $data = [
                 'Id'=>$param['Id'],
-                'UserName'=>$param['UserName'],
+                // 禁止修改用户名
+                // 'UserName'=>$param['UserName'],
                 'Name'=>$param['Name'],
                 // 'EmailAddress'=>$param['EmailAddress'],
                 'IsActive'=>$param['IsActive'],
-                'NormalizedUserName'=>strtoupper($param['UserName']),
+                // 'NormalizedUserName'=>strtoupper($param['UserName']),
                 // 'NormalizedEmailAddress'=>strtoupper($param['EmailAddress']),
             ];
 
@@ -152,6 +156,9 @@ class Users extends AdminBase
             }else{
                 Db::name('auth_group_access')->insert($authGroupInfo);
             }
+            // 查询出原用户名
+            $userName = Db::name('users')->where(['Id'=>$param['Id']])->value('UserName');
+            $param['UserName'] = $userName;
 
             $return = $this->postUserInfo($param);
             if(is_array($return)){
@@ -205,9 +212,11 @@ class Users extends AdminBase
             ];
 
             Db::name('users')->where(['Id'=>$param['Id']])->update($data);
+            $userName = Db::name('users')->where(['Id'=>$param['Id']])->value('UserName');
 
             $uData = [
-                'UserName'=>$userInfo['UserName'],
+                // 禁止修改用户名
+                'UserName'=>$userName,
                 'md5_password'=>$data['md5_password'],
             ];
 
@@ -354,9 +363,9 @@ class Users extends AdminBase
 
         // dump($data);die;
 
-        $appUrl = $this->modelSettings->getValue(['Name'=>'App.appUrl'], 'Value');
+        $refrigeratorUrl = $this->modelSettings->getValue(['Name'=>'App.refrigeratorUrl'], 'Value');
 
-        $result = httpsPost($appUrl, $data);
+        $result = httpsPost($refrigeratorUrl . '/setuserinfo', $data);
 
         $result = json_decode($result, true);
 

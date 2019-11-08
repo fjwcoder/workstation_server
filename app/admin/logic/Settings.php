@@ -105,8 +105,6 @@ class Settings extends AdminBase
 
         // $result = json_decode($result,true);
 
-        // dump($result);die;
-
         if(!empty($result)){
             $result = json_decode($result,true);
         }else{

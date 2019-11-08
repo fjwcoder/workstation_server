@@ -273,6 +273,9 @@
             
             if(res.UserName == undefined){
                 res.UserName = '';
+                disabled = ''
+            }else{
+                disabled = 'disabled';
             }
 
             if(res.Name == undefined){
@@ -300,7 +303,7 @@
                 isActiveHtml = '<input type="radio" name="IsActive" value="0"> 否</label><label><input type="radio" name="IsActive" value="1" checked="checked"> 是';
             }
 
-            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:600px;"><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>账号</label><div class="col-md-10"><input class="form-control" name="UserName" placeholder="请输入账号" type="text" value="'+res.UserName+'"></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>昵称</label><div class="col-md-10"><input class="form-control" name="Name" placeholder="请输入昵称" type="text" value="'+res.Name+'"></div></div>'+authAllHtml+''+pwdHtml+'<div class="form-group"><label class="col-md-2 control-label">启用</label><div class="col-md-10">'+isActiveHtml+'</div></div></div></form>';
+            var cHtml = '<form class="form-horizontal" id="editInfo"><input type="hidden" name="Id" value="'+res.Id+'"><div style="width:600px;"><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>账号</label><div class="col-md-10"><input class="form-control" name="UserName" placeholder="请输入账号" type="text" value="'+res.UserName+'" '+disabled+'></div></div><div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>昵称</label><div class="col-md-10"><input class="form-control" name="Name" placeholder="请输入昵称" type="text" value="'+res.Name+'"></div></div>'+authAllHtml+''+pwdHtml+'<div class="form-group"><label class="col-md-2 control-label">启用</label><div class="col-md-10">'+isActiveHtml+'</div></div></div></form>';
             // <div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>邮箱</label><div class="col-md-10"><input  class="form-control" typr="text" name="EmailAddress" placeholder="请输入邮箱" value="'+res.EmailAddress+'"></div></div>
             return cHtml;
 

@@ -6,7 +6,7 @@
     <!-- 面包屑header -->
     <div class="wp99">
         <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
-            <legend>常规
+            <legend>接种点信息
                 <div style="float:right;padding-right: 20px;padding-bottom: 10px;">
                     <button  type="submit" class="btn ladda-button unajax-post un-input-btn" data-style="slide-up" target-form="form_single">
                         <span class="ladda-label"><i class="fa fa-send"></i> 保 存</span>
@@ -92,98 +92,106 @@
                 </div>
         </div>
         <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
-            <legend>叫号机</legend>
+            <legend>叫号机配置</legend>
         </fieldset>
         <div style="width: 60%">
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">叫号机地址UR：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.QueueServerAddress" value="{$info['App.QueueServerAddress']|default=''}">
-                    </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">叫号机地址URL：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.QueueServerAddress" value="{$info['App.QueueServerAddress']|default=''}">
                 </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">冰箱服务地址URL：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.refrigeratorUrl" value="{$info['App.refrigeratorUrl']|default=''}">
-                    </div>
-                </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">小程序地址URL：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.appUrl" value="{$info['App.appUrl']|default=''}">
-                    </div>
-                </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">请求小票短链地址：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.shortUrl" value="{$info['App.shortUrl']|default=''}">
-                    </div>
-                </div>
-
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">实时队列URL：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.immediatelyQueueUrl" value="{$info['App.immediatelyQueueUrl']|default=''}">
-                    </div>
-                </div>
-
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">实时队列频率(秒)：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.immediatelyQueueRate" value="{$info['App.immediatelyQueueRate']|default=''}">
-                    </div>
-                </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">服务执行时间：</label>
-                    <div class="layui-input-block">
-                        <select class="layui-input input_w un-select" name="App.serverBeginTime" style="width: 100px;float: left;"></select>
-                        <span style="float: left;margin: 0 15px;line-height: 38px;">——</span>
-                        <select class="layui-input input_w un-select"  name="App.serverEndTime" style="width: 100px;float: left;"></select>
-                    </div>
-                </div>
-
-                <!-- <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">登记大屏显示行数：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.WritingDeskScreenRows" value="{$info['App.WritingDeskScreenRows']|default=''}">
-                    </div>
-                </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w ">登记大屏刷新频率：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.WritingDeskScreenInterval" value="{$info['App.WritingDeskScreenInterval']|default=''}">
-                    </div>
-                </div>
-
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">接种大屏显示行数：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenRows" value="{$info['App.VaccinationDeskScreenRows']|default=''}">
-                    </div>
-                </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">接种大屏刷新频率：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenInterval" value="{$info['App.VaccinationDeskScreenInterval']|default=''}">
-                    </div>
-                </div> -->
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">留观大屏显示行数：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.ObseverRoomScreenRows" value="{$info['App.ObseverRoomScreenRows']|default=''}">
-                    </div>
-                </div>
-                <div class="layui-form-item margin_top">
-                    <label class="layui-form-label label_w">留观大屏刷新频率：</label>
-                    <div class="layui-input-block">
-                        <input type="text" class="layui-input input_w" name="App.ObseveScreenRefreshRate" value="{$info['App.ObseveScreenRefreshRate']|default=''}">
-                    </div>
-                </div>
-                
-            </form>
-            <button  type="submit" class="btn ladda-button ajax-post" data-style="slide-up" target-form="form_single" style="display:none;"></button>
+            </div>
             
+
+            <!-- <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">登记大屏显示行数：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.WritingDeskScreenRows" value="{$info['App.WritingDeskScreenRows']|default=''}">
+                </div>
+            </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w ">登记大屏刷新频率：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.WritingDeskScreenInterval" value="{$info['App.WritingDeskScreenInterval']|default=''}">
+                </div>
+            </div>
+
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">接种大屏显示行数：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenRows" value="{$info['App.VaccinationDeskScreenRows']|default=''}">
+                </div>
+            </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">接种大屏刷新频率：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.VaccinationDeskScreenInterval" value="{$info['App.VaccinationDeskScreenInterval']|default=''}">
+                </div>
+            </div> -->
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">留观大屏显示行数：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.ObseverRoomScreenRows" value="{$info['App.ObseverRoomScreenRows']|default=''}">
+                </div>
+            </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">留观大屏刷新频率：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.ObseveScreenRefreshRate" value="{$info['App.ObseveScreenRefreshRate']|default=''}">
+                </div>
+            </div>
         </div>
+
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+            <legend>服务配置<span style="color: red;margin-left: 15px;">（请勿修改）</span></legend>
+        </fieldset>
+
+        <div style="width: 60%">
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">冰箱服务地址URL：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.refrigeratorUrl" value="{$info['App.refrigeratorUrl']|default=''}">
+                </div>
+            </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">小程序地址URL：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.appUrl" value="{$info['App.appUrl']|default=''}">
+                </div>
+            </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">请求小票短链地址：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.shortUrl" value="{$info['App.shortUrl']|default=''}">
+                </div>
+            </div>
+
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">实时队列URL：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.immediatelyQueueUrl" value="{$info['App.immediatelyQueueUrl']|default=''}">
+                </div>
+            </div>
+
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">实时队列频率(秒)：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.immediatelyQueueRate" value="{$info['App.immediatelyQueueRate']|default=''}">
+                </div>
+            </div>
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">服务执行时间：</label>
+                <div class="layui-input-block">
+                    <select class="layui-input input_w un-select" name="App.serverBeginTime" style="width: 100px;float: left;"></select>
+                    <span style="float: left;margin: 0 15px;line-height: 38px;">——</span>
+                    <select class="layui-input input_w un-select"  name="App.serverEndTime" style="width: 100px;float: left;"></select>
+                </div>
+            </div>
+        
+        </div>
+
+    </form>
+    <button  type="submit" class="btn ladda-button ajax-post" data-style="slide-up" target-form="form_single" style="display:none;"></button>
 
 
         <!-- 
@@ -282,21 +290,20 @@ layui.use(['layer','jquery'], function(){
                 data.inject_position_id !== "{$info['App.InjectPositionId']}"
             ){
                 $.post('{:url("settings/setSettingsInfo")}',data,function(res){
-                // console.log(res);
-                if(res.code == 200){
-                    console.log(res)
-                    if(res.msg !== 'success'){
-                        $('input[name="App.InjectPositionId"]').val(res.msg);
-                        
+                    // console.log(res);
+                    if(res.code == 200){
+                        console.log(res)
+                        if(res.msg !== 'success'){
+                            $('input[name="App.InjectPositionId"]').val(res.msg);
+                        }
+                        $('.ajax-post').trigger("click");
+                    }else{
+                        layer.msg(res.msg);
+                        $('.fakeloader').hide();
+                        $(that).removeClass('disabled').prop('disabled',false);
                     }
-                    $('.ajax-post').trigger("click");
-                }else{
-                    layer.msg(res.msg);
-                    $('.fakeloader').hide();
-                    $(that).removeClass('disabled').prop('disabled',false);
-                }
 
-            },'json');
+                },'json');
             }else{
                 $('.ajax-post').trigger("click");
             }

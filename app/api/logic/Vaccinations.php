@@ -53,7 +53,7 @@ class Vaccinations extends ApiBase
             'VaccinationId' => $param['Id']
         ];
 
-        $field = 'd.VaccinationPosition, y.ShortName';
+        $field = 'd.VaccineId, d.VaccinationPosition, y.ShortName';
 
         $this->modelVaccinationdetails->alias('d');
 
@@ -115,6 +115,10 @@ class Vaccinations extends ApiBase
             ];
             // 对接种流水表继续修改数据
             Db::name('vaccinations')->where($where)->update($data);
+            // 修改接种位置
+            // foreach ($param as $k => $v) {
+            //     Db::name('vaccinationdetails')->where(['VaccinationId'=>$param['Id'],'VaccineId'=>$k])->update(['VaccinationPosition'=>$v]);
+            // }
 
             // 接种疫苗列表
             $vaccine_list = [];
@@ -253,7 +257,7 @@ class Vaccinations extends ApiBase
         }
         // 如果有下一个
         if($nextData !== null){
-            $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('d.VaccinationPosition,v.ShortName')->select();
+            $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('d.VaccineId,d.VaccinationPosition,v.ShortName')->select();
             // 进行叫号
             $this->logicCommon->callName(['deviceId'=>2,'number'=>$nextData['Number'],'childName'=>$nextData['Name'],'consultingRoom'=>$param['ConsultationRoom']]);
         }else{
@@ -270,7 +274,7 @@ class Vaccinations extends ApiBase
             
             // 如果有下一个
             if($nextData !== null){
-                $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('d.VaccinationPosition,v.ShortName')->select();
+                $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('d.VaccineId,d.VaccinationPosition,v.ShortName')->select();
                 // 进行叫号
                 $this->logicCommon->callName(['deviceId'=>2,'number'=>$nextData['Number'],'childName'=>$nextData['Name'],'consultingRoom'=>$param['ConsultationRoom']]);
             }else{

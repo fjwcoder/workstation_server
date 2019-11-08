@@ -10,7 +10,7 @@ class Users extends ValidateBase
 
     // 验证规则
     protected $rule = [
-        'UserName'  => 'require|unique:users',
+        'UserName'  => 'require|alphaNum|unique:users',
         'md5_password'  => 'require|length:6,12',
         'Name'  => 'require',
         // 'EmailAddress'  => 'require|email',
@@ -22,6 +22,7 @@ class Users extends ValidateBase
     protected $message = [
         'UserName.require'    => '请输入账号',
         'UserName.unique'    => '账号已存在',
+        'UserName.alphaNum' =>'用户名只能是字符或数字',
         'md5_password.require'    => '请输入密码',
         'md5_password.length'    => '密码长度为6-12位',
         'Name.require'    => '请输入昵称',
@@ -36,7 +37,7 @@ class Users extends ValidateBase
     // 应用场景
     protected $scene = [
         'add'  =>  ['UserName','md5_password','Name','IsActive','auth_id'],
-        'edit'  =>  ['UserName','Name','IsActive','auth_id'],
+        'edit'  =>  ['Name','IsActive','auth_id'],
         'editpwd'  =>  ['md5_password'],
     ];
 

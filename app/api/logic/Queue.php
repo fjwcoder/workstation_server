@@ -190,10 +190,9 @@ class Queue extends ApiBase
 
         // 循环保存图片 插入数据
         foreach ($param['attachments'] as $k => $v) {
-
-            $file_name = $param['number'].'-'.$v['name'];
-
-            $file_path = saveImg($v['content'], $v['name']);
+            // 修改保存文件名称，避免覆盖
+            $file_name = $param['number'].'_'.$v['name'];
+            $file_path = saveImg($v['content'], $file_name);
 
             $attachmentsData = [
                 'CreationTime'=>$time,
