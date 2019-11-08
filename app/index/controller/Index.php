@@ -20,13 +20,21 @@ class Index extends IndexBase
 
     public function test(){
         $data = [
-            'uc'=>203,
-            'no'=>'A001'
+            'number'=>'A001',
+            // 'oid'=>'V4B13AIB01690003504004'
+            'attachments'=>[
+                ['name'=>'head.JPG', 'content'=>'asdfasdfasd'],
+                ['name'=>'fingerprint.JPG', 'content'=>'asdfasdfasd……'],
+            ]
+
         ];
-        $url = 'http://xiaoai.mamitianshi.com/queueUrlToShort';
-        $response = $this->formPost($url, $data);
+        $url = 'http://workstation.mamitianshi.com/api/queue/push';
+        // $url = 'http://192.168.1.120:21022/api/queue/push';
+        // $response = $this->formPost($url, $data);
+        $response = httpsPost($url, json_encode($data));
         dump($response);
     }
+
     /**
      * 工作台首页
      * create by fjw in 19.9.28
