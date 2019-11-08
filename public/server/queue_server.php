@@ -46,15 +46,16 @@ use Workerman\Lib\Timer;
 /**
  * 数据库连接
  */
-// $db_servername = "192.168.1.250";
-// $db_username = "root";
-// $db_password = "ruitong2019";
-// $db_name = "rtdb";
-
-$db_servername = "127.0.0.1";
-$db_username = "root";
-$db_password = "19920104";
-$db_name = "rt_workstation";
+$db_config = [];
+if(file_exists(__DIR__ . '/../../app/database.php')){
+    $db_config = require_once __DIR__ . '/../../app/database.php';
+}else{
+    serverLog('数据库配置文件 database.php 文件不存在');
+}
+$db_servername = $db_config['hostname']; //"127.0.0.1";
+$db_username = $db_config['username']; //"root";
+$db_password = $db_config['password']; //"19920104";
+$db_name = $db_config['database']; //"rt_workstation";
 
 // 创建连接
 
