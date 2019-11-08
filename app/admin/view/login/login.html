@@ -1,60 +1,153 @@
-{include file="layout/top"/}
-<body class="hold-transition login-page admin-login-body-background">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>登录 - 爱纳吉</title>
+    <meta name="keywords" content="登录 - 爱纳吉"/>
+    <meta name="description" content="登录 - 爱纳吉" />
     
-<script src="__STATIC__/module/admin/ext/background/login_background.js"></script>
+    <script type="text/javascript" src="__STATIC__/module/common/jquery/jquery-2.0.3.min.js"></script>
+    <link href="__STATIC__/module/common/layui-v2.4.5/layui/css/layui.css" rel="stylesheet">
+    <link href="__STATIC__/module/common/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script type="text/javascript" src="__STATIC__/module/common/layui-v2.4.5/layui/layui.js"></script>
+    <link rel="stylesheet" href="__STATIC__/module/common/toastr/toastr.min.css">
+    <link rel="stylesheet" href="__STATIC__/module/admin/ext/btnloading/dist/ladda-themeless.min.css">
+    <script src="__STATIC__/module/admin/ext/jquerypjax/jquery.pjax.js"></script>
+    <script src="__STATIC__/module/admin/js/init.js"></script>
 
-<canvas></canvas>
+    <style>
 
-<div class="admin-login-box">
-  <div class="login-logo">
-      <a href="" class="login-logo-a"><b>One</b>Base</a>
-  </div>
+    /* 布局 */
+    .f_l{float: left;}
+    .f_r{float: right;}
+    .t_c{text-align: center;}
+    .t_l{text-align: left;}
+    .t_r{text-align: right;}
+    .of_h{overflow: hidden;}
+    .hidden{display: none!important;}
 
-  <!-- /.login-logo -->
-  <div class="login-box-body">
-    <p class="login-box-msg">请输入您的登录信息</p>
+    .fixed{position: fixed;}
+    .fixed-all-screen{
+        position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+    }
 
-    <form action="{:url('loginHandle')}" method="post" class="admin-login-form">
-      <div class="form-group has-feedback">
-          <input type="text" name="username" class="form-control" placeholder="请输入您的用户名">
-           <span class="glyphicon glyphicon-user form-control-feedback"></span>
-      </div>
-      <div class="form-group has-feedback">
-           <input type="password" name="password" class="form-control" placeholder="请输入您的密码">
-           <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-      </div>
-        
-        <div>
-            <img src="{:captcha_src()}" alt="captcha" class="admin-login-captcha-img captcha_change" id="captcha_img"/>
-        </div>
-        <br/>
-      <div class="row">
-        <div class="col-xs-8">
-          <input type="text" name="verify" class="form-control verify" placeholder="请输入您的验证码">
-          <span class="glyphicon glyphicon-open form-control-feedback admin-login-captcha-input-icon"></span>
-        </div>
-        <!-- /.col -->
-        <div class="col-xs-4">
-          <button type="button" class="btn btn-primary btn-block btn-flat captcha_change">换一张</button>
-        </div>
-        <!-- /.col -->
-      </div>
+    .active{background: #20c997; color: #fff;}
+    #menu-active{color: #20c997!important;}
+    .abs_btm_btn{position: absolute; bottom: 0; left: 0; }
+    /* 颜色 */
+    .main-bg-color{background-color: #2AC7B2!important;}
+    .main-font-color{color: #2AC7B2!important;}
+    .layui-form-onswitch{
+        border-color: #2AC7B2!important;
+        background-color: #2AC7B2!important;
+    }
 
-        <div class="social-auth-links text-center">
-            
-          <button  type="submit" class="btn btn-block btn-facebook ladda-button login-submit-button" data-style="slide-up">
-              <span class="ladda-label">登 录</span>
-          </button>
-            
-          <!--<button  type="button" class="btn btn-block btn-google btn-flat">忘记密码</button>-->
+    .c3{color: #333;}
+    .c6{color: #666;}
+    .c9{color: #999;}
+    .cf{color: #fff;}
+    .bg_f{background: #fff;}
+
+    .c_green{color: #20c997;}
+
+</style>
+
+
+<link href="__STATIC__/module/index/css/imitate.css" rel="stylesheet">
+</head>
+<body>
+<div id="biggest-container" style="position: fixed; top: 0;  bottom: 0; left: 0; right: 0; background: #fff;">
+    <!-- <div id="imitate-container"> -->
+
+<style>
+    .login-page-bg{
+        padding: 82px 0 24px;
+        background-image: url(https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg);
+    }
+    .login-page-bg .login-title{
+        font-size: 20px; font-weight: 800;
+        margin: 20px 0 35px;
+    }
+    .login-input-box{
+        background-color: #e8f0fe;
+        height: 40px;   width: 368px;
+        margin: 0 auto; border: 1px solid #f0f0f0;
+        border-radius: 3px; line-height: 39.99px;
+        padding: 0px 10px;
+    }
+    .login-icon{
+        color: #999;
+    }
+    .login-input-box input{
+        border: 0; background-color: inherit;
+        width: 330px;  margin-left: 10px;
+    }
+    /* i{margin: 0 5px;} */
+    .action{
+        display: inline-block;
+        font-style: normal;
+        vertical-align: -0.125em;
+        text-align: center;
+        text-transform: none;
+        line-height: 0;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+    }
+    .action svg{
+        display: inline-block;
+    }
+</style>
+<div class="login-page-bg fixed-all-screen">
+    
+    <div class=" t_c">
+        <img class="h55" src="/static/assets/logo-color.svg">
+    </div>
+    <div class="login-title t_c main-font-color">
+        爱纳吉疫苗接种门诊系统
+    </div>
+    <form class="layui-form admin-login-form" method="post" action="{:url('loginHandle')}">
+        <div class="layui-card" style="margin: 0 auto; width: 420px; ">
+            <div class="layui-card-body">
+                <div class="layui-form-item login-input-box t_l">
+                    <span class="layui-icon login-icon layui-icon-username"></span>
+                    <input type="text" maxlength="11" name="username" placeholder="请输入账号" required >
+                </div>
+                <br>
+                <div class="layui-form-item login-input-box t_l">
+                    <span class="layui-icon login-icon layui-icon-auz"></span>
+                    <input type="password"  name="password" placeholder="请输入密码" required >
+                </div>
+                <br>
+
+                <button type="submit" class="btn btn-block btn-facebook layui-btn main-bg-color btn-facebook ladda-button login-submit-button" style="width: 388px;" data-style="slide-up"><span class="ladda-label">登 录</span></button>
+                
+                <div class="t_c" style="margin-top: 40px; font-size: 14px; color: rgba(0,0,0, .45);">
+                        Copyright
+                        &nbsp;
+                        <i  class="anticon anticon-copyright"><svg viewBox="64 64 896 896" fill="currentColor" width="1em" height="1em" data-icon="copyright" aria-hidden="true"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372zm5.6-532.7c53 0 89 33.8 93 83.4.3 4.2 3.8 7.4 8 7.4h56.7c2.6 0 4.7-2.1 4.7-4.7 0-86.7-68.4-147.4-162.7-147.4C407.4 290 344 364.2 344 486.8v52.3C344 660.8 407.4 734 517.3 734c94 0 162.7-58.8 162.7-141.4 0-2.6-2.1-4.7-4.7-4.7h-56.8c-4.2 0-7.6 3.2-8 7.3-4.2 46.1-40.1 77.8-93 77.8-65.3 0-102.1-47.9-102.1-133.6v-52.6c.1-87 37-135.5 102.2-135.5z"></path></svg></i>
+                        &nbsp;
+                        2019
+                        <span class="main-font-color">爱纳吉</span>
+                    </div>
+            </div>
         </div>
     </form>
 
-    <!-- /.social-auth-links -->
-    <!--<a href="#">找回密码</a><br>-->
+    
 
-  </div>
-  <!-- /.login-box-body -->
 </div>
-<!-- /.login-box -->
-{include file="layout/bottom"/}
+
+</div>
+
+<script src="__STATIC__/module/common/toastr/toastr.min.js"></script>
+<script src="__STATIC__/module/admin/ext/btnloading/dist/spin.min.js"></script>
+<script src="__STATIC__/module/admin/ext/btnloading/dist/ladda.min.js"></script>
+<script src="__STATIC__/module/admin/ext/remodal/remodal.min.js"></script>
+<script src="__STATIC__/module/admin/ext/adminlte/plugins/iCheck/icheck.min.js"></script>
+<script src="__STATIC__/module/admin/js/onebase.js"></script>
+<link rel="stylesheet" href="__STATIC__/module/admin/css/ob_skin.css">
+
+<script type="text/javascript" src="__STATIC__/module/index/js/footer.js"></script>
+</body>
+</html>

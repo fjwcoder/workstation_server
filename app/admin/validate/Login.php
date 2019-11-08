@@ -37,6 +37,7 @@ class Login extends AdminBase
     // 应用场景
     protected $scene = [
         
-        'admin'   =>  ['username','password', 'verify'],
+        'admin'   =>  ['username','password'],
+        // 'admin'   =>  ['username','password', 'verify'],
     ];
 }
