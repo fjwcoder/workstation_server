@@ -64,7 +64,8 @@ class AuthGroupAccess extends AdminBase
         
         if (IS_ROOT) {
             
-            return $this->logicMenu->getMenuList(['is_hide' => 0], true, $sort);
+            return $this->logicMenu->getMenuList([], true, $sort);
+            // return $this->logicMenu->getMenuList(['is_hide' => 0], true, $sort);
         }
         
         // 获取用户组列表

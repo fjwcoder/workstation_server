@@ -15,21 +15,28 @@ class Vaccinations extends AdminBase
      */
     public function getWaitingList($where = [], $field = true, $order = '', $paginate = 1, $limit = 15)
     {
+        empty($where['Number']) ? $isNum = false : $isNum = true;
 
         $where['VaccinationDate'] = ['like', '%'.NOW_DATE.'%'];
         $where['State'] = 0;
-
-        $where['Number'] = ['like', '%V%'];
+        if($isNum == false){
+            $where['Number'] = ['like', '%V%'];
+        }
         // $Vlist = $this->modelVaccinations->getList($where, $field, $order, $paginate);
         $Vlist = Db::name('vaccinations')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
         // dump($Vlist);
-
-        $where['Number'] = ['like', '%A%'];
+        if($isNum == false){
+            $where['Number'] = ['like', '%A%'];
+        }
         // $Alist = $this->modelVaccinations->getList($where, $field, $order, $paginate);
         $Alist = Db::name('vaccinations')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
         // dump($Alist);
 
-        $list = array_merge($Vlist,$Alist);
+        if($isNum == true){
+            $list = array_unique(array_merge($Vlist,$Alist), SORT_REGULAR);
+        }else{
+            $list = array_merge($Vlist,$Alist);
+        }
 
         return $list;
     }
@@ -264,18 +271,30 @@ class Vaccinations extends AdminBase
     public function getInoculationList($where = [], $field = true, $order = '', $paginate = 1, $limit = 15)
     {
 
+        empty($where['Number']) ? $isNum = false : $isNum = true;
+
         $where['v.RegistrationFinishTime'] = ['like', '%'.NOW_DATE.'%'];
         $where['v.State'] = 1;
 
         // 预约列表
-        $where['Number'] = ['like', '%V%'];
+        if($isNum == false){
+            $where['Number'] = ['like', '%V%'];
+        }
         $Vlist = Db::name('vaccinations')->alias('v')->join('childs c','v.ChildId = c.Id','LEFT')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
         // 本地取号列表
-        $where['Number'] = ['like', '%A%'];
+        if($isNum == false){
+            $where['Number'] = ['like', '%A%'];
+        }
         $Alist = Db::name('vaccinations')->alias('v')->join('childs c','v.ChildId = c.Id','LEFT')->where($where)->field($field)->order($order)->limit($limit)->page($paginate)->select();
         // dump($Alist);
 
-        $list = array_merge($Vlist,$Alist);
+        if($isNum == true){
+            $list = array_unique(array_merge($Vlist,$Alist), SORT_REGULAR);
+        }else{
+            $list = array_merge($Vlist,$Alist);
+        }
+
+        
 
         return $list;
 

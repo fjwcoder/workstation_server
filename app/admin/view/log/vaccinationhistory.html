@@ -32,11 +32,7 @@
 </div>
 
 <script>
-    let searchData = {};
-
-    if(searchData.search_data !== undefined){
-        $('input[name="search_data"]').val(searchData.search_data);
-    }
+    
 
     layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
         var table = layui.table,
@@ -44,6 +40,12 @@
         layer = layui.layer,
         laydate = layui.laydate,
         $ = layui.jquery;
+
+        let searchData = {};
+
+        if(searchData.search_data !== undefined){
+            $('input[name="search_data"]').val(searchData.search_data);
+        }
 
         // 数据表格
         table.render({

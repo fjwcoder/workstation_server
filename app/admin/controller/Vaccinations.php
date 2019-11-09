@@ -91,7 +91,7 @@ class Vaccinations extends AdminBase
 
         $data = $this->param;
 
-        !empty($data['search_data']) && $where['Number'] = ['like', '%'.$data['search_data'].'%'];
+        !empty($data['search_data']) && $where['Number'] = ['like', '%'.trim($data['search_data']).'%'];
 
         $paginate = !empty($data['page']) ? $data['page'] : 1;
         $limit = !empty($data['limit']) ? $data['limit'] : 15;
@@ -125,7 +125,7 @@ class Vaccinations extends AdminBase
 
         $data = $this->param;
 
-        !empty($data['search_data']) && $where['Number'] = ['like', '%'.$data['search_data'].'%'];
+        !empty($data['search_data']) && $where['v.Number|c.Name'] = ['like', '%'.trim($data['search_data']).'%'];
 
         $this->assign('list',$this->logicVaccinations->observationList($where));
 
@@ -162,7 +162,7 @@ class Vaccinations extends AdminBase
 
         $data = $this->param;
 
-        !empty($data['search_data']) && $where['c.Name|c.CardNo'] = ['like', '%'.$data['search_data'].'%'];
+        !empty($data['search_data']) && $where['v.Number|c.Name|c.CardNo'] = ['like', '%'.trim($data['search_data']).'%'];
 
         $paginate = 15;
 

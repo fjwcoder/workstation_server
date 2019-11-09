@@ -5,14 +5,14 @@
           <div class="row">
               <div class="col-sm-5">
                   <button type="button" class="btn btn-refresh btn-sm">刷新</button>
-                  <script> $('.btn-refresh').click(function(){ window.location.reload(); }); </script>
+                  <script> $('.btn-refresh').click(function(){ window.location.href ='{:url("observerList")}'; }); </script>
               </div>
               
               <div class="col-sm-7">
                   <div class="box-tools search-form pull-right">
                       <div class="input-group input-group-sm">
                           
-                          <input type="text" name="search_data" style="width: 200px;" class="form-control pull-right" value="{:input('search_data')}" placeholder="请输入号码">
+                          <input type="text" name="search_data" style="width: 200px;" class="form-control pull-right" value="{:input('search_data')}" placeholder="请输入号码|姓名">
       
                           <div class="input-group-btn">
                             <button type="button" id="search"  url="{:url('observerList')}" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
@@ -56,7 +56,7 @@
           </table>
         </div>
       
-        <div class="box-footer clearfix text-center">
+        <div class=" clearfix text-center"><!-- 去掉样式 box-footer -->
             {$list->render()}
         </div>
       

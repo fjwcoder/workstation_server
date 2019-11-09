@@ -22,7 +22,7 @@ class Users extends ValidateBase
     protected $message = [
         'UserName.require'    => '请输入账号',
         'UserName.unique'    => '账号已存在',
-        'UserName.alphaNum' =>'用户名只能是字符或数字',
+        'UserName.alphaNum' =>'账号只能是字符或数字',
         'md5_password.require'    => '请输入密码',
         'md5_password.length'    => '密码长度为6-12位',
         'Name.require'    => '请输入昵称',

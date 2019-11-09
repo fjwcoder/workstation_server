@@ -4,22 +4,22 @@
         <table class="layui-hide" id="test" lay-filter="test"></table>
 
         <script type="text/html" id="toolbarDemo">
-                <div class="row">
-                    <div class="col-sm-5">
-                        <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="refresh">刷新</button>
-                    </div>
-                    
-                    <div class="col-sm-7">
-                        <div class="box-tools search-form pull-right">
-                            <div class="input-group input-group-sm">
-                                <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="请输入号码">
-                                <div class="input-group-btn">
-                                    <button type="button" id="search" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
-                                </div>
+            <div class="row">
+                <div class="col-sm-5">
+                    <button class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="refresh">刷新</button>
+                </div>
+                
+                <div class="col-sm-7">
+                    <div class="box-tools search-form pull-right">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="请输入号码">
+                            <div class="input-group-btn">
+                                <button type="button" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
         </script>
 
         <script type="text/html" id="barDemo">
@@ -32,11 +32,7 @@
 </div>
 
 <script>
-    let searchData = {};
-
-    if(searchData.search_data !== undefined){
-        $('input[name="search_data"]').val(searchData.search_data);
-    }
+    
 
     layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
         var table = layui.table,
@@ -44,6 +40,12 @@
         layer = layui.layer,
         laydate = layui.laydate,
         $ = layui.jquery;
+
+        let searchData = {};
+
+        if(searchData.search_data !== undefined){
+            $('input[name="search_data"]').val(searchData.search_data);
+        }
 
         // 数据表格
         table.render({
@@ -101,7 +103,11 @@
             } else if(layEvent == 'searchData'){
                 
                 searchData.search_data = $('input[name="search_data"]').val();
-                
+                // console.log(searchData)
+                if(searchData.search_data == ''){
+                    layer.msg('请输入号码');
+                    return false;
+                }
                 table.reload('test', {
                     url:'{:url("vaccinations/getWaitingList")}',
 

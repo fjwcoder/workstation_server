@@ -37,12 +37,7 @@
 </div>
 
 <script>
-    let searchData = {};
-    let authList = {};
-
-    if(searchData.search_data !== undefined){
-        $('input[name="search_data"]').val(searchData.search_data);
-    }
+    
 
     layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
         var table = layui.table,
@@ -50,6 +45,13 @@
         layer = layui.layer,
         laydate = layui.laydate,
         $ = layui.jquery;
+
+        let searchData = {};
+        let authList = {};
+
+        if(searchData.search_data !== undefined){
+            $('input[name="search_data"]').val(searchData.search_data);
+        }
 
         $.post('{:url("auth/getAuthList")}','',function(res){
             authList = res;

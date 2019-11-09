@@ -12,7 +12,7 @@
                 <div class="col-sm-7">
                     <div class="box-tools search-form pull-right">
                         <div class="input-group input-group-sm">
-                            <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="姓名或卡号">
+                            <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="号码|姓名|卡号">
                             <div class="input-group-btn">
                                 <button type="button" id="search" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
                             </div>
@@ -32,11 +32,7 @@
 </div>
 
 <script>
-    let searchData = {};
-
-    if(searchData.search_data !== undefined){
-        $('input[name="search_data"]').val(searchData.search_data);
-    }
+    
 
     layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
         var table = layui.table,
@@ -44,6 +40,12 @@
         layer = layui.layer,
         laydate = layui.laydate,
         $ = layui.jquery;
+
+        let searchData = {};
+
+        if(searchData.search_data !== undefined){
+            $('input[name="search_data"]').val(searchData.search_data);
+        }
 
         // 数据表格
         table.render({

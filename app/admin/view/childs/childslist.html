@@ -15,7 +15,7 @@
                         <div class="input-group input-group-sm">
                             <input type="text" name="search_data" style="width: 150px;" class="form-control pull-right" placeholder="姓名|卡号|手机号">
                             <div class="input-group-btn">
-                                <button type="button" id="search" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
+                                <button type="button" class="layui-btn layui-btn-sm un-btn-bg-color" lay-event="searchData"><i class="fa fa-search"></i></button>
                             </div>
                         </div>
                     </div>
@@ -37,7 +37,7 @@
 </div>
 
 <script>
-    let searchData = {};
+    
 
     layui.use(['table', 'form', 'layer', 'laydate','jquery'], function () {
         var table = layui.table,
@@ -45,6 +45,8 @@
         layer = layui.layer,
         laydate = layui.laydate,
         $ = layui.jquery;
+
+        let searchData = {};
 
         // 数据表格
         table.render({
@@ -141,6 +143,7 @@
                     $.post('{:url("childs/delChilds")}',{Id:obj.data.Id},function(res){
                         if(res.code == 200){
                             obj.del();
+                            layer.msg(res.msg);
                             layer.close(index);
 
                         }else{

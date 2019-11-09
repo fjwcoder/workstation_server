@@ -162,8 +162,8 @@
                                                 <select class="layui-input un-select" name="VaccinationPosition">
                                                     <option value="左上臂" {if condition="$vo['VaccinationPosition'] == '左上臂'"}selected{/if}>左上臂</option>
                                                     <option value="右上臂" {if condition="$vo['VaccinationPosition'] == '右上臂'"}selected{/if}>右上臂</option>
-                                                    <option value="左臀" {if condition="$vo['VaccinationPosition'] == '左臀'"}selected{/if}>左臀</option>
-                                                    <option value="右臀" {if condition="$vo['VaccinationPosition'] == '右臀'"}selected{/if}>右臀</option>
+                                                    <option value="左臀部" {if condition="$vo['VaccinationPosition'] == '左臀部'"}selected{/if}>左臀部</option>
+                                                    <option value="右臀部" {if condition="$vo['VaccinationPosition'] == '右臀部'"}selected{/if}>右臀部</option>
                                                     <option value="左大腿" {if condition="$vo['VaccinationPosition'] == '左大腿'"}selected{/if}>左大腿</option>
                                                     <option value="右大腿" {if condition="$vo['VaccinationPosition'] == '右大腿'"}selected{/if}>右大腿</option>
                                                     <option value="口服" {if condition="$vo['VaccinationPosition'] == '口服'"}selected{/if}>口服</option>
@@ -324,7 +324,7 @@
             // 添加 tr
             $('.add_vaccination').on('click',function(){
 
-                html = '<tr><td style="display: none;"><input type="hidden" name="Id" value="0"></td><td><select class="layui-input un-select" name="VaccineId"><option value="0">请选择</option>{volist name="info.vaccines" id="vo"}<option value="{$vo.Id}">{$vo.ShortName}</option>{/volist}</select></td><td><input class="layui-input" type="text" name="Times" value="1"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company"></td><td><select class="layui-input un-select" name="VaccinationPosition"><option value="0">请选择接种部位</option><option value="左上臂">左上臂</option><option value="右上臂">右上臂</option><option value="左臀">左臀</option><option value="右臀">右臀</option><option value="左大腿">左大腿</option><option value="右大腿">右大腿</option><option value="口服">口服</option></select></td><td><input type="checkbox" lay-skin="primary" name="IsFree" value="1"></td><td><a class="del_vaccination" id="0">删除</a></td></tr>';
+                html = '<tr><td style="display: none;"><input type="hidden" name="Id" value="0"></td><td><select class="layui-input un-select" name="VaccineId"><option value="0">请选择</option>{volist name="info.vaccines" id="vo"}<option value="{$vo.Id}">{$vo.ShortName}</option>{/volist}</select></td><td><input class="layui-input" type="text" name="Times" value="1"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗批号" name="LotNumber"></td><td><input class="layui-input" type="text" placeholder="请填写疫苗公司" name="Company"></td><td><select class="layui-input un-select" name="VaccinationPosition"><option value="0">请选择接种部位</option><option value="左上臂">左上臂</option><option value="右上臂">右上臂</option><option value="左臀部">左臀部</option><option value="右臀部">右臀部</option><option value="左大腿">左大腿</option><option value="右大腿">右大腿</option><option value="口服">口服</option></select></td><td><input type="checkbox" lay-skin="primary" name="IsFree" value="1"></td><td><a class="del_vaccination" id="0">删除</a></td></tr>';
 
                 // <td><input class="layui-input" type="text" placeholder="请填写接种地址" name="VaccinationPlace"></td>
                 // <input class="layui-input" type="text" placeholder="请填写接种部位" name="VaccinationPosition">
@@ -531,18 +531,18 @@
                         layer.msg('暂无该卡号信息，请先填写儿童信息');
 
                     }else{
-                        
+
                         inputChildId.val(res.Id);
                         
                         inputMobile.val(res.Mobile);
                         inputParentName.val(res.ParentName);
                         inputName.val(res.Name);
-                        var str = res.BirthDate;
-                        var m =str.length;
-                        var n = str.indexOf(' ');
-                        var j = str.substring(n,m);
-                        var BirthDate = str.replace(j,'');
-                        inputBirthDate.val(BirthDate);
+                        // var str = res.BirthDate;
+                        // var m =str.length;
+                        // var n = str.indexOf(' ');
+                        // var j = str.substring(n,m);
+                        // var BirthDate = str.replace(j,'');
+                        inputBirthDate.val(res.BirthDate);
                         textareaAddress.val(res.Address);
                         // $('input[name="Sex"]').val(res.Sex);
                         if(res.Sex === 1){

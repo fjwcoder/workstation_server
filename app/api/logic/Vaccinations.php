@@ -116,9 +116,10 @@ class Vaccinations extends ApiBase
             // 对接种流水表继续修改数据
             Db::name('vaccinations')->where($where)->update($data);
             // 修改接种位置
-            // foreach ($param as $k => $v) {
-            //     Db::name('vaccinationdetails')->where(['VaccinationId'=>$param['Id'],'VaccineId'=>$k])->update(['VaccinationPosition'=>$v]);
-            // }
+            $v_list = json_decode(html_entity_decode(htmlspecialchars_decode($param['v_list'])),true);
+            foreach ($v_list as $k => $v) {
+                Db::name('vaccinationdetails')->where(['VaccinationId'=>$param['Id'],'VaccineId'=>$k])->update(['VaccinationPosition'=>$v]);
+            }
 
             // 接种疫苗列表
             $vaccine_list = [];

@@ -22,8 +22,8 @@ class Auth extends AdminBase
      */
     public function groupList()
     {
-        
-        $this->assign('list', $this->logicAuthGroup->getAuthGroupList(['member_id' => MEMBER_ID], true, '', DB_LIST_ROWS));
+        // MEMBER_ID
+        $this->assign('list', $this->logicAuthGroup->getAuthGroupList(['member_id' => 1], true, '', DB_LIST_ROWS));
         
         return $this->fetch('group_list');
     }
