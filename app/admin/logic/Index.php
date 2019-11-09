@@ -19,7 +19,7 @@ class Index extends AdminBase
     {
 
         $where = [
-            'CreationTime'=>['like', '%'.NOW_DATE.'%'],
+            'VaccinationDate'=>['like', '%'.NOW_DATE.'%'],
         ];
 
         // 取号
@@ -38,11 +38,14 @@ class Index extends AdminBase
         $data['completeNumber'] = $this->modelVaccinations->stat($where,'count','Id');
 
         // 留观队列
-        $where['State'] = 3;
+        // $where['State'] = 3;
+        $d_time = date('Y-m-d H:i:s',time() - 1800);
+        $where['VaccinationFinishTime'] = ['>=',$d_time];
         $data['observerNumber'] = $this->modelVaccinations->stat($where,'count','Id');
 
         // 今日完成
-        $where['State'] = 4;
+        // $where['State'] = 4;
+        unset($where['VaccinationFinishTime']);
         $data['finishedNumber'] = $this->modelVaccinations->stat($where,'count','Id');
 
         return $data;
