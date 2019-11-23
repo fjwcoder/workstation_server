@@ -328,33 +328,36 @@
 
             // 点击完成 / 完成并下一位 按钮
             $('.submit').on('click',function(){
-                var noNext = $(this).attr('data');
+                // var noNext = $(this).attr('data');
                 $('.fakeloader').show();
                 var ConsultationRoom = $('input[name="ConsultationRoom"]').val();
                 var Id = $('input[name="Id"]').val();
-                var State = $(this).attr('State');
+                // var State = $(this).attr('State');
+                var status = $(this).attr('data');
 
                 data = {
                     Id:Id,
-                    State:State,
+                    VaccinationUserId:'{$member_info.Id}',
+                    status:status,
                     ConsultationRoom:ConsultationRoom,
-                    noNext:noNext
+                    // noNext:noNext
                 };
 
                 layer.confirm("确定要完成吗？建议接种台完成!!!", {icon: 3, title:'提示'}, function(index){
                 
-                    $.post('{:url("Vaccinations/setInjectVaccineComplete")}',data,function(res){
-                        if(res.code == 200){
-                            if(noNext == 2){
-                                if(res.data.code == 200){
-                                    layer.msg(res.msg,{icon:1});
-                                    setTimeout('window.location.href = "{:url()}?Id="+'+res.data.msg, 500);
-                                    return false;
-                                }else{
-                                    $('.fakeloader').hide();
-                                    layer.msg(res.data.msg,{icon:1});
-                                    return false;
-                                }
+                    // $.post('{:url("Vaccinations/setInjectVaccineComplete")}',data,function(res){
+                    $.post('/api.php/Vaccinations/completeInject',data,function(res){
+                        // console.log(res)
+                        // return false
+                        if(res.code == 44444){
+                            layer.msg('接种成功，没有下一个了',{icon:1});
+                            $('.fakeloader').hide();
+                            layer.close(index);
+                        }else if(res.code == 200){
+                            if(status == 2){
+                                layer.msg(res.msg,{icon:1});
+                                setTimeout('window.location.href = "{:url()}?Id='+res.data.Id+'"', 500);
+                                return false;
                             }
                             $('.fakeloader').hide();
                             layer.msg(res.msg,{icon:1});

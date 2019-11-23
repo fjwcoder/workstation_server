@@ -90,7 +90,7 @@ class Vaccinations extends ApiBase
             'Id'=>$param['Id'],
         ];
         // 当前接种流水信息
-        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State,appointment_order')->find();
         if($vInfo['State'] >= 2){
             return [API_CODE_NAME => 40001, API_MSG_NAME => '请勿重复操作'];
         }
@@ -98,13 +98,6 @@ class Vaccinations extends ApiBase
         // 启动事务
         Db::startTrans();
         try{
-            
-            // 判断是不是预约订单
-            $app_result = $this->editOrderInfo($param['Id'], 3);
-
-            if($app_result === false){
-                return [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
-            }
 
             // 接种流水数据 完成时间 接种用户Id 接种台名称
             $data = [
@@ -112,21 +105,24 @@ class Vaccinations extends ApiBase
                 'VaccinationUserId'=>$param['VaccinationUserId'],
                 'ConsultationRoom'=>!empty($param['ConsultationRoom'])? $param['ConsultationRoom']:'',
                 'State'=>4,
+                'electronSuperviseCode'=> !empty($param['escode']) ? $param['escode'] : '', // 电子监管码
             ];
             // 对接种流水表继续修改数据
             Db::name('vaccinations')->where($where)->update($data);
             // 修改接种位置
-            $v_list = json_decode(html_entity_decode(htmlspecialchars_decode($param['v_list'])),true);
-            foreach ($v_list as $k => $v) {
-                Db::name('vaccinationdetails')->where(['VaccinationId'=>$param['Id'],'VaccineId'=>$k])->update(['VaccinationPosition'=>$v]);
+            if(!empty($param['v_list'])){
+                $v_list = json_decode(html_entity_decode(htmlspecialchars_decode($param['v_list'])),true);
+                foreach ($v_list as $k => $v) {
+                    Db::name('vaccinationdetails')->where(['VaccinationId'=>$param['Id'],'VaccineId'=>$k])->update(['VaccinationPosition'=>$v]);
+                }
             }
 
             // 接种疫苗列表
             $vaccine_list = [];
-            $v_where = ['VaccinationId'=>$param['Id']];
-            $field = 'VaccineId,Times,VaccinationDate,VaccinationPlace,LotNumber,Company,IsFree,VaccinationPosition,Flag';
-            $vaccine_list = Db::name('vaccinationdetails')->where($v_where)->field($field)->select();
-            $vaccine_json = json_encode($vaccine_list);
+            $v_where = ['a.VaccinationId'=>$param['Id']];
+            $field = 'a.VaccineId,a.Times,a.VaccinationDate,a.VaccinationPlace,a.LotNumber,a.Company,a.IsFree,a.VaccinationPosition,a.Flag,v.FullName,v.ShortName as vaccine_name';
+            $vaccine_list = Db::name('vaccinationdetails')->alias('a')->join('vaccines v','a.VaccineId = v.Id','LEFT')->where($v_where)->field($field)->select();
+            $vaccine_json = json_encode($vaccine_list,320);
             foreach ($vaccine_list as $k => $v) {
                 $vaccine_list[$k]['CreationTime']=$time;
                 $vaccine_list[$k]['IsDeleted']=0;
@@ -135,6 +131,14 @@ class Vaccinations extends ApiBase
             }
             // 把今天接种的疫苗插入到历史接种表中
             Db::name('childvaccines')->insertAll($vaccine_list);
+
+            // 判断是不是预约订单，是，返回预约订单id，添加失败，回滚事务
+            $app_result = $this->editOrderInfo($param['Id'], 3);
+            if($app_result === false){
+                // 回滚事务
+                Db::rollback();
+                return [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
+            }
 
             // 孩子信息
             $childInfo = Db::name('childs')->where(['Id'=>$vInfo['ChildId']])->find();
@@ -153,9 +157,11 @@ class Vaccinations extends ApiBase
                 'vaccine_list'=>$vaccine_json,
                 'sex'=>$childInfo['Sex'],
                 'birth_date' => $childInfo['BirthDate'],
-                'parent_info' => json_encode($parent_info),
+                'parent_info' => json_encode($parent_info,320),
                 'position_id'=>$position_id,
                 'room_name'=>$data['ConsultationRoom'],
+                'order_id'=>$vInfo['appointment_order'], // 是预约订单：预约订单id，不是为空
+                'escode'=>!empty($param['escode']) ? $param['escode'] : '', // 电子监管码
             ];
             // 把当前接种信息 添加到线上数据库中
             $refrigeratorUrl = Db::name('settings')->where(['Name'=>'App.refrigeratorUrl'])->value('Value');
@@ -171,6 +177,7 @@ class Vaccinations extends ApiBase
                     if(isset($nextData['code']) && $nextData['code'] == 44444){
                         // $nextData = [];
                         Db::commit();
+                        $result = true;
                         return [API_CODE_NAME => 44444, API_MSG_NAME => '接种成功']; 
                     }
                     

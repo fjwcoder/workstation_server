@@ -184,7 +184,14 @@
                 ,{field:'Company', title: '生产企业', align: 'center'}
                 ,{field:'VaccinationPosition', title: '接种部位', align: 'center'}
                 // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
-                ,{field:'IsFree', title: '免费',   align: 'center'} 
+                ,{field:'IsFree', title: '免费',   align: 'center',templet:function(d){
+                        if(d.IsFree == 0){
+                            return '不免费';
+                        }else{
+                            return '免费'
+                        }
+
+                    }}
             ]],
             parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
                 return {

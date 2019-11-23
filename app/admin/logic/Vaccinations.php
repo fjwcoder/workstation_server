@@ -471,7 +471,8 @@ class Vaccinations extends AdminBase
             'Id'=>$param['Id'],
         ];
         // 当前接种流水信息
-        $vInfo = Db::name('vaccinations')->where($where)->field('Id,Number,ChildId,State')->find();
+        $vInfoField = 'Id,Number,ChildId,State,appointment_order,electronSuperviseCode';
+        $vInfo = Db::name('vaccinations')->where($where)->field($vInfoField)->find();
         if($vInfo['State'] >= 2){
             return [API_CODE_NAME => 40001, API_MSG_NAME => '请勿重复操作'];
         }
@@ -479,13 +480,6 @@ class Vaccinations extends AdminBase
         // 启动事务
         Db::startTrans();
         try{
-            
-            // 判断是不是预约订单
-            $app_result = $this->editOrderInfo($param['Id'], 3);
-
-            if($app_result === false){
-                return [API_CODE_NAME => 400, API_MSG_NAME => '接种失败'];
-            }
 
             // 接种流水数据 完成时间 接种用户Id 接种台名称
             $data = [
@@ -504,7 +498,7 @@ class Vaccinations extends AdminBase
             $v_where = ['VaccinationId'=>$param['Id']];
             $field = 'VaccineId,Times,VaccinationDate,VaccinationPlace,LotNumber,Company,IsFree,VaccinationPosition,Flag';
             $vaccine_list = Db::name('vaccinationdetails')->where($v_where)->field($field)->select();
-            $vaccine_json = json_encode($vaccine_list);
+            $vaccine_json = json_encode($vaccine_list,320);
             foreach ($vaccine_list as $k => $v) {
                 $vaccine_list[$k]['CreationTime']=$time;
                 $vaccine_list[$k]['IsDeleted']=0;
@@ -513,6 +507,14 @@ class Vaccinations extends AdminBase
             }
             // 把今天接种的疫苗插入到历史接种表中
             Db::name('childvaccines')->insertAll($vaccine_list);
+
+            // 判断是不是预约订单，是，返回预约订单id，添加失败，回滚事务
+            $app_result = $this->editOrderInfo($param['Id'], 3);
+            if($app_result === false){
+                // 回滚事务
+                Db::rollback();
+                return [API_CODE_NAME => 40002, API_MSG_NAME => '接种失败'];
+            }
 
             // 孩子信息
             $childInfo = Db::name('childs')->where(['Id'=>$vInfo['ChildId']])->find();
@@ -531,9 +533,11 @@ class Vaccinations extends AdminBase
                 'vaccine_list'=>$vaccine_json,
                 'sex'=>$childInfo['Sex'],
                 'birth_date' => $childInfo['BirthDate'],
-                'parent_info' => json_encode($parent_info),
+                'parent_info' => json_encode($parent_info,320),
                 'position_id'=>$position_id,
                 'room_name'=>$data['ConsultationRoom'],
+                'order_id'=>$vInfo['appointment_order'], // 是预约订单：预约订单id，不是为空
+                'escode'=>$vInfo['electronSuperviseCode'], // 电子监管码
             ];
             // 把当前接种信息 添加到线上数据库中
             $refrigeratorUrl = Db::name('settings')->where(['Name'=>'App.refrigeratorUrl'])->value('Value');
@@ -720,16 +724,21 @@ class Vaccinations extends AdminBase
     {
         if(empty($param['Id'])) return ['code'=>400,'msg'=>'参数错误'];
 
-        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State,VaccinationDate,RegistrationFinishTime,VaccinationFinishTime');
+        // 当前接种流水的查询字段
+        $vField = 'Id,Number,State,CreationTime,VaccinationDate,RegistrationFinishTime,VaccinationFinishTime';
+        // 当前的接种流水的信息
+        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']], $vField);
 
+        // 上一个的查询字段
         $field = 'Id';
-
+        // 上一个的查询条件
         $where = [
-            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
-            'State'=>$param['State'],
-            'Number'=>reNumO($vInfo['Number']),
+            'CreationTime' => ['like', '%'.NOW_DATE.'%'], // 创建时间是当天的
+            'State'=>$param['State'], // 根据传过来的State判断是登记队列或者接种队列
+            'Number'=>reNumO($vInfo['Number']), // 根据当前结婚总流水信息判断当前接种流水的Number开头字母
         ];
 
+        // 如果是登记队列，按照VaccinationDate排序，如果是接种队列，按照RegistrationFinishTime排序
         if($param['State'] == 0){
             $vdate = 'VaccinationDate';
             $order = $vdate.' desc';
@@ -737,25 +746,27 @@ class Vaccinations extends AdminBase
             $vdate = 'RegistrationFinishTime';
             $order = $vdate.' desc';
         }
-
+        // 上一个的查询条件，比当前的时间早
         $where[$vdate] = ['<', $vInfo[$vdate]];
-
-        // dump($where);
-        // dump($order);
-
-        $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
-
+        // 第一次查询上一个
+        $prev = Db::name('vaccinations')->where($where)->value($field);
+        // 如果第一次查询为空
         if($prev == null){
+            // 查询字段修改Number的第一个字母
             $where['Number'] = reNumT($vInfo['Number']);
+            // 删除时间大于小于的查询条件
             unset($where[$vdate]);
-            // $order = $vdate.' asc';
-            
+            // 第二次查询上一个
             $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
+            // 如果第二次查询为空
+            if($prev == null){
+                // 再次修改查询字段Number的第一个字母
+                $where['Number'] = reNumO($vInfo['Number']);
+                // 第三次查询上一个
+                $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
+            }
 
         }
-
-        // dump($prev);
-        // die;
 
         return $prev ? ['code'=>200,'msg'=>$prev] : ['code'=>400,'msg'=>'已经到第一位了!!!'];
 
@@ -770,16 +781,22 @@ class Vaccinations extends AdminBase
     {
         if(empty($param['Id'])) return ['code'=>400,'msg'=>'参数错误'];
 
-        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],'Id,Number,State,VaccinationDate,RegistrationFinishTime,VaccinationFinishTime');
+        // 当前接种流水的查询字段
+        $vField = 'Id,Number,State,CreationTime,VaccinationDate,RegistrationFinishTime,VaccinationFinishTime';
+        // 当前的接种流水的信息
+        $vInfo = $this->modelVaccinations->getInfo(['Id'=>$param['Id']],$vField);
 
+        // 下一个的查询字段
         $field = 'Id';
-
+        // 下一个的查询条件
         $where = [
-            'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'CreationTime' => ['like', '%'.NOW_DATE.'%'],
+            // 'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
             'State'=>$param['State'],
             'Number'=>reNumO($vInfo['Number']),
         ];
 
+        // 如果是登记队列，按照VaccinationDate排序，如果是接种队列，按照RegistrationFinishTime排序
         if($param['State'] == 0){
             $vdate = 'VaccinationDate';
             $order = $vdate.' asc';
@@ -787,16 +804,26 @@ class Vaccinations extends AdminBase
             $vdate = 'RegistrationFinishTime';
             $order = $vdate.' asc';
         }
-
+        // 下一个的查询条件，比当前的时间早
         $where[$vdate] = ['>', $vInfo[$vdate]];
-
+        // 第一次查询下一个
         $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
+        // 如果第一次查询为空
         if($next == null){
+            // 查询字段修改Number的第一个字母
             $where['Number'] = reNumT($vInfo['Number']);
+            // 删除时间大于小于的查询条件
             unset($where[$vdate]);
-            // $order = $vdate.' desc';
-            
+            // 第二次查询下一个
             $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
+            // 如果第二次查询为空
+            if($next == null){
+                // 再次修改查询字段Number的第一个字母
+                $where['Number'] = reNumO($vInfo['Number']);
+                // 第三次查询上一个
+                $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
+            }
+
         }
 
         return $next ? ['code'=>200,'msg'=>$next] : ['code'=>400,'msg'=>'已经到最后一位了!!!'];
