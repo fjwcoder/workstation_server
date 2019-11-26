@@ -134,6 +134,18 @@ class Queue extends ApiBase
         // 有孩子信息
         if($child_info){
             $data['ChildId'] = $child_info['Id'];
+
+            $child_new_data = [
+                'Name'=>$babyOrder['baby_name'],
+                // 'CardNo'=>$babyOrder['card_no'],
+                'Sex'=>$babyOrder['baby_sex'],
+                'BirthDate'=>$babyOrder['baby_birth_date'],
+                'ParentName'=>$babyOrder['father_name'],
+                'Address'=>$babyOrder['address_detail'],
+                'Mobile'=>$babyOrder['mobile'],
+            ];
+
+            Db::name('childs')->where('Id',$data['ChildId'])->update($child_new_data);
             
         }else{
         // 没有孩子信息
