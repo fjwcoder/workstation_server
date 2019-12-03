@@ -248,7 +248,7 @@
                     // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
                     ,{title: '免费',   align: 'center',templet:function(d){
                         if(d.IsFree == 0){
-                            return '不免费';
+                            return '收费';
                         }else{
                             return '免费'
                         }
@@ -350,7 +350,7 @@
                         // console.log(res)
                         // return false
                         if(res.code == 44444){
-                            layer.msg('接种成功，没有下一个了',{icon:1});
+                            layer.msg('接种成功，没有下一个了!',{icon:1});
                             $('.fakeloader').hide();
                             layer.close(index);
                         }else if(res.code == 200){

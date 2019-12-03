@@ -72,7 +72,7 @@
                                             <label class="layui-form-label" style="color:#666">电话：</label>
                                             <div class="layui-input-block">
                                                 <input type="text" name="Mobile" autocomplete="off"
-                                                    placeholder="请输入电话" class="layui-input" value="{$info['registerInfo']['Mobile']|default=''}">
+                                                    placeholder="请输入电话" class="layui-input" value="{$info['registerInfo']['Mobile']|default=''}" maxlength="11">
                                             </div>
                                         </div>
                                         <div class="layui-form-item">
@@ -297,7 +297,7 @@
                     // ,{field:'VaccinationPlace', title: '接种地址', align: 'center'} 
                     ,{title: '免费',   align: 'center',templet:function(d){
                         if(d.IsFree == 0){
-                            return '不免费';
+                            return '收费';
                         }else{
                             return '免费'
                         }
@@ -474,7 +474,7 @@
                                 return false;
                             }else{
                                 $('.fakeloader').hide();
-                                layer.msg(res.data.msg,{icon:2});
+                                layer.msg('登记完成，没有下一位了!',{icon:1});
                                 return false;
                             }
                         }
