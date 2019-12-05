@@ -17,22 +17,30 @@ namespace app\index\controller;
  */
 class Index extends IndexBase
 {
+   
+    /**
+     * socket 
+     */
 
     public function test(){
-        $data = [
-            'number'=>'A001',
-            // 'oid'=>'V4B13AIB01690003504004'
-            'attachments'=>[
-                ['name'=>'head.JPG', 'content'=>'asdfasdfasd'],
-                ['name'=>'fingerprint.JPG', 'content'=>'asdfasdfasd……'],
-            ]
+        // 指明给谁推送，为空表示向所有在线用户推送
+        $to_uid = 1001;
 
+        // 推送的url地址，使用自己的服务器地址
+        $push_api_url = "http://localhost:2121/";
+        $post_data = array(
+        "type" => "publish",
+        "content" => "这个是推送的测试数据",
+        "to" => $to_uid, 
+        );
+        $param = [
+            ['url'=>$push_api_url, 'data'=>$post_data],
+            ['url'=>$push_api_url, 'data'=>$post_data]
+            
         ];
-        $url = 'http://workstation.mamitianshi.com/api/queue/push';
-        // $url = 'http://192.168.1.120:21022/api/queue/push';
-        // $response = $this->formPost($url, $data);
-        $response = httpsPost($url, json_encode($data));
-        dump($response);
+        $ret = asyncCurl($param);
+        dump($ret);
+        
     }
 
     /**

@@ -10,6 +10,7 @@
 // +---------------------------------------------------------------------+
 use \rsa\RSA;
 use \aes\AES;
+use \http\AsyncCURL;
 /**
  * 应用公共扩展（函数）文件
  */
@@ -388,3 +389,13 @@ function aes_key(){
 }
 
 
+/**
+ * 异步发送curl
+ * add by fjw in 19.12.05
+ */
+function asyncCurl($param){
+    $ac = new AsyncCURL();
+    $ac->set_param($param);
+    $ret = $ac->send();
+    return $ret;
+}
