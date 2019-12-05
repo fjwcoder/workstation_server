@@ -173,11 +173,6 @@ class Vaccinations extends AdminBase
                 'State'=>1
             ];
 
-            $app_result = $this->editOrderInfo($param['Id'], 2);
-            if(!$app_result){
-                Db::rollback();
-            }
-
             Db::name('vaccinations')->where('Id',$param['Id'])->update($v_data);
 
             $where_v = [
@@ -230,9 +225,16 @@ class Vaccinations extends AdminBase
                 $nextId = $this->nextNumber(['Id'=>$param['Id'],'State'=>0]);
             }
 
-            // 提交事务
-            Db::commit();
-            $result = true;
+            // 判断是不是预约订单，是，修改线上预约订单状态
+            $app_result = $this->editOrderInfo($param['Id'], 2);
+            if($app_result === false){
+                Db::rollback();
+            }else{
+                // 提交事务
+                Db::commit();
+                $result = true;
+            }
+            
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -242,26 +244,26 @@ class Vaccinations extends AdminBase
 
 
 
-        $data = [
-            'Id' => $param['Id'],
-            'ChildId' => $param['ChildId'],
-            'WritingDesk' => $param['WritingDesk'],
-            'LastModificationTime' => $time,
-            'LastModifierUserId' => MEMBER_ID,
-            'RegistrantId' => MEMBER_ID,
-            'RegistrationFinishTime' => $time,
-            'RegistrantId' => MEMBER_ID,
-            'RegistrantId' => MEMBER_ID,
-            'State'=>1
-        ];
+        // $data = [
+        //     'Id' => $param['Id'],
+        //     'ChildId' => $param['ChildId'],
+        //     'WritingDesk' => $param['WritingDesk'],
+        //     'LastModificationTime' => $time,
+        //     'LastModifierUserId' => MEMBER_ID,
+        //     'RegistrantId' => MEMBER_ID,
+        //     'RegistrationFinishTime' => $time,
+        //     'RegistrantId' => MEMBER_ID,
+        //     'RegistrantId' => MEMBER_ID,
+        //     'State'=>1
+        // ];
 
-        $app_result = $this->editOrderInfo($param['Id'], 2);
+        // $app_result = $this->editOrderInfo($param['Id'], 2);
 
-        if($app_result){
-            $result = $this->modelVaccinations->setInfo($data);
-        }
+        // if($app_result){
+        //     $result = $this->modelVaccinations->setInfo($data);
+        // }
 
-        return $result ? ['code'=>200,'msg'=>'操作成功'] : ['code'=>400,'msg'=>'操作失败'];
+        // return $result ? ['code'=>200,'msg'=>'操作成功'] : ['code'=>400,'msg'=>'操作失败'];
     }
 
     

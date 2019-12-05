@@ -154,10 +154,10 @@
                     <div>
                     {empty name="info.category"}
                         <label class="margin-r-5"><input type="radio" name="category" value="1" checked> 免费</label>
-                        <label><input type="radio" name="category" value="2"> 不免费</label>
+                        <label><input type="radio" name="category" value="2"> 收费</label>
                     {else/}
                         <label class="margin-r-5"><input type="radio" name="category" value="1" {if condition="$info['category'] == 1"}checked{/if}> 免费</label>
-                        <label><input type="radio" name="category" value="2" {if condition="$info['category'] == 2"}checked{/if}> 不免费</label>
+                        <label><input type="radio" name="category" value="2" {if condition="$info['category'] == 2"}checked{/if}> 收费</label>
                     {/empty}
                     </div>
                 </div>
