@@ -25,7 +25,8 @@
         "qiniu/php-sdk": "^7.1",
         "aliyuncs/oss-sdk-php": "^2.3",
         "workerman/workerman-for-win": "^3.5",
-        "guzzlehttp/guzzle": "~6.0"
+        "guzzlehttp/guzzle": "~6.0",
+        "topthink/think-queue": "2.*"
     },
     "extra": {
         "think-path": "thinkphp"

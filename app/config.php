@@ -262,4 +262,13 @@ return [
         // 验证成功后是否重置
         'reset'    => true
     ],
+
+
+    'queue' =>  [
+        'connector' => 'Database',   // 数据库驱动
+        'expire'    => null,           // 任务的过期时间，默认为60秒; 若要禁用，则设置为 null
+        // 'default'   => 'default',    // 默认的队列名称
+        'table'     => 'queue',       // 存储消息的表名，不带前缀
+        'dsn'       => [],
+    ],
 ];
