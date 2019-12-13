@@ -5,64 +5,97 @@
 namespace app\common\logic;
 
 use think\queue\Job;
+use think\Db;
 
 class Queue {
 
 
-
-    /**
-       * fire方法是消息队列默认调用的方法
-       * @param Job            $job      当前的任务对象
-       * @param array|mixed    $data     发布任务时自定义的数据
-       */
-      public function fire(Job $job,$data){
-        // 如有必要,可以根据业务需求和数据库中的最新数据,判断该任务是否仍有必要执行.
-        $isJobStillNeedToBeDone = $this->checkDatabaseToSeeIfJobNeedToBeDone($data);
-        if(!$isJobStillNeedToBeDone){
-            $job->delete();
-            return;
+    // 添加到队列
+    public function addQueue($queueClassName, $queueName, $queueData, $max_interval = 5)
+    {
+        if($queueData['to_uid'] == 1001){
+            $queue_date['to_uid'] = 1001;
+            $queue_date['data'] = '请'.$queueData['name'].'到登机台'.$queueData['deskRoom'];
+        }elseif($queueData['to_uid'] == 1002){
+            $queue_date['to_uid'] = 1002;
+            $queue_date['data'] = '请'.$queueData['name'].'到接种室'.$queueData['deskRoom'];
         }
-      
-        $isJobDone = $this->doHelloJob($data);
-      
+        
+
+        $list = Db::name('queue')->where(['queue'=>$queueName])->count();
+        
+        if($list == 0){
+
+            $isPushed = \think\Queue::later($max_interval, $queueClassName, $queue_date, $queueName);
+
+        }else{
+
+            // 最后一个的执行时间
+            $p_time = Db::name('queue')->where(['queue'=>$queueName])->order('available_at desc')->value('available_at');
+
+            if(time() > $p_time+$max_interval){
+                $delayTime = $max_interval;
+            }else{
+                $delayTime = $p_time + $max_interval - time();
+            }
+            
+            $isPushed = \think\Queue::later($delayTime, $queueClassName, $queue_date, $queueName);
+        }
+
+        if($isPushed !== false){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+
+
+    // 叫号
+    public function callNumber(Job $job,$data)
+    {
+        $isJobDone = $this->doCallNumber($data);
+        // $job->delete();
         if ($isJobDone) {
             //如果任务执行成功， 记得删除任务
             $job->delete();
-            print("<info>Hello Job has been done and deleted"."</info>\n");
         }else{
-            if ($job->attempts() > 3) {
+            if($job->attempts() > 3){
                 //通过这个方法可以检查这个任务已经重试了几次了
-                print("<warn>Hello Job has been retried more than 3 times!"."</warn>\n");
                 $job->delete();
                 // 也可以重新发布这个任务
-                //print("<info>Hello Job will be availabe again after 2s."."</info>\n");
                 //$job->release(2); //$delay为延迟时间，表示该任务延迟2秒后再执行
             }
         }
-    }
-    
-    /**
-     * 有些消息在到达消费者时,可能已经不再需要执行了
-     * @param array|mixed    $data     发布任务时自定义的数据
-     * @return boolean                 任务执行的结果
-     */
-    private function checkDatabaseToSeeIfJobNeedToBeDone($data){
-        return true;
+
     }
 
-    /**
-     * 根据消息中的数据进行实际的业务处理
-     * @param array|mixed    $data     发布任务时自定义的数据
-     * @return boolean                 任务执行的结果
-     */
-    private function doHelloJob($data) {
-        // 根据消息中的数据进行实际的业务处理...
-      
-        print("<info>Hello Job Started. job Data is: ".var_export($data,true)."</info> \n");
-        print("<info>Hello Job is Fired at " . date('Y-m-d H:i:s') ."</info> \n");
-        print("<info>Hello Job is Done!"."</info> \n");
-        
-        return true;
+    // 进行叫号
+    private function doCallNumber($data) {
+
+
+        // 指明给谁推送，为空表示向所有在线用户推送
+        $to_uid = $data['to_uid'];
+
+        // 推送的url地址，使用自己的服务器地址
+        $push_api_url = "http://localhost:2121/";
+        $post_data = array(
+        "type" => "publish",
+        "content" => $data['data'],
+        // "content" => "这个是推送的测试数据",
+        "to" => $to_uid, 
+        );
+        $param = [
+            ['url'=>$push_api_url, 'data'=>$post_data],
+            // ['url'=>$push_api_url, 'data'=>$post_data]
+            
+        ];
+        $ret = asyncCurl($param);
+        if($ret[0] == 'ok'){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 
