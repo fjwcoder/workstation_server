@@ -623,6 +623,15 @@ class Vaccinations extends AdminBase
         if(empty($param['number'])) return ['code'=>400,'msg'=>'请选择叫号号码'];
         if(empty($param['WritingDesk'])) return ['code'=>400,'msg'=>'请选择登记台'];
 
+        $queueClassName = 'app\common\logic\Queue@callNumber';
+        $queueName = 'waitingqueue';
+        $queueData = [
+            'name'=>$param['number'],
+            'deskRoom'=>$param['WritingDesk'],
+            'to_uid'=>1001
+        ];
+        $this->logicQueue->addQueue($queueClassName, $queueName, $queueData);
+
         $url = $this->modelSettings->getValue(['Name'=>'App.QueueServerAddress'],'Value');
 
         $data = [
@@ -655,7 +664,18 @@ class Vaccinations extends AdminBase
      */
     public function callInjectNumber($param = [])
     {
-        
+        if(empty($param['Name'])) return ['code'=>400,'msg'=>'请选择叫号号码'];
+        if(empty($param['WritingDesk'])) return ['code'=>400,'msg'=>'请选择接种室'];
+
+        $queueClassName = 'app\common\logic\Queue@callNumber';
+        $queueName = 'injectqueue';
+        $queueData = [
+            'name'=>$param['Name'],
+            'deskRoom'=>$param['WritingDesk'],
+            'to_uid'=>1002
+        ];
+        $this->logicQueue->addQueue($queueClassName, $queueName, $queueData);
+
         $data = [
             'deviceId'=>2,
             'data' =>[

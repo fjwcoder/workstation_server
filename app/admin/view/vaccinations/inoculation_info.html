@@ -308,6 +308,21 @@
                 // var Id  = $('input[name="Id"]').val();
                 var Number = '{$info.registerInfo.Number}';
                 var Name = $('input[name="Name"]').val();
+                $(this).attr('disabled',true);
+                var time = 5;
+                var number = '{$info.registerInfo.Number}';
+                var timer = setInterval(function(){
+                    if(time > 0){
+                        flag = false;
+                        $('.call_number').html(time+'秒');
+                        time--;
+                    }else{
+                        clearInterval(timer);
+                        time = 5;
+                        $('.call_number').html('叫号');
+                        $('.call_number').attr('disabled',false);
+                    }
+                },1000);
 
                 var data = {
                     Number:Number,

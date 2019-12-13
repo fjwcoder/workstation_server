@@ -494,7 +494,21 @@
             * 呼叫
             */
             $('.call_number').on('click',function(){
+                $(this).attr('disabled',true);
+                var time = 5;
                 var number = '{$info.registerInfo.Number}';
+                var timer = setInterval(function(){
+                    if(time > 0){
+                        flag = false;
+                        $('.call_number').html(time+'秒');
+                        time--;
+                    }else{
+                        clearInterval(timer);
+                        time = 5;
+                        $('.call_number').html('叫号');
+                        $('.call_number').attr('disabled',false);
+                    }
+                },1000);
 
                 $.post('{:url("Vaccinations/callNumber")}',{number:number,WritingDesk:WritingDesk},function(res){
                     // console.log(res);
@@ -505,8 +519,7 @@
                     }
                 });
             });
-
-
+        
             // 卡号的输入框失去焦点
             // $("input[name='CardNo']").blur(function(){
             //     getChildInfo();
