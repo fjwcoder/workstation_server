@@ -27,7 +27,8 @@ class ApiBase extends LogicBase
     {
         return [
             // 'vaccine/scanappointmentqrcode',
-           'vaccinations/nextnumber'
+           'vaccinations/nextnumber',
+           'common/getvideofiles'
         ];
     }
 

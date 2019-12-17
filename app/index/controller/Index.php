@@ -12,7 +12,6 @@
 namespace app\index\controller;
 
 use think\queue\Job;
-
 use think\Db;
 /**
  * 前端首页控制器
@@ -20,6 +19,27 @@ use think\Db;
  */
 class Index extends IndexBase
 {
+    public function test2($uid,$msg)
+    {
+        
+        $to_uid = $uid;
+
+        // 推送的url地址，使用自己的服务器地址
+        $push_api_url = "http://localhost:2121/";
+        $post_data = array(
+        "type" => "publish",
+        "content" => $msg,
+        
+        "to" => $to_uid, 
+        );
+        $param = [
+            ['url'=>$push_api_url, 'data'=>$post_data],
+            
+        ];
+        $ret = asyncCurl($param);
+        dump($ret);
+
+    }
 
     public function test1()
     {

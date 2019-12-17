@@ -15,6 +15,7 @@ use app\api\error\CodeBase;
 use app\api\error\Common as CommonError;
 use \Firebase\JWT\JWT;
 use think\Db;
+use app\common\logic\Queue as CommonQueue;
 /**
  * 接口基础逻辑
  */
@@ -28,6 +29,17 @@ class Common extends ApiBase
      */
     public function callName($param = [])
     {
+
+        // 添加到叫号队列
+        $queueClassName = 'app\common\logic\Queue@callNumber';
+        $queueName = 'injectqueue';
+        $queueData = [
+            'name'=>$param['childName'],
+            'deskRoom'=>$param['consultingRoom'],
+            'to_uid'=>1002
+        ];
+        $CommonQueue = new CommonQueue;
+        $callStatus = $CommonQueue->addQueue($queueClassName, $queueName, $queueData);
 
         $data = [
             'deviceId'=>(int)$param['deviceId'],
