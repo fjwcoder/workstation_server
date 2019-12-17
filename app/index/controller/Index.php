@@ -33,12 +33,8 @@ class Index extends IndexBase
         $jobQueueName     = "dengji";
         // 3.当前任务所需的业务数据 . 不能为 resource 类型，其他类型最终将转化为json形式的字符串
         // ( jobData 为对象时，需要在先在此处手动序列化，否则只存储其public属性的键值对)
-<<<<<<< HEAD
-        $jobData          = date('Y-m-d H:i:s'); //rand();
-=======
         // $jobData          = date('Y-m-d H:i:s');
         $jobData          = rand();
->>>>>>> b3ca888ec79f894c9b46ea6fe0d32edb3d08c190
         // 4.将该任务推送到消息队列，等待对应的消费者去执行
         // $time2wait = strtotime('2018-09-08 11:15:00') - strtotime('now');  // 定时执行
         $list = Db::name('queue')->where(['queue'=>$jobQueueName])->count();
