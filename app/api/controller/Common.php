@@ -23,7 +23,8 @@ class Common extends ApiBase
     public function getVideoFiles()
     {
 
-        $file_path = PATH_UPLOAD . 'video';
+        // public下video文件夹
+        $file_path = ROOT_PATH . 'video';
 
         $filename = scandir($file_path);
 
@@ -39,7 +40,7 @@ class Common extends ApiBase
             if(strpos($v,'mp4') == false && strpos($v,'MP4') == false){
                 continue;
             }
-            $conname[] = 'http://'.$requestIp.':21022/upload/video/' . $v;
+            $conname[] = 'http://'.$requestIp.':21022/video/' . $v;
         }
         if(!empty($conname)){
 

@@ -12,7 +12,6 @@
 namespace app\index\controller;
 
 use think\queue\Job;
-use think\Request;
 use think\Db;
 /**
  * 前端首页控制器
@@ -20,13 +19,6 @@ use think\Db;
  */
 class Index extends IndexBase
 {
-    public function adddd(){
-        $request = Request::instance();
-echo '请求方法：' . $request->method() . '<br/>';
-echo '资源类型：' . $request->type() . '<br/>';
-echo '访问ip地址：' . $request->ip() . '<br/>';
-    }
-
     public function test2($uid,$msg)
     {
         
@@ -61,8 +53,12 @@ echo '访问ip地址：' . $request->ip() . '<br/>';
         $jobQueueName     = "dengji";
         // 3.当前任务所需的业务数据 . 不能为 resource 类型，其他类型最终将转化为json形式的字符串
         // ( jobData 为对象时，需要在先在此处手动序列化，否则只存储其public属性的键值对)
+<<<<<<< HEAD
+        $jobData          = date('Y-m-d H:i:s'); //rand();
+=======
         // $jobData          = date('Y-m-d H:i:s');
         $jobData          = rand();
+>>>>>>> b3ca888ec79f894c9b46ea6fe0d32edb3d08c190
         // 4.将该任务推送到消息队列，等待对应的消费者去执行
         // $time2wait = strtotime('2018-09-08 11:15:00') - strtotime('now');  // 定时执行
         $list = Db::name('queue')->where(['queue'=>$jobQueueName])->count();
@@ -184,13 +180,13 @@ echo '访问ip地址：' . $request->ip() . '<br/>';
         $push_api_url = "http://localhost:2121/";
         $post_data = array(
         "type" => "publish",
-        "content" => rand(),
+        "content" => date('Y-m-d H:i:s'),
         // "content" => "这个是推送的测试数据",
         "to" => $to_uid, 
         );
         $param = [
             ['url'=>$push_api_url, 'data'=>$post_data],
-            ['url'=>$push_api_url, 'data'=>$post_data]
+            // ['url'=>$push_api_url, 'data'=>$post_data]
             
         ];
         $ret = asyncCurl($param);
