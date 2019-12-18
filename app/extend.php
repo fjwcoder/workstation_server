@@ -399,3 +399,7 @@ function asyncCurl($param){
     $ret = $ac->send();
     return $ret;
 }
+
+// function test(){
+//     echo '我是冯建文';
+// }

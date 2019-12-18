@@ -51,6 +51,27 @@ use Workerman\Worker;
 use Workerman\Lib\Timer;
 
 /**
+ * 引入异步发送curl
+ */
+// if(file_exists(__DIR__ . '/../../extend/http/AsyncCURLS.php')){
+//     require_once __DIR__ . '/../../extend/http/AsyncCURLS.php';
+// }else{
+//     serverLog('extend/http/AsyncCURLS.php 文件不存在');
+
+// }
+
+function asyncCurl($param){
+    require_once __DIR__ . '/../../extend/http/AsyncCURLS.php';
+    $ac = new AsyncCURLS();
+    $ac->set_param($param);
+    $ret = $ac->send();
+    return $ret;
+}
+
+
+// asyncCurl('');
+
+/**
  * 数据库连接
  */
 $db_config = [];
@@ -155,6 +176,7 @@ $task->onWorkerStart = function($task){
 
     // N秒后执行发送邮件任务，最后一个参数传递false，表示只运行一次
     Timer::add($GLOBALS['ObseveScreenRefreshRate'], 'sendWaitingQueue', array(), true);
+    // Timer::add(5, 'sendWaitingQueue', array(), true);
     // Timer::add(5, 'serverLog', array(), true);
 };
 // 运行worker
@@ -181,6 +203,7 @@ function sendWaitingQueue()
                 FROM vaccinations as a left join childs as b on a.ChildId=b.id 
                 WHERE a.CreationTime LIKE '$today%'
                 and `State` >= 2 
+                and `ChildId` > 0  
                 and `VaccinationFinishTime` >= '$old_time' 
             ";
 
@@ -199,40 +222,52 @@ function sendWaitingQueue()
             }
         }
 
-        // var_export($GLOBALS['waitting_queue']);
-        $data = ['deviceId'=>13, 'data'=>[]];
+        $post_data = [
+            "type" => "publish", "to" => 1003, "content" => null
+        ];
         if(empty($GLOBALS['waitting_queue'])){
             serverLog('------- 内存留观队列为空 -------');
             serverEcho('------- 内存留观队列为空 -------');
             
-            $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
-            serverLog('空数据推送返回：'.$send_response);
+            // $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
+            $post_data['content'] = '队列为空';
+            $param = [
+                 ['url'=>'http://localhost:2121/', 'data'=>$post_data]
+            ];
+            serverLog(var_export($param, true));
+            $send_response = asyncCurl($param);
+
+            serverLog('空数据推送返回：'.json_encode($send_response, 320));
         }else{
-            // var_export($GLOBALS['waitting_queue']); die;
-            // $send_queue = array_slice($GLOBALS['waitting_queue'], 0, 2);
+
             $send_queue = array_slice($GLOBALS['waitting_queue'], 0, $GLOBALS['ObseverRoomScreenRows']); // 取出前N个数据
             
+            $temp_data = [];
 
             foreach($send_queue as $k=>$v){
-                // $inoculabilityTime = substr($v['VaccinationFinishTime'], -15, 8);
                 $inoculabilityTime = substr($v['VaccinationFinishTime'], -8);
-                // echo $inoculabilityTime;
-                // echo PHP_EOL;
                 $remainingTime = floor((time()-strtotime($inoculabilityTime))%86400/60);
                 if($remainingTime > 31){
                     continue;
                 }else{
                     $remainingTime = ($remainingTime >= 30) ? 0 : (30-$remainingTime); 
-                    $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
+                    // $data['data'][] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
+                    $temp_data[] = ['number'=>$v['Number'], 'childName'=>$v['Name'], 'inoculabilityTime'=>$inoculabilityTime, 'remainingTime'=>intval($remainingTime)]; 
                 }
 
             }
-            // var_export($data);
 
-            $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
-            serverLog('队列数据推送返回：'.$send_response);
-            $send_response = json_decode($send_response, true);
-            if($send_response['sucess'] == true){ // 发送成功
+            // $send_response = httpsPost($GLOBALS['QueueServerAddress'], json_encode($data, 320));
+            $post_data['content'] = json_encode($temp_data, 320);
+            $param = [
+                ['url'=>'http://localhost:2121/', 'data'=>$post_data]
+            ];
+            $send_response = asyncCurl($param);
+
+            serverLog('队列数据推送返回：'.json_encode($send_response, 320));
+
+            // $send_response = json_decode($send_response, true);
+            if($send_response[0] == 'ok'){ // 发送成功
                 foreach($send_queue as $k=>$v){
                     unset($GLOBALS['waitting_queue'][$k]);
                 }

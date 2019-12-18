@@ -19,6 +19,32 @@ use think\Db;
  */
 class Index extends IndexBase
 {
+
+    public function liuguan(){
+        $url = 'http://localhost:2121/';
+
+        $data = [
+
+                ['number'=>'A001', 'childName'=>'留观1', 'inoculabilityTime'=>'09:39:21', 'remainingTime'=>1],
+                ['number'=>'A002', 'childName'=>'留观2', 'inoculabilityTime'=>'09:39:22', 'remainingTime'=>2],
+                ['number'=>'A003', 'childName'=>'留观3', 'inoculabilityTime'=>'09:39:23', 'remainingTime'=>3],
+                ['number'=>'A004', 'childName'=>'留观4', 'inoculabilityTime'=>'09:39:24', 'remainingTime'=>4],
+
+        ];
+        // $data ='[{"number":"A001","childName":"留观1","inoculabilityTime":"09:39:21","remainingTime":1},{"number":"A002","childName":"留观2","inoculabilityTime":"09:39:22","remainingTime":2},{"number":"A003","childName":"留观3","inoculabilityTime":"09:39:23","remainingTime":3},{"number":"A004","childName":"留观4","inoculabilityTime":"09:39:24","remainingTime":4}]';
+        // dump(json_encode($data, 320)); die;
+        $post_data = array(
+            "type" => "publish", "to" => 1003,
+            "content" => json_encode($data, 320)
+        );
+        $param = [
+            ['url'=>$url, 'data'=>$post_data]
+        ];
+        // dump($param); die;
+        $ret = asyncCurl($param);
+        dump($ret);
+    }
+
     public function test2($uid,$msg)
     {
         
@@ -196,13 +222,13 @@ class Index extends IndexBase
      * create by fjw in 19.9.28
      * edit by fqm in 19.9.30
      */
-    public function index(){
+    // public function index(){
         
-        $this->assign('todayNumber',$this->logicIndex->index());
+    //     $this->assign('todayNumber',$this->logicIndex->index());
 
-        return $this->fetch();
+    //     return $this->fetch();
 
-    }
+    // }
 
 
     public function dengji(){
@@ -273,24 +299,7 @@ class Index extends IndexBase
     }
     
 
-    public function liuguan(){
-        $url = 'http://192.168.1.249:9500';
-
-        $array13 = [
-            'deviceId'=>13,
-            'data'=>[
-                ['number'=>'A001', 'childName'=>'留观1', 'inoculabilityTime'=>'09:39:21', 'remainingTime'=>1],
-                ['number'=>'A002', 'childName'=>'留观2', 'inoculabilityTime'=>'09:39:22', 'remainingTime'=>2],
-                ['number'=>'A003', 'childName'=>'留观3', 'inoculabilityTime'=>'09:39:23', 'remainingTime'=>3],
-                ['number'=>'A004', 'childName'=>'留观4', 'inoculabilityTime'=>'09:39:24', 'remainingTime'=>4],
-
-            ]
-        ];
-        $json13 = json_encode($array13, 320);
-        $response13 = httpsPost($url, $json13);
-
-        dump($response13);
-    }
+    
 
 
 }
