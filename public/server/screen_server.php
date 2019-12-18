@@ -234,7 +234,7 @@ function sendWaitingQueue()
             $param = [
                  ['url'=>'http://localhost:2121/', 'data'=>$post_data]
             ];
-            serverLog(var_export($param, true));
+            // serverLog(var_export($param, true));
             $send_response = asyncCurl($param);
 
             serverLog('空数据推送返回：'.json_encode($send_response, 320));
