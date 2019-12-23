@@ -11,6 +11,7 @@
 
 namespace app\api\controller;
 use think\Request;
+use think\Db;
 /**
  * 公共基础接口控制器
  */
@@ -24,13 +25,13 @@ class Common extends ApiBase
     {
 
         // public下video文件夹
-        $file_path = ROOT_PATH . 'video';
+        $file_path = PATH_PUBLIC . 'video';
 
         $filename = scandir($file_path);
 
-        $request = Request::instance();
-
-        $requestIp = $request->ip();
+        // $request = Request::instance();
+        // $requestIp = $request->ip();
+        $localhostIp = Db::name('settings')->where(['Name'=>'App.localhost'])->value('Value');
         // 定义一个数组接收文件名
         $conname = array();
         foreach($filename as $k=>$v){
@@ -40,7 +41,7 @@ class Common extends ApiBase
             if(strpos($v,'mp4') == false && strpos($v,'MP4') == false){
                 continue;
             }
-            $conname[] = 'http://'.$requestIp.':21022/video/' . $v;
+            $conname[] = $localhostIp.'/video/' . $v;
         }
         if(!empty($conname)){
 

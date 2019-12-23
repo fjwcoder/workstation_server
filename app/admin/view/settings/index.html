@@ -101,6 +101,13 @@
                     <input type="text" class="layui-input input_w" name="App.QueueServerAddress" value="{$info['App.QueueServerAddress']|default=''}">
                 </div>
             </div>
+
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">叫号时间间隔(秒)：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.CallNumberTime" value="{$info['App.CallNumberTime']|default=''}">
+                </div>
+            </div>
             
 
             <!-- <div class="layui-form-item margin_top">
@@ -147,6 +154,12 @@
         </fieldset>
 
         <div style="width: 60%">
+            <div class="layui-form-item margin_top">
+                <label class="layui-form-label label_w">本机IP地址(端口号)：</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input input_w" name="App.localhost" value="{$info['App.localhost']|default=''}">
+                </div>
+            </div>
             <div class="layui-form-item margin_top">
                 <label class="layui-form-label label_w">冰箱服务地址URL：</label>
                 <div class="layui-input-block">

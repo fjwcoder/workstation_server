@@ -244,25 +244,71 @@ class Vaccinations extends ApiBase
 
         // 下一个的查询条件 
         $n_where = [
-            'a.VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'a.VaccinationDate' => ['like', NOW_DATE.'%'],
             'a.State'=>1,
-            'a.Number'=>reNumO($vInfo['Number']),
-            'a.RegistrationFinishTime'=>['>', $vInfo['RegistrationFinishTime']],
+            // 'a.Number'=>reNumO($vInfo['Number']),
+            'a.Number'=>['like','V%'], // 先查询有没有新添加的V开头的号码
+            // 'a.RegistrationFinishTime'=>['>', $vInfo['RegistrationFinishTime']],
+            'a.injectCallNumTime'=>[['=',''],['=',null],['<',time()-60],['EXP','IS null'],'or'], // 接种叫号时间为空或者小于当前时间减60秒
         ];
+        
         // 下一个的字段
         $n_field = 'a.Id,a.Number,c.Sex,C.Name';
         // 连表查询
         $n_join = [['childs c','a.ChildId = c.Id','LEFT']];
 
         $nextData = [];
-        // 查询有没有和当前取号号码开头一样的数据
-        $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('VaccinationDate asc')->field($n_field)->find();
-        // 没有和当前取号号码开头一样的数据，不查询 Number 条件
+        // 第一次查询开头是V的号码
+        $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->field($n_field)->find();
+        // 如果没有开头是V的号码
         if($nextData == null){
-            $n_where['a.Number'] = reNumT($vInfo['Number']);
-            unset($n_where['a.RegistrationFinishTime']);
-            $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('a.RegistrationFinishTime asc')->field($n_field)->find();
+            // 第二次查询开头和当前叫号号码开头相同的 并且登记完成时间比当前的号码登记完成时间晚
+            $n_where['a.Number'] = reNumO($vInfo['Number']);
+            $n_where['a.RegistrationFinishTime']=['>', $vInfo['RegistrationFinishTime']];
+            $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('a.VaccinationDate asc')->field($n_field)->find();
+            // 如果第二次查询为空，进行第三次查询
+            if($nextData == null){
+                // 第三次查询，不查询 RegistrationFinishTime 条件
+                $n_where['a.Number'] = reNumT($vInfo['Number']);
+                unset($n_where['a.RegistrationFinishTime']);
+                $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('a.RegistrationFinishTime asc')->field($n_field)->find();
+
+                // 如果第三次查询为空，进行第四次查询
+                if($nextData == null){
+                    unset($n_where['a.RegistrationFinishTime']);
+                    $n_where['a.Number'] = reNumO($vInfo['Number']);
+
+                    $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('VaccinationDate asc')->field($n_field)->find();
+
+                    if($nextData == null){
+                        $n_where['a.Number'] = reNumT($vInfo['Number']);
+                        unset($n_where['a.RegistrationFinishTime']);
+                        $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('a.RegistrationFinishTime asc')->field($n_field)->find();
+                    }
+                }
+            }
         }
+
+        if($nextData !== null){
+            // 接种疫苗列表
+            $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('d.VaccineId,d.VaccinationPosition,v.ShortName')->select();
+            // 进行叫号
+            $this->logicCommon->callName(['Id'=>$nextData['Id'],'deviceId'=>2,'number'=>$nextData['Number'],'childName'=>$nextData['Name'],'consultingRoom'=>$param['ConsultationRoom']]);
+            return $nextData;
+
+        }else{
+            return [API_CODE_NAME => 44444, API_MSG_NAME => '已经到最后一个了!!!'];
+        }
+
+
+
+        // 之前的第一次查询
+        // 没有和当前取号号码开头一样的数据，不查询 RegistrationFinishTime 条件
+        // if($nextData == null){
+        //     $n_where['a.Number'] = reNumT($vInfo['Number']);
+        //     unset($n_where['a.RegistrationFinishTime']);
+        //     $nextData = Db::name('vaccinations')->alias('a')->join($n_join)->where($n_where)->order('a.RegistrationFinishTime asc')->field($n_field)->find();
+        // }
         // 如果有下一个
         if($nextData !== null){
             $nextData['vaccineList'] = Db::name('vaccinationdetails')->alias('d')->join('vaccines v','d.VaccineId = v.Id')->where(['d.VaccinationId'=>$nextData['Id']])->field('d.VaccineId,d.VaccinationPosition,v.ShortName')->select();

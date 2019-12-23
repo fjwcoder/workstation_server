@@ -167,6 +167,7 @@
         var VaccinationDesk = '{$info["VaccinationDesk"]|default=""}';
         console.log(VaccinationDesk)
         var VaccinationId={$info.registerInfo.Id};
+        console.log(VaccinationId)
         layui.use(['jquery', 'layer','table','laydate'], function(){
             var table = layui.table,
             layer = layui.layer,
@@ -197,6 +198,7 @@
                     var Name = $('input[name="Name"]').val();
 
                     var data = {
+                        Id:VaccinationId,
                         Number:Number,
                         Name:Name,
                         WritingDesk:VaccinationDesk,
@@ -268,7 +270,7 @@
             // 点击下一个按钮
             $('.next_number').on('click',function(){
                 var data = {
-                    Id:{$info.registerInfo.Id},
+                    Id:VaccinationId,
                     State:1,
                 };
 
@@ -286,7 +288,7 @@
             // 点击上一个按钮
             $('.prev_number').on('click',function(){
                 var data = {
-                    Id:{$info.registerInfo.Id},
+                    Id:VaccinationId,
                     State:1,
                 };
 
@@ -305,7 +307,6 @@
             * 呼叫
             */
             $('.call_number').on('click',function(){
-                // var Id  = $('input[name="Id"]').val();
                 var Number = '{$info.registerInfo.Number}';
                 var Name = $('input[name="Name"]').val();
                 $(this).attr('disabled',true);
@@ -325,6 +326,7 @@
                 },1000);
 
                 var data = {
+                    Id:VaccinationId,
                     Number:Number,
                     Name:Name,
                     WritingDesk:VaccinationDesk,

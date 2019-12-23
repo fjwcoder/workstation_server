@@ -1169,9 +1169,9 @@ function saveImg($base64, $file_name)
 function reNumO($number)
 {
     if(strtoupper($number[0]) == 'V'){
-        return ['like','%V%'];
+        return ['like','V%'];
     }else{
-        return ['like','%A%'];
+        return ['like','A%'];
     }
 }
 
@@ -1181,9 +1181,27 @@ function reNumO($number)
 function reNumT($number)
 {
     if(strtoupper($number[0]) == 'V'){
-        return ['like','%A%'];
+        return ['like','A%'];
     }else{
-        return ['like','%V%'];
+        return ['like','V%'];
+    }
+}
+
+/**
+ * 判断叫号时间是否为空，叫号时间长短等
+ */
+function judgeCallTime($id)
+{
+    
+    $callTime = Db::name('vaccinations')->where('Id',$id)->value('registerCallNumTime');
+    if($callTime == null){
+        return true;
+    }else{
+        if(time() - $callTime >= 60){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
 

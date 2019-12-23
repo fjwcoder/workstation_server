@@ -29,8 +29,10 @@ class Common extends ApiBase
      */
     public function callName($param = [])
     {
+        if(empty($param['Id'])) return ['code'=>400,'msg'=>'叫号失败'];
+        if(empty($param['childName'])) return ['code'=>400,'msg'=>'叫号失败'];
 
-        // 添加到叫号队列
+        // 添加到叫号队列的数据
         $queueClassName = 'app\common\logic\Queue@callNumber';
         $queueName = 'injectqueue';
         $queueData = [
@@ -38,8 +40,18 @@ class Common extends ApiBase
             'deskRoom'=>$param['consultingRoom'],
             'to_uid'=>1002
         ];
+
+        // 修改当前叫号号码的接种叫号时间
+        $editTimeStatus = Db::name('vaccinations')->where('Id',$param['Id'])->setField('injectCallNumTime',time());
+        // 添加到队列
         $CommonQueue = new CommonQueue;
         $callStatus = $CommonQueue->addQueue($queueClassName, $queueName, $queueData);
+        // by fqm
+        if($editTimeStatus && $callStatus){
+            return json_encode(['code'=>200,'msg'=>'叫号成功'],320);
+        }else{
+            return json_encode(['code'=>400,'msg'=>'叫号失败'],320);
+        }
 
         $data = [
             'deviceId'=>(int)$param['deviceId'],

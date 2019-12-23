@@ -258,7 +258,14 @@
                     $('.un_number').show();
                     $('.un_writingdesk').text('登记台'+WritingDesk);
                     $('.un_writingdesk').show();
-                    $.post('{:url("vaccinations/setCacheWritingDesk")}',{number:number,WritingDesk:WritingDesk},function(res){
+                    // 设置缓存并进行叫号
+                    // callNumber(Id,number,WritingDesk);
+                    data = {
+                        Id:VaccinationId,
+                        number:number,
+                        WritingDesk:WritingDesk
+                    };
+                    $.post('{:url("vaccinations/setCacheWritingDesk")}',data,function(res){
                         if(res.code == 200){
                             layer.msg(res.msg,{icon:1});
                         }else{
@@ -349,7 +356,7 @@
             // 点击下一个按钮
             $('.next_number').on('click',function(){
                 var data = {
-                    Id:{$info.registerInfo.Id},
+                    Id:VaccinationId,
                     State:0,
                 };
 
@@ -367,12 +374,13 @@
             // 点击上一个按钮
             $('.prev_number').on('click',function(){
                 var data = {
-                    Id:{$info.registerInfo.Id},
+                    Id:VaccinationId,
                     State:0,
                 };
 
                 $.post('{:url("vaccinations/prevNumber")}',data,function(res){
                     if(res.code == 200){
+                        // console.log(res);
                         window.location.href = "{:url()}?Id="+res.msg;
 
                     }else{
@@ -509,8 +517,14 @@
                         $('.call_number').attr('disabled',false);
                     }
                 },1000);
-
-                $.post('{:url("Vaccinations/callNumber")}',{number:number,WritingDesk:WritingDesk},function(res){
+                // 进行叫号
+                // callNumber(Id,number,WritingDesk);
+                data = {
+                    Id:VaccinationId,
+                    number:number,
+                    WritingDesk:WritingDesk
+                };
+                $.post('{:url("Vaccinations/callNumber")}',data,function(res){
                     // console.log(res);
                     if(res.code == 200){
                         layer.msg(res.msg,{icon:1});
@@ -519,6 +533,20 @@
                     }
                 });
             });
+
+            // 叫号方法
+            // function callNumber(Id,number,WritingDesk){
+                
+            //     $.post('{:url("Vaccinations/callNumber")}',{Id:Id,number:number,WritingDesk:WritingDesk},function(res){
+            //         // console.log(res);
+            //         if(res.code == 200){
+            //             layer.msg(res.msg,{icon:1});
+            //         }else{
+            //             layer.msg(res.msg,{icon:2});
+            //         }
+            //     });
+
+            // }
         
             // 卡号的输入框失去焦点
             // $("input[name='CardNo']").blur(function(){

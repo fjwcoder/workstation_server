@@ -70,7 +70,6 @@ class Vaccinations extends AdminBase
                 $head_fingerprint_path[$v['Name']] = $v['Path'];
             }
         }
-
         $registerInfoDefilds = $this->logicVaccinationdetails->getVIdObVdetail(['VaccinationId' => $registerInfo['Id']]);
         
         // 所有疫苗列表
@@ -78,10 +77,10 @@ class Vaccinations extends AdminBase
         // 登记台数量
         $writingdeskcount = $this->modelSettings->getValue(['Name'=>'App.WritingDeskCount'],'Value');
         // 当前登记台缓存
-        $WritingDesk = cache('WritingDesk');
+        $WritingDesk = cache(MEMBER_ID.'_WritingDesk');
         if($WritingDesk){
             // 进行登记叫号
-            $this->callNumber(['number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
+            $this->callNumber(['Id'=>$registerInfo['Id'],'number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
         }
         
 
@@ -351,11 +350,11 @@ class Vaccinations extends AdminBase
         $vaccinationDeskCount = $this->modelSettings->getValue(['Name'=>'App.VaccinationDeskCount'],'Value');
 
         // 当前接种室缓存
-        $VaccinationDesk = cache('VaccinationDesk');
+        $VaccinationDesk = cache(MEMBER_ID.'_VaccinationDesk');
 
         if($VaccinationDesk){
             // 进行接种叫号
-            $this->callInjectNumber(['Number'=>$registerInfo['Number'],'Name'=>$childInfo['Name'],'WritingDesk'=>$VaccinationDesk]);
+            $this->callInjectNumber(['Id'=>$registerInfo['Id'],'Number'=>$registerInfo['Number'],'Name'=>$childInfo['Name'],'WritingDesk'=>$VaccinationDesk]);
         }
 
 
@@ -620,10 +619,11 @@ class Vaccinations extends AdminBase
      */
     public function callNumber($param = [])
     {
+        if(empty($param['Id'])) return ['code'=>400,'msg'=>'请选择叫号号码'];
         if(empty($param['number'])) return ['code'=>400,'msg'=>'请选择叫号号码'];
         if(empty($param['WritingDesk'])) return ['code'=>400,'msg'=>'请选择登记台'];
 
-        // 添加到叫号队列
+        // 添加到叫号队列的数据
         $queueClassName = 'app\common\logic\Queue@callNumber';
         $queueName = 'waitingqueue';
         $queueData = [
@@ -631,7 +631,16 @@ class Vaccinations extends AdminBase
             'deskRoom'=>$param['WritingDesk'],
             'to_uid'=>1001
         ];
+        // 修改当前叫号号码的登记叫号时间
+        $editTimeStatus = Db::name('vaccinations')->where('Id',$param['Id'])->setField('registerCallNumTime',time());
+        // 添加到叫号队列
         $callStatus = $this->logicQueue->addQueue($queueClassName, $queueName, $queueData);
+        // by fqm
+        if($editTimeStatus && $callStatus){
+            return ['code'=>200,'msg'=>'叫号成功'];
+        }else{
+            return ['code'=>400,'msg'=>'叫号失败'];
+        }
 
         $url = $this->modelSettings->getValue(['Name'=>'App.QueueServerAddress'],'Value');
 
@@ -665,10 +674,11 @@ class Vaccinations extends AdminBase
      */
     public function callInjectNumber($param = [])
     {
+        if(empty($param['Id'])) return ['code'=>400,'msg'=>'请选择叫号号码'];
         if(empty($param['Name'])) return ['code'=>400,'msg'=>'请选择叫号号码'];
         if(empty($param['WritingDesk'])) return ['code'=>400,'msg'=>'请选择接种室'];
 
-        // 添加到叫号队列
+        // 添加到叫号队列的数据
         $queueClassName = 'app\common\logic\Queue@callNumber';
         $queueName = 'injectqueue';
         $queueData = [
@@ -676,7 +686,17 @@ class Vaccinations extends AdminBase
             'deskRoom'=>$param['WritingDesk'],
             'to_uid'=>1002
         ];
+
+        // 修改当前叫号号码的接种叫号时间
+        $editTimeStatus = Db::name('vaccinations')->where('Id',$param['Id'])->setField('injectCallNumTime',time());
+        // 添加到叫号队列
         $callStatus = $this->logicQueue->addQueue($queueClassName, $queueName, $queueData);
+        // by fqm
+        if($editTimeStatus && $callStatus){
+            return ['code'=>200,'msg'=>'叫号成功'];
+        }else{
+            return ['code'=>400,'msg'=>'叫号失败'];
+        }
 
         $data = [
             'deviceId'=>2,
@@ -755,46 +775,69 @@ class Vaccinations extends AdminBase
 
         // 上一个的查询字段
         $field = 'Id';
+        // $field = 'Id,registerCallNumTime,injectCallNumTime';
         // 上一个的查询条件
         $where = [
-            'CreationTime' => ['like', '%'.NOW_DATE.'%'], // 创建时间是当天的
+            'CreationTime' => ['like', NOW_DATE.'%'], // 创建时间是当天的
             'State'=>$param['State'], // 根据传过来的State判断是登记队列或者接种队列
-            'Number'=>reNumO($vInfo['Number']), // 根据当前结婚总流水信息判断当前接种流水的Number开头字母
+            // 'Number'=>reNumO($vInfo['Number']), // 根据当前接种流水信息判断当前接种流水的Number开头字母
+            'Number'=>['like','V%'], // 第一次查询V开头的
         ];
 
         // 如果是登记队列，按照VaccinationDate排序，如果是接种队列，按照RegistrationFinishTime排序
         if($param['State'] == 0){
             $vdate = 'VaccinationDate';
             $order = $vdate.' desc';
+            // $cField = 'registerCallNumTime';
+            $where['registerCallNumTime'] = [['=',''],['=',null],['<',time()-60],['EXP','IS null'],'or'];
+
         }elseif($param['State'] == 1){
             $vdate = 'RegistrationFinishTime';
             $order = $vdate.' desc';
+            // $cField = 'injectCallNumTime';
+            $where['injectCallNumTime'] = [['=',''],['=',null],['<',time()-60],['EXP','IS null'],'or'];
         }
-        // 上一个的查询条件，比当前的时间早
-        $where[$vdate] = ['<', $vInfo[$vdate]];
-        // 第一次查询上一个
+        
+        // 第一次查询上一个， V开头的
+        // if(strtoupper($vInfo['Number'][0]) != 'V'){
+        //     $prev = Db::name('vaccinations')->where($where)->value($field);
+        // }else{
+        //     $where['Number'] = reNumO($vInfo['Number']);
+        //     // 上一个的查询条件，比当前的$vdate时间早
+        //     $where[$vdate] = ['<', $vInfo[$vdate]];
+        //     $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
+        // }
+
         $prev = Db::name('vaccinations')->where($where)->value($field);
-        // 如果第一次查询为空
+
+        // 第二次查询,如果第一次查询V开头的为空,根据当前接种流水信息判断当前接种流水的Number开头字母
         if($prev == null){
-            // 查询字段修改Number的第一个字母
-            $where['Number'] = reNumT($vInfo['Number']);
-            // 删除时间大于小于的查询条件
-            unset($where[$vdate]);
-            // 第二次查询上一个
+            $where['Number'] = reNumO($vInfo['Number']);
+            // 上一个的查询条件，比当前的$vdate时间早
+            $where[$vdate] = ['<', $vInfo[$vdate]];
             $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
             // 如果第二次查询为空
             if($prev == null){
-                // 再次修改查询字段Number的第一个字母
-                $where['Number'] = reNumO($vInfo['Number']);
+                // 查询字段修改Number的第一个字母
+                $where['Number'] = reNumT($vInfo['Number']);
+                // 删除时间大于小于的查询条件
+                unset($where[$vdate]);
                 // 第三次查询上一个
                 $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
-            }
+                // 如果第三次查询为空
+                if($prev == null){
+                    // 再次修改查询字段Number的第一个字母
+                    $where['Number'] = reNumO($vInfo['Number']);
+                    // 第四次查询上一个
+                    $prev = Db::name('vaccinations')->where($where)->order($order)->value($field);
+                }
 
+            }
         }
 
+        // dump($prev);die;
+
         return $prev ? ['code'=>200,'msg'=>$prev] : ['code'=>400,'msg'=>'已经到第一位了!!!'];
-
-
 
     }
 
@@ -814,42 +857,60 @@ class Vaccinations extends AdminBase
         $field = 'Id';
         // 下一个的查询条件
         $where = [
-            'CreationTime' => ['like', '%'.NOW_DATE.'%'],
-            // 'VaccinationDate' => ['like', '%'.NOW_DATE.'%'],
+            'CreationTime' => ['like', NOW_DATE.'%'],
             'State'=>$param['State'],
-            'Number'=>reNumO($vInfo['Number']),
+            'Number'=>['like','V%'], // 第一次查询V开头的
         ];
 
         // 如果是登记队列，按照VaccinationDate排序，如果是接种队列，按照RegistrationFinishTime排序
         if($param['State'] == 0){
             $vdate = 'VaccinationDate';
             $order = $vdate.' asc';
+            $where['registerCallNumTime'] = [['=',''],['=',null],['<',time()-60],['EXP','IS null'],'or'];
         }elseif($param['State'] == 1){
             $vdate = 'RegistrationFinishTime';
             $order = $vdate.' asc';
+            $where['injectCallNumTime'] = [['=',''],['=',null],['<',time()-60],['EXP','IS null'],'or'];
         }
-        // 下一个的查询条件，比当前的时间早
-        $where[$vdate] = ['>', $vInfo[$vdate]];
-        // 第一次查询下一个
-        $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
-        // 如果第一次查询为空
+
+        // 第一次查询上一个， V开头的
+        // if(strtoupper($vInfo['Number'][0]) != 'V'){
+        //     $next = Db::name('vaccinations')->where($where)->value($field);
+        // }else{
+        //     $where['Number'] = reNumO($vInfo['Number']);
+        //     // 下一个的查询条件，$vdate比当前的$vdate时间早
+        //     $where[$vdate] = ['>', $vInfo[$vdate]];
+        //     $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
+        // }
+        
+        $next = Db::name('vaccinations')->where($where)->value($field);
+        
+
         if($next == null){
-            // 查询字段修改Number的第一个字母
-            $where['Number'] = reNumT($vInfo['Number']);
-            // 删除时间大于小于的查询条件
-            unset($where[$vdate]);
-            // 第二次查询下一个
+            $where['Number'] = reNumO($vInfo['Number']);
+            // 下一个的查询条件，$vdate比当前的$vdate时间早
+            $where[$vdate] = ['>', $vInfo[$vdate]];
             $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
             // 如果第二次查询为空
             if($next == null){
-                // 再次修改查询字段Number的第一个字母
-                $where['Number'] = reNumO($vInfo['Number']);
-                // 第三次查询上一个
+
+                // 查询字段修改Number的第一个字母
+                $where['Number'] = reNumT($vInfo['Number']);
+                // 删除时间大于小于的查询条件
+                unset($where[$vdate]);
+                // 第三次查询下一个
                 $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
+                // 如果第三次查询为空
+                if($next == null){
+                    // 再次修改查询字段Number的第一个字母
+                    $where['Number'] = reNumO($vInfo['Number']);
+                    // 第四次查询上一个
+                    $next = Db::name('vaccinations')->where($where)->order($order)->value($field);
+                }
             }
-
         }
-
+        // dump($next);die;
+    
         return $next ? ['code'=>200,'msg'=>$next] : ['code'=>400,'msg'=>'已经到最后一位了!!!'];
     }
 

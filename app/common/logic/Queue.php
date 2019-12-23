@@ -11,22 +11,34 @@ class Queue {
 
 
     // 添加到队列
-    public function addQueue($queueClassName, $queueName, $queueData, $max_interval = 5)
+    public function addQueue($queueClassName, $queueName, $queueData)
     {
         if($queueData['to_uid'] == 1001){
             $queue_date['to_uid'] = 1001;
             $queue_date['data'] = '请'.$queueData['name'].'到登机台'.$queueData['deskRoom'];
+            $lastExecuteTime = cache('lastRegistET');
         }elseif($queueData['to_uid'] == 1002){
             $queue_date['to_uid'] = 1002;
             $queue_date['data'] = '请'.$queueData['name'].'到接种室'.$queueData['deskRoom'];
+            $lastExecuteTime = cache('lastInjectET');
         }
-        
+
+        // 叫号时间间隔
+        $max_interval = Db::name('settings')->where('Name','App.CallNumberTime')->value('Value');
+        $max_interval = (int)$max_interval;
 
         $list = Db::name('queue')->where(['queue'=>$queueName])->count();
         
         if($list == 0){
+            // 如果缓存时间为空 或者 小于当前时间减去叫号间隔时间 可以立即叫号
+            if($lastExecuteTime == null || $lastExecuteTime == false || ($lastExecuteTime+$max_interval) < time() ){
+                $delayTime = 1;
+            }else{
+                $delayTime = $lastExecuteTime+$max_interval-time();
+            }
 
-            $isPushed = \think\Queue::later($max_interval, $queueClassName, $queue_date, $queueName);
+            // 前边没有延迟一秒直接进行叫号
+            // $isPushed = \think\Queue::later(1, $queueClassName, $queue_date, $queueName);
 
         }else{
 
@@ -39,8 +51,10 @@ class Queue {
                 $delayTime = $p_time + $max_interval - time();
             }
             
-            $isPushed = \think\Queue::later($delayTime, $queueClassName, $queue_date, $queueName);
+            // $isPushed = \think\Queue::later($delayTime, $queueClassName, $queue_date, $queueName);
         }
+
+        $isPushed = \think\Queue::later($delayTime, $queueClassName, $queue_date, $queueName);
 
         if($isPushed !== false){
             return true;
@@ -57,7 +71,12 @@ class Queue {
         $isJobDone = $this->doCallNumber($data);
         // $job->delete();
         if ($isJobDone) {
-            //如果任务执行成功， 记得删除任务
+            if($data['to_uid'] == 1001){
+                cache('lastRegistET',time());
+            }elseif($data['to_uid'] == 1002){
+                cache('lastInjectET',time());
+            }
+            //任务执行成功， 删除任务
             $job->delete();
         }else{
             if($job->attempts() > 3){
