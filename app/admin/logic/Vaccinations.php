@@ -77,7 +77,7 @@ class Vaccinations extends AdminBase
         // 登记台数量
         $writingdeskcount = $this->modelSettings->getValue(['Name'=>'App.WritingDeskCount'],'Value');
         // 当前登记台缓存
-        $WritingDesk = cache(MEMBER_ID.'_WritingDesk');
+        $WritingDesk = cookie(MEMBER_ID.'_WritingDesk');
         if($WritingDesk){
             // 进行登记叫号
             $this->callNumber(['Id'=>$registerInfo['Id'],'number'=>$registerInfo['Number'],'WritingDesk'=>$WritingDesk]);
@@ -350,7 +350,7 @@ class Vaccinations extends AdminBase
         $vaccinationDeskCount = $this->modelSettings->getValue(['Name'=>'App.VaccinationDeskCount'],'Value');
 
         // 当前接种室缓存
-        $VaccinationDesk = cache(MEMBER_ID.'_VaccinationDesk');
+        $VaccinationDesk = cookie(MEMBER_ID.'_VaccinationDesk');
 
         if($VaccinationDesk){
             // 进行接种叫号
@@ -636,11 +636,11 @@ class Vaccinations extends AdminBase
         // 添加到叫号队列
         $callStatus = $this->logicQueue->addQueue($queueClassName, $queueName, $queueData);
         // by fqm
-        if($editTimeStatus && $callStatus){
-            return ['code'=>200,'msg'=>'叫号成功'];
-        }else{
-            return ['code'=>400,'msg'=>'叫号失败'];
-        }
+        // if($editTimeStatus && $callStatus){
+        //     return ['code'=>200,'msg'=>'叫号成功'];
+        // }else{
+        //     return ['code'=>400,'msg'=>'叫号失败'];
+        // }
 
         $url = $this->modelSettings->getValue(['Name'=>'App.QueueServerAddress'],'Value');
 
@@ -692,11 +692,11 @@ class Vaccinations extends AdminBase
         // 添加到叫号队列
         $callStatus = $this->logicQueue->addQueue($queueClassName, $queueName, $queueData);
         // by fqm
-        if($editTimeStatus && $callStatus){
-            return ['code'=>200,'msg'=>'叫号成功'];
-        }else{
-            return ['code'=>400,'msg'=>'叫号失败'];
-        }
+        // if($editTimeStatus && $callStatus){
+        //     return ['code'=>200,'msg'=>'叫号成功'];
+        // }else{
+        //     return ['code'=>400,'msg'=>'叫号失败'];
+        // }
 
         $data = [
             'deviceId'=>2,

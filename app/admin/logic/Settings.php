@@ -69,6 +69,9 @@ class Settings extends AdminBase
             
         }
 
+        // 清理缓存
+        \think\Cache::clear();
+
         return [RESULT_SUCCESS, '操作成功'];
     }
 
@@ -113,6 +116,9 @@ class Settings extends AdminBase
 
         if(!empty($result) && $result['code'] == 200){
 
+            // 清理缓存
+            \think\Cache::clear();
+            
             if($data['id'] == 0){
                 return ['code'=>200,'msg'=>$result['data']];
             }else{

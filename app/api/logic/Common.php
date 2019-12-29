@@ -47,11 +47,11 @@ class Common extends ApiBase
         $CommonQueue = new CommonQueue;
         $callStatus = $CommonQueue->addQueue($queueClassName, $queueName, $queueData);
         // by fqm
-        if($editTimeStatus && $callStatus){
-            return json_encode(['code'=>200,'msg'=>'叫号成功'],320);
-        }else{
-            return json_encode(['code'=>400,'msg'=>'叫号失败'],320);
-        }
+        // if($editTimeStatus && $callStatus){
+        //     return json_encode(['code'=>200,'msg'=>'叫号成功'],320);
+        // }else{
+        //     return json_encode(['code'=>400,'msg'=>'叫号失败'],320);
+        // }
 
         $data = [
             'deviceId'=>(int)$param['deviceId'],
@@ -66,7 +66,18 @@ class Common extends ApiBase
 
         $result = httpsPost($url, json_encode($data));
 
-        return $result;
+        if($result === false){
+            return ['code'=>400,'msg'=>'连接超时'];
+        }
+
+        $result = json_decode($result,true);
+
+        if($result['sucess'] == true){
+            return json_encode(['code'=>200,'msg'=>'叫号成功'],320);
+        }else{
+            return json_encode(['code'=>400,'msg'=>'叫号成功'],320);
+        }
+
     }
 
     /**

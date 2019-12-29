@@ -250,7 +250,7 @@ class Vaccinations extends AdminBase
     {
         $data = $this->param;
 
-        cache(MEMBER_ID.'_WritingDesk',$data['WritingDesk'],43200);
+        cookie(MEMBER_ID.'_WritingDesk',$data['WritingDesk'],43200);
 
         $result = $this->logicVaccinations->callNumber($data);
 
@@ -265,7 +265,7 @@ class Vaccinations extends AdminBase
     {
         $data = $this->param;
 
-        cache(MEMBER_ID.'_VaccinationDesk',$data['WritingDesk'],43200);
+        cookie(MEMBER_ID.'_VaccinationDesk',$data['WritingDesk'],43200);
 
         $result = $this->logicVaccinations->callInjectNumber($data);
 

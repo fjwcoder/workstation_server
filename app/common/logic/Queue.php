@@ -15,7 +15,7 @@ class Queue {
     {
         if($queueData['to_uid'] == 1001){
             $queue_date['to_uid'] = 1001;
-            $queue_date['data'] = '请'.$queueData['name'].'到登机台'.$queueData['deskRoom'];
+            $queue_date['data'] = '请'.$queueData['name'].'到登记台'.$queueData['deskRoom'];
             $lastExecuteTime = cache('lastRegistET');
         }elseif($queueData['to_uid'] == 1002){
             $queue_date['to_uid'] = 1002;
@@ -54,6 +54,9 @@ class Queue {
             // $isPushed = \think\Queue::later($delayTime, $queueClassName, $queue_date, $queueName);
         }
 
+        // 执行时间添加到执行内容中
+        $queue_date['reserved_time'] = time() + $delayTime;
+
         $isPushed = \think\Queue::later($delayTime, $queueClassName, $queue_date, $queueName);
 
         if($isPushed !== false){
@@ -68,6 +71,16 @@ class Queue {
     // 叫号
     public function callNumber(Job $job,$data)
     {
+
+        // 当天0点时间戳
+        $dateStr = strtotime(date('Y-m-d'));
+
+        // 如果执行时间比当天0点时间早 删除此条数据，并返回
+        if($data['reserved_time'] < $dateStr){
+            $job->delete();
+            return;
+        }
+
         $isJobDone = $this->doCallNumber($data);
         // $job->delete();
         if ($isJobDone) {
