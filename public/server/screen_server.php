@@ -26,6 +26,27 @@ global $waitting_queue; // 留观队列
 
 $date = date('Y-m-d');
 $log_path = __DIR__ . '/serverlog/screen_push/';
+/**
+ * 删除10天前的日志
+ * 
+ */
+$log_list = scandir($log_path);
+$per_date = date('Y-m-d', strtotime('-10 days'));
+foreach($log_list as $k=>$v){
+    if($k > 1){
+        $log_date = explode('.', $v)[0];
+        if($log_date < $per_date){
+            unlink($log_path.$v);  // 删除该文件
+        }else{
+            break;
+        }
+    }
+}
+
+
+/**
+ * 创建今日日志文件
+ */
 $log_file =  $log_path.$date.'.log';
 if(!is_dir($log_path)){
     mkdir($log_path,0777,true);//创建目录
@@ -33,6 +54,7 @@ if(!is_dir($log_path)){
 if(!file_exists($log_file)){
     file_put_contents($log_file, ' === 创建推屏日志文件 === ' . "\r\n");
 }
+
 
 serverLog('************* 服务启动 ***************');
  /**
