@@ -261,16 +261,17 @@
 
             var authHtml = '';
             if(authList){
-                var optionHtml = '';
                 for (let i = 0; i < authList.length; i++) {
-                    if(authList[i]['id'] == res.group_id){
+                    if(authList[i]['id'] === res.group_id){
                         optionHtml = 'selected';
+                    }else{
+                        optionHtml = '';
                     }
                     authHtml += '<option value="'+authList[i]['id']+'" '+optionHtml+'>'+authList[i]['name']+'</option>';
                 }
             }
 
-            var authAllHtml = '<div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>权限</label><div class="col-md-10"><select class="form-control" name="auth_id"><option value="0">请选择权限</option>'+authHtml+'</select></div></div>';
+            authAllHtml = '<div class="form-group"><label class="col-md-2 control-label"><span style="color:red;">*</span>权限</label><div class="col-md-10"><select class="form-control" name="auth_id"><option value="0">请选择权限</option>'+authHtml+'</select></div></div>';
 
             
             if(res.UserName == undefined){
