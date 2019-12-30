@@ -20,6 +20,9 @@ use think\Db;
 class Index extends IndexBase
 {
 
+
+
+
     public function liuguan(){
         $url = 'http://localhost:2121/';
 

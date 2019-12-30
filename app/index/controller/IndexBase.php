@@ -25,6 +25,8 @@ class IndexBase extends ControllerBase
      */
     public function __construct()
     {
+        //前台直接跳转到后台
+        return $this->redirect('/admin.php/index/index');
         
         // 执行父类构造方法
         parent::__construct();
